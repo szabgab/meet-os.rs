@@ -82,3 +82,25 @@ pre-commit install
     * all the people who registered to a specific event
     * all the people in the group who have not registered to a specific event
 
+
+
+## Deploy
+
+copy the `meetings.service` to the server e.g. to `/home/gabor/rust/`
+
+```
+sudo ln -s /home/gabor/rust/meetings.service /usr/lib/systemd/system/meetings.service
+sudo systemctl daemon-reload
+
+sudo systemctl start meetings.service
+```
+
+
+## Release and deployment
+
+```
+cargo build --release
+scp target/release/meetings s7:rust/
+ssh sudo systemctl start meetings.service
+
+```
