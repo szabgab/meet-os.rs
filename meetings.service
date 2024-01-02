@@ -1,0 +1,15 @@
+[Unit]
+Description=Meetings Service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/home/gabor/rust/meetings
+Restart=always
+WorkingDirectory=/tmp
+Nice=19
+LimitNOFILE=16384
+
+[Install]
+WantedBy=multi-user.target
