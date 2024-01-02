@@ -2,15 +2,15 @@ use rocket::http::Status;
 use rocket::local::blocking::Client;
 
 #[test]
-fn hello_world() {
+fn index_page() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
-    assert_eq!(
-        response.into_string(),
-        Some("Welcome to the Rust meeting server".into())
-    );
+    assert!(response
+        .into_string()
+        .unwrap()
+        .contains("Welcome to the Rust meeting server"));
 }
 
 // Web based register user to the web site
