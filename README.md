@@ -86,6 +86,9 @@ pre-commit install
 
 ## Deploy
 
+* We have nginx server configured as a reverse proxy in-front of the application.
+
+
 copy the `meetings.service` to the server e.g. to `/home/gabor/rust/`
 
 ```
@@ -100,7 +103,9 @@ sudo systemctl start meetings.service
 
 ```
 cargo build --release
+ssh mv rust/meetings rust/meetings.old
 scp target/release/meetings s7:rust/
-ssh sudo systemctl start meetings.service
+ssh s7
+sudo systemctl restart meetings.service
 
 ```

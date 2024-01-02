@@ -7,7 +7,10 @@ fn hello_world() {
     let response = client.get("/").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
-    assert_eq!(response.into_string(), Some("Hello, world!".into()));
+    assert_eq!(
+        response.into_string(),
+        Some("Welcome to the Rust meeting server".into())
+    );
 }
 
 // Web based register user to the web site
