@@ -1,5 +1,5 @@
 [package]
-name = "meeting"
+name = "meetings"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,12 @@ edition = "2021"
 clap = { version = "4.3", features = ["derive"] }
 simple_logger = "4.2"
 log = "0.4"
+rocket = "0.5.0"
 
+
+[[bin]]
+name = "meetings"
+path = "src/main.rs"
 
 [[bin]]
 name = "cli"
