@@ -6,9 +6,16 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
 
+// TODO is there a better way to set the id of the event to the filename?
 #[derive(Deserialize, Serialize, Debug)]
 struct Event {
+    #[serde(default = "get_empty_string")]
+    id: String,
     title: String,
+}
+
+fn get_empty_string() -> String {
+    "".to_string()
 }
 
 #[derive(FromForm)]
@@ -21,7 +28,8 @@ struct RegistrationForm<'r> {
 fn load_events() -> Vec<Event> {
     let filename = "data/events/1.json";
     let json_string = read_to_string(filename).unwrap();
-    let data: Event = serde_json::from_str(&json_string).expect("JSON parsing error");
+    let mut data: Event = serde_json::from_str(&json_string).expect("JSON parsing error");
+    data.id = "1".to_string();
     vec![data]
 }
 

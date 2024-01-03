@@ -5,10 +5,11 @@ Meet-OS (pronounced as mythos is the pattern of basic values and attitudes of a 
 
 <h2>Events</h2>
 
-
+<ul>
 {% for event in events %}
-{{ event.title}}
+    <li><a href="/e/{{ event.id }}">{{ event.title}}</a></li>
 {% endfor %}
+</ul>
 
 
 <h2>About</h2>
