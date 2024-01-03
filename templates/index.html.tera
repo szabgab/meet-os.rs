@@ -12,6 +12,14 @@ Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes o
 </ul>
 
 
+<h2>Groups</h2>
+
+<ul>
+{% for group in groups %}
+    <li><a href="/g/{{ group.id }}">{{ group.name }}</a></li>
+{% endfor %}
+</ul>
+
 <h2>About</h2>
 
 The goal of this web application is to provide a platform where we can organize meeting for people.

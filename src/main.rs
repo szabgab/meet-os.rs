@@ -60,11 +60,13 @@ fn load_groups() -> Vec<Group> {
 #[get("/")]
 fn index() -> Template {
     let events = load_events();
+    let groups = load_groups();
 
     Template::render(
         "index",
         context! {
             events: events,
+            groups: groups,
         },
     )
 }

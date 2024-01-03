@@ -10,7 +10,10 @@ fn index_page() {
     let body = response.into_string().unwrap();
     assert!(body.contains("Welcome to the Rust meeting server"));
     assert!(body.contains("Web development with Rocket"));
+    assert!(body.contains("<h2>Events</h2>"));
     assert!(body.contains(r#"<a href="/e/1">Web development with Rocket</a>"#));
+    assert!(body.contains("<h2>Groups</h2>"));
+    assert!(body.contains(r#"<a href="/g/1">Rust Maven</a>"#));
 }
 
 #[test]
