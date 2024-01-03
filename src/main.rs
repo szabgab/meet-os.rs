@@ -3,8 +3,15 @@ extern crate rocket;
 
 use rocket::form::Form;
 use rocket_dyn_templates::{context, Template};
+use sendgrid::SGClient;
+use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
+
+#[derive(Deserialize, Debug)]
+struct PrivateConfig {
+    sendgrid_api_key: String,
+}
 
 // TODO is there a better way to set the id of the event to the filename?
 #[derive(Deserialize, Serialize, Debug)]
@@ -98,11 +105,41 @@ fn register_get() -> Template {
     )
 }
 
+fn get_private_config() -> PrivateConfig {
+    let filename = "private.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let data: PrivateConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data
+}
+
 #[post("/register", data = "<input>")]
-fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
+async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     println!("input: {:?} {:?}", input.email, input.name);
     // email: lowerase, remove spaces from sides
     // validate format @
+    let subject = "Verify your Meet-OS registration!";
+    let text = r#"Hi,
+    Someone used your email to register on the Meet-OS web site.
+    If it was you, please click on this link to verify your email address.
+
+
+    If it was not you, we would like to apolozie. You don't need to do anything. We'll discard your registration if it is not validated.
+    "#;
+
+    let private = get_private_config();
+
+    // TODO: read from some config file
+    let from = EmailAddress {
+        name: "Meet OS".to_string(),
+        email: "gabor@szabgab.com".to_string(),
+    };
+    let to_address = &EmailAddress {
+        name: input.name.to_string(),
+        email: input.email.to_string(),
+    };
+
+    sendgrid(&private.sendgrid_api_key, &from, to_address, subject, text).await;
+
     Template::render("register", context! {title: "Register"})
 }
 
@@ -179,6 +216,39 @@ fn rocket() -> _ {
             ],
         )
         .attach(Template::fairing())
+}
+
+#[derive(Debug)]
+struct EmailAddress {
+    name: String,
+    email: String,
+}
+
+async fn sendgrid(
+    api_key: &str,
+    from: &EmailAddress,
+    to: &EmailAddress,
+    subject: &str,
+    html: &str,
+) {
+    let sg = SGClient::new(api_key);
+
+    let mut x_smtpapi = String::new();
+    x_smtpapi.push_str(r#"{"unique_args":{"test":7}}"#);
+
+    let mail_info = Mail::new()
+        .add_to(Destination {
+            address: &to.email,
+            name: &to.name,
+        })
+        .add_from(&from.email)
+        .add_from_name(&from.name)
+        .add_subject(subject)
+        .add_html(html)
+        .add_header("x-cool".to_string(), "indeed")
+        .add_x_smtpapi(&x_smtpapi);
+
+    sg.send(mail_info).await.ok();
 }
 
 #[cfg(test)]

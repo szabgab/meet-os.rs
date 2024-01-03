@@ -49,6 +49,23 @@ pre-commit install
 
 ### For the Rust-Maven online meetings
 
+Registration form, record the user name, email, generate id, generated and save validation code, timestamp send email with validation code.
+When user clicks on link, mark as validated and remove the code.
+
+
+
+New user
+* register on the web site
+* register to a group -> also to the web site
+* register to an even -> also to the group -> also to the web site
+
+Registered users who is not logged in
+* login
+* register to group -> login
+* register to event -> 
+
+
+
 
 * I can assume only a few tens maybe a few hundred people for the first few months so I think I can start with a filesystem based "database".
 
