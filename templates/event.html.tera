@@ -1,2 +1,5 @@
 <h1>{{event.title}}</h1>
 
+Date: {{event.date}} UTC
+
+{{event.body}}

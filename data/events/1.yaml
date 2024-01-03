@@ -1,0 +1,15 @@
+title: Web development with Rocket
+date: "2024-01-21T17:00:00"
+body: >
+  Rust is primarily a system-language, but there are plenty of web framework for Rust.
+  At this event we are going to show how to get started using the [Rocket](https://rocket.rs/) web framework.
+
+  This event will be in Zoom.
+
+  The speaker is [Gabor Szabo](https://szabgab.com/) who is trying to make Meet-OS web site work well.
+
+  As you can see you are on the meet-os web site and it looks like someone has just started to develop it. You are right.
+  I've started to write it at the beginning of 2024 (that's 2 days ago) while trying to learn how to use Rocket.
+
+  Hopefully by the time I am going to give this presentation the site will work much better.
+

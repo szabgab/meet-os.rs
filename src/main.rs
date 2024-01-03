@@ -12,6 +12,8 @@ struct Event {
     #[serde(default = "get_empty_string")]
     id: String,
     title: String,
+    date: String,
+    body: String,
 }
 
 fn get_empty_string() -> String {
@@ -26,9 +28,9 @@ struct RegistrationForm<'r> {
 
 // TODO load n events to display on the front page, which n events?
 fn load_events() -> Vec<Event> {
-    let filename = "data/events/1.json";
-    let json_string = read_to_string(filename).unwrap();
-    let mut data: Event = serde_json::from_str(&json_string).expect("JSON parsing error");
+    let filename = "data/events/1.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data.id = "1".to_string();
     vec![data]
 }
