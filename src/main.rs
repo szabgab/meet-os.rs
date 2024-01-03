@@ -58,10 +58,22 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     Template::render("register", context! {})
 }
 
+#[get("/e/<id>")]
+fn event_get(id: &str) -> Template {
+    let events = load_events();
+    let id = id.parse::<usize>().unwrap();
+    Template::render(
+        "event",
+        context! {
+            event: &events[id-1],
+        },
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, register_get, register_post])
+        .mount("/", routes![index, register_get, register_post, event_get])
         .attach(Template::fairing())
 }
 

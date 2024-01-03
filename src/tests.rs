@@ -14,6 +14,16 @@ fn index_page() {
 }
 
 #[test]
+fn event_page() {
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/e/1").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    let body = response.into_string().unwrap();
+    assert!(body.contains("<h1>Web development with Rocket</h1>"));
+}
+
+#[test]
 fn register_page() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/register").dispatch();
