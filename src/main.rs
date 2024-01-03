@@ -89,12 +89,9 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     Template::render("register", context! {})
 }
 
-#[get("/event/<id>")]
-fn event_get(id: usize) -> Template {
-    let event = load_event(id);
-
-    let body = markdown::to_html_with_options(
-        &event.body,
+fn markdown2html(text: &str) -> Result<String, String> {
+    markdown::to_html_with_options(
+        text,
         &markdown::Options {
             compile: markdown::CompileOptions {
                 allow_dangerous_html: true,
@@ -103,7 +100,13 @@ fn event_get(id: usize) -> Template {
             ..markdown::Options::gfm()
         },
     )
-    .unwrap();
+}
+
+#[get("/event/<id>")]
+fn event_get(id: usize) -> Template {
+    let event = load_event(id);
+
+    let body = markdown2html(&event.body).unwrap();
 
     Template::render(
         "event",
@@ -118,17 +121,7 @@ fn event_get(id: usize) -> Template {
 fn group_get(id: usize) -> Template {
     let group = load_group(id);
 
-    let description = markdown::to_html_with_options(
-        &group.description,
-        &markdown::Options {
-            compile: markdown::CompileOptions {
-                allow_dangerous_html: true,
-                ..markdown::CompileOptions::default()
-            },
-            ..markdown::Options::gfm()
-        },
-    )
-    .unwrap();
+    let description = markdown2html(&group.description).unwrap();
 
     Template::render(
         "group",
