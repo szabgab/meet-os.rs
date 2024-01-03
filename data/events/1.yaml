@@ -1,13 +1,22 @@
 title: Web development with Rocket
 date: "2024-01-21T17:00:00"
 group_id: 1
-body: >
+body: |
   Rust is primarily a system-language, but there are plenty of web framework for Rust.
   At this event we are going to show how to get started using the [Rocket](https://rocket.rs/) web framework.
 
-
   This event will be in Zoom.
 
+  Let me try to add the starting time in several time-zones manually. In pleaces where the [Rust Maven](https://rust.code-maven.com/) site is the most popular.
+
+  | location        | date   |
+  | --------------- | ------ |
+  | USA West coast  |  9:00 am |
+  | USA East coast  |  12:00 am |
+  | UK              |  17:00 |
+  | CET             |  18:00 |
+  | Israel, Ukraine |  19:00 |
+  | India           |  22:30 |
 
   The speaker is [Gabor Szabo](https://szabgab.com/) who is trying to make Meet-OS web site work well.
 
@@ -28,4 +37,3 @@ body: >
   If you'd like to be notified when the registration is open follow [this issue](https://github.com/szabgab/meetings.rs/issues/3).
 
 
-  Check the timezone! The time is given in UTC.
