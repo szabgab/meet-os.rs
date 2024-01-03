@@ -153,6 +153,16 @@ fn group_get(id: usize) -> Template {
     )
 }
 
+use rocket::fs::NamedFile;
+use std::path::{Path, PathBuf};
+
+#[get("/js/<file..>")]
+async fn js_files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/js/").join(file))
+        .await
+        .ok()
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -164,7 +174,8 @@ fn rocket() -> _ {
                 register_get,
                 register_post,
                 event_get,
-                group_get
+                group_get,
+                js_files
             ],
         )
         .attach(Template::fairing())
