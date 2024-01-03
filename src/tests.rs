@@ -9,6 +9,7 @@ fn index_page() {
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
     assert!(body.contains("Welcome to the Rust meeting server"));
+    assert!(body.contains("Web development with Rocket"));
 }
 
 #[test]

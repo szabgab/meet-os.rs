@@ -1,1 +1,20 @@
 <h1>Welcome to the Rust meeting server</h1>
+
+Meet-OS (pronounced as mythos is the pattern of basic values and attitudes of a people, characteristically transmitted through myths and the arts.)
+
+
+<h2>Events</h2>
+
+
+{% for event in events %}
+{{ event.title}}
+{% endfor %}
+
+
+<h2>About</h2>
+
+The goal of this web application is to provide a platform where we can organize meeting for people.
+
+The source code is available in a <a href="https://github.com/szabgab/meetings.rs">git repository</a>.
+
+The development started as 2024 started rolling.

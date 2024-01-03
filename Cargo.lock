@@ -1040,6 +1040,8 @@ dependencies = [
  "rocket",
  "rocket_dyn_templates",
  "sendgrid",
+ "serde",
+ "serde_json",
  "simple_logger",
 ]
 
