@@ -78,9 +78,8 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 }
 
 #[get("/e/<id>")]
-fn event_get(id: &str) -> Template {
+fn event_get(id: usize) -> Template {
     let events = load_events();
-    let id = id.parse::<usize>().unwrap();
 
     let body = markdown::to_html_with_options(
         &events[id - 1].body,
@@ -104,9 +103,8 @@ fn event_get(id: &str) -> Template {
 }
 
 #[get("/g/<id>")]
-fn group_get(id: &str) -> Template {
+fn group_get(id: usize) -> Template {
     let groups = load_groups();
-    let id = id.parse::<usize>().unwrap();
 
     let description = markdown::to_html_with_options(
         &groups[id - 1].description,
