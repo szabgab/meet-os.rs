@@ -116,7 +116,7 @@ sudo systemctl start meetings.service
 
 ```
 cargo build --release
-ssh mv rust/meetings rust/meetings.old
+ssh s7 mv rust/meetings rust/meetings.old
 scp target/release/meetings s7:rust/
 ssh s7
 sudo systemctl restart meetings.service
