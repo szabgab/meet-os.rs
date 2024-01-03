@@ -32,3 +32,9 @@ path = "src/main.rs"
 [[bin]]
 name = "cli"
 path = "src/cli.rs"
+
+#[lints.clippy]
+#unwrap_used = "deny"
+#expect_used = "deny"
+
+
