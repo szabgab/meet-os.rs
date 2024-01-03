@@ -24,6 +24,16 @@ fn event_page() {
 }
 
 #[test]
+fn group_page() {
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/g/1").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    let body = response.into_string().unwrap();
+    assert!(body.contains("<h1>Rust Maven</h1>"));
+}
+
+#[test]
 fn register_page() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/register").dispatch();
