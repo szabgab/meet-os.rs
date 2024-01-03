@@ -119,6 +119,7 @@ sudo systemctl start meetings.service
 ## Release and deployment
 
 ```
+ssh s7
 cd /home/gabor/work/meetings.rs/
 git pull
 cargo build --release
