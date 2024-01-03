@@ -111,10 +111,10 @@ fn event_get(id: usize) -> Template {
 
 #[get("/g/<id>")]
 fn group_get(id: usize) -> Template {
-    let groups = load_groups();
+    let group = load_group(id);
 
     let description = markdown::to_html_with_options(
-        &groups[id - 1].description,
+        &group.description,
         &markdown::Options {
             compile: markdown::CompileOptions {
                 allow_dangerous_html: true,
@@ -128,7 +128,7 @@ fn group_get(id: usize) -> Template {
     Template::render(
         "group",
         context! {
-            group: &groups[id-1],
+            group: &group,
             description: description,
         },
     )
