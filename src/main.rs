@@ -34,12 +34,17 @@ struct RegistrationForm<'r> {
     email: &'r str,
 }
 
-// TODO load n events to display on the front page, which n events?
-fn load_events() -> Vec<Event> {
-    let filename = "data/events/1.yaml";
+fn load_event(id: usize) -> Event {
+    let filename = format!("data/events/{}.yaml", id);
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data.id = "1".to_string();
+    data
+}
+
+// TODO load n events to display on the front page, which n events?
+fn load_events() -> Vec<Event> {
+    let data = load_event(1);
     vec![data]
 }
 
