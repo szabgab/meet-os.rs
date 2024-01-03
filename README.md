@@ -49,17 +49,9 @@ pre-commit install
 
 ### For the Rust-Maven online meetings
 
-* Buy domain name
-* Set up web site
-* Text of the first event read from a YAML file
-
 
 * I can assume only a few tens maybe a few hundred people for the first few months so I think I can start with a filesystem based "database".
 
-* The event can be defined using a YAML file, necessary images can be add on the filesystem.
-    * Title
-    * Date, starting hour (timezone), length
-    * Description: Markdown without HTML tags
 * I can send email notifications "manually" from the command line. There is no need for scheduling.
 * Users need to be able to register on the web-site with email address. We need to verify the email address. (keep the email address lowercase)
     * Name

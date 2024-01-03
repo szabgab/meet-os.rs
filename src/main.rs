@@ -16,6 +16,14 @@ struct Event {
     body: String,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+struct Group {
+    #[serde(default = "get_empty_string")]
+    id: String,
+    name: String,
+    description: String,
+}
+
 fn get_empty_string() -> String {
     "".to_string()
 }
@@ -31,6 +39,15 @@ fn load_events() -> Vec<Event> {
     let filename = "data/events/1.yaml";
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data.id = "1".to_string();
+    vec![data]
+}
+
+// TODO load n groups to display on the front page
+fn load_groups() -> Vec<Group> {
+    let filename = "data/groups/1.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data.id = "1".to_string();
     vec![data]
 }
@@ -86,10 +103,39 @@ fn event_get(id: &str) -> Template {
     )
 }
 
+#[get("/g/<id>")]
+fn group_get(id: &str) -> Template {
+    let groups = load_groups();
+    let id = id.parse::<usize>().unwrap();
+
+    let description = markdown::to_html_with_options(
+        &groups[id - 1].description,
+        &markdown::Options {
+            compile: markdown::CompileOptions {
+                allow_dangerous_html: true,
+                ..markdown::CompileOptions::default()
+            },
+            ..markdown::Options::gfm()
+        },
+    )
+    .unwrap();
+
+    Template::render(
+        "group",
+        context! {
+            group: &groups[id-1],
+            description: description,
+        },
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, register_get, register_post, event_get])
+        .mount(
+            "/",
+            routes![index, register_get, register_post, event_get, group_get],
+        )
         .attach(Template::fairing())
 }
 
