@@ -1,0 +1,21 @@
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">About Meet-OS</h1>
+       <p>
+       Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes of a people, characteristically transmitted through myths and the arts.) 
+       <p>
+       The goal of this web application is to provide a platform where we can organize meeting for people.
+       <p>
+       The source code is available in a <a href="https://github.com/szabgab/meetings.rs">git repository</a>.
+       <p>
+       The development started as 2024 started rolling.
+
+    </div>
+  </div>
+</section>
+
+
+{% include "incl/footer" %}

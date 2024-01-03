@@ -23,7 +23,7 @@ fn event_page() {
 
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
-    assert!(body.contains("<h1>Web development with Rocket</h1>"));
+    assert!(body.contains(r#"<h1 class="title is-3">Web development with Rocket</h1>"#));
     assert!(body.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
 }
 
@@ -34,7 +34,7 @@ fn group_page() {
 
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
-    assert!(body.contains("<h1>Rust Maven</h1>"));
+    assert!(body.contains(r#"<h1 class="title is-3">Rust Maven</h1>"#));
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn register_page() {
     assert!(response
         .into_string()
         .unwrap()
-        .contains("<h2>Register</h2>"));
+        .contains("<title>Register</title>"));
 }
 
 // Web based register user to the web site

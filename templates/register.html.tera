@@ -1,6 +1,19 @@
-<h2>Register</h2>
-<form method="POST" action="/register">
-Name: <input name="name" id="name" type="text">
-email: <input name="email" id="email" type="email">
-<input type="submit" value="Register">
-</form>
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">Register</h1>
+
+        <form method="POST" action="/register">
+        Name: <input name="name" id="name" type="text">
+        Email: <input name="email" id="email" type="email">
+        <input type="submit" value="Register">
+        </form>
+    
+    </div>
+  </div>
+</section>
+
+
+{% include "incl/footer" %}

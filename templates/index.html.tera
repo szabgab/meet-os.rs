@@ -1,29 +1,42 @@
-<h1>Welcome to the Rust meeting server</h1>
-
-Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes of a people, characteristically transmitted through myths and the arts.)
+{% include "incl/header" %}
 
 
-<h2>Events</h2>
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">Welcome to the Rust meeting server</h1>
 
-<ul>
-{% for event in events %}
-    <li><a href="/event/{{ event.id }}">{{ event.title}}</a></li>
-{% endfor %}
-</ul>
+       Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes of a people, characteristically transmitted through myths and the arts.)
 
 
-<h2>Groups</h2>
+       <h2>Events</h2>
 
-<ul>
-{% for group in groups %}
-    <li><a href="/group/{{ group.id }}">{{ group.name }}</a></li>
-{% endfor %}
-</ul>
+       <ul>
+       {% for event in events %}
+           <li><a href="/event/{{ event.id }}">{{ event.title}}</a></li>
+       {% endfor %}
+       </ul>
 
-<h2>About</h2>
 
-The goal of this web application is to provide a platform where we can organize meeting for people.
+       <h2>Groups</h2>
 
-The source code is available in a <a href="https://github.com/szabgab/meetings.rs">git repository</a>.
+       <ul>
+       {% for group in groups %}
+           <li><a href="/group/{{ group.id }}">{{ group.name }}</a></li>
+       {% endfor %}
+       </ul>
 
-The development started as 2024 started rolling.
+       <h2>About</h2>
+
+       The goal of this web application is to provide a platform where we can organize meeting for people.
+       <p>
+       The source code is available in a <a href="https://github.com/szabgab/meetings.rs">git repository</a>.
+       <p>
+       The development started as 2024 started rolling.
+
+    </div>
+  </div>
+</section>
+
+
+{% include "incl/footer" %}

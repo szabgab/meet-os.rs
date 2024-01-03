@@ -1,3 +1,12 @@
-<h1>{{group.name}}</h1>
+{% include "incl/header" %}
 
-{{description | safe}}
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">{{group.name}}</h1>
+        {{description | safe}}
+    </div>
+  </div>
+</section>
+
+{% include "incl/footer" %}

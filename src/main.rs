@@ -71,15 +71,31 @@ fn index() -> Template {
     Template::render(
         "index",
         context! {
+            title: "Meet-OS",
             events: events,
             groups: groups,
         },
     )
 }
 
+#[get("/about")]
+fn about() -> Template {
+    Template::render(
+        "about",
+        context! {
+            title: "About Meet-OS",
+        },
+    )
+}
+
 #[get("/register")]
 fn register_get() -> Template {
-    Template::render("register", context! {})
+    Template::render(
+        "register",
+        context! {
+            title: "Register"
+        },
+    )
 }
 
 #[post("/register", data = "<input>")]
@@ -87,7 +103,7 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     println!("input: {:?} {:?}", input.email, input.name);
     // email: lowerase, remove spaces from sides
     // validate format @
-    Template::render("register", context! {})
+    Template::render("register", context! {title: "Register"})
 }
 
 fn markdown2html(text: &str) -> Result<String, String> {
@@ -113,6 +129,7 @@ fn event_get(id: usize) -> Template {
     Template::render(
         "event",
         context! {
+            title: &event.title,
             event: &event,
             body: body,
             group: group,
@@ -129,6 +146,7 @@ fn group_get(id: usize) -> Template {
     Template::render(
         "group",
         context! {
+            title: &group.name,
             group: &group,
             description: description,
         },
@@ -140,7 +158,14 @@ fn rocket() -> _ {
     rocket::build()
         .mount(
             "/",
-            routes![index, register_get, register_post, event_get, group_get],
+            routes![
+                index,
+                about,
+                register_get,
+                register_post,
+                event_get,
+                group_get
+            ],
         )
         .attach(Template::fairing())
 }
