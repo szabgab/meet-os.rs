@@ -64,10 +64,24 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 fn event_get(id: &str) -> Template {
     let events = load_events();
     let id = id.parse::<usize>().unwrap();
+
+    let body = markdown::to_html_with_options(
+        &events[id - 1].body,
+        &markdown::Options {
+            compile: markdown::CompileOptions {
+                allow_dangerous_html: true,
+                ..markdown::CompileOptions::default()
+            },
+            ..markdown::Options::gfm()
+        },
+    )
+    .unwrap();
+
     Template::render(
         "event",
         context! {
             event: &events[id-1],
+            body: body,
         },
     )
 }

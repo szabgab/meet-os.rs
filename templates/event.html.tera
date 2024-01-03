@@ -2,4 +2,4 @@
 
 Date: {{event.date}} UTC
 
-{{event.body}}
+{{body | safe}}
