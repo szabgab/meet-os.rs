@@ -102,12 +102,16 @@ pre-commit install
 * We have nginx server configured as a reverse proxy in-front of the application.
 
 
-copy the `meetings.service` to the server e.g. to `/home/gabor/rust/`
+I have a folder called `/home/gabor/work` with all of the projects. The deployment described here is relative to that.
 
 ```
-sudo ln -s /home/gabor/rust/meetings.service /usr/lib/systemd/system/meetings.service
-sudo systemctl daemon-reload
+cd /home/gabor/work
+git clone git@github.com:szabgab/meetings.rs.git
+```
 
+```
+sudo ln -s /home/gabor/work/meetings.rs/meetings.service /usr/lib/systemd/system/meetings.service
+sudo systemctl daemon-reload
 sudo systemctl start meetings.service
 ```
 
@@ -115,10 +119,8 @@ sudo systemctl start meetings.service
 ## Release and deployment
 
 ```
+cd /home/gabor/work/meetings.rs/
+git pull
 cargo build --release
-ssh s7 mv rust/meetings rust/meetings.old
-scp target/release/meetings s7:rust/
-ssh s7
 sudo systemctl restart meetings.service
-
 ```
