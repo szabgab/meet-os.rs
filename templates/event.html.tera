@@ -3,3 +3,5 @@
 Date: {{event.date}} UTC
 
 {{body | safe}}
+
+Organized by <a href="/group/{{ group.id }}">{{ group.name }}</a>.

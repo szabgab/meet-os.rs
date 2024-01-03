@@ -13,6 +13,7 @@ struct Event {
     id: String,
     title: String,
     date: String,
+    group_id: usize,
     body: String,
 }
 
@@ -105,6 +106,7 @@ fn markdown2html(text: &str) -> Result<String, String> {
 #[get("/event/<id>")]
 fn event_get(id: usize) -> Template {
     let event = load_event(id);
+    let group = load_group(event.group_id);
 
     let body = markdown2html(&event.body).unwrap();
 
@@ -113,6 +115,7 @@ fn event_get(id: usize) -> Template {
         context! {
             event: &event,
             body: body,
+            group: group,
         },
     )
 }

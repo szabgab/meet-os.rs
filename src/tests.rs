@@ -24,6 +24,7 @@ fn event_page() {
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
     assert!(body.contains("<h1>Web development with Rocket</h1>"));
+    assert!(body.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
 }
 
 #[test]

@@ -1,10 +1,11 @@
 title: Web development with Rocket
 date: "2024-01-21T17:00:00"
+group_id: 1
 body: >
   Rust is primarily a system-language, but there are plenty of web framework for Rust.
   At this event we are going to show how to get started using the [Rocket](https://rocket.rs/) web framework.
 
-  
+
   This event will be in Zoom.
 
 
