@@ -11,15 +11,15 @@ fn index_page() {
     assert!(body.contains("Welcome to the Rust meeting server"));
     assert!(body.contains("Web development with Rocket"));
     assert!(body.contains("<h2>Events</h2>"));
-    assert!(body.contains(r#"<a href="/e/1">Web development with Rocket</a>"#));
+    assert!(body.contains(r#"<a href="/event/1">Web development with Rocket</a>"#));
     assert!(body.contains("<h2>Groups</h2>"));
-    assert!(body.contains(r#"<a href="/g/1">Rust Maven</a>"#));
+    assert!(body.contains(r#"<a href="/group/1">Rust Maven</a>"#));
 }
 
 #[test]
 fn event_page() {
     let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/e/1").dispatch();
+    let response = client.get("/event/1").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
@@ -29,7 +29,7 @@ fn event_page() {
 #[test]
 fn group_page() {
     let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/g/1").dispatch();
+    let response = client.get("/group/1").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();

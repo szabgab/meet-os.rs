@@ -84,7 +84,7 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     Template::render("register", context! {})
 }
 
-#[get("/e/<id>")]
+#[get("/event/<id>")]
 fn event_get(id: usize) -> Template {
     let events = load_events();
 
@@ -109,7 +109,7 @@ fn event_get(id: usize) -> Template {
     )
 }
 
-#[get("/g/<id>")]
+#[get("/group/<id>")]
 fn group_get(id: usize) -> Template {
     let group = load_group(id);
 

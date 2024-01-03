@@ -7,7 +7,7 @@ Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes o
 
 <ul>
 {% for event in events %}
-    <li><a href="/e/{{ event.id }}">{{ event.title}}</a></li>
+    <li><a href="/event/{{ event.id }}">{{ event.title}}</a></li>
 {% endfor %}
 </ul>
 
@@ -16,7 +16,7 @@ Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes o
 
 <ul>
 {% for group in groups %}
-    <li><a href="/g/{{ group.id }}">{{ group.name }}</a></li>
+    <li><a href="/group/{{ group.id }}">{{ group.name }}</a></li>
 {% endfor %}
 </ul>
 
