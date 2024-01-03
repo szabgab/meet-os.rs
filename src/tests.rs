@@ -13,6 +13,18 @@ fn index_page() {
         .contains("Welcome to the Rust meeting server"));
 }
 
+#[test]
+fn register_page() {
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/register").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    assert!(response
+        .into_string()
+        .unwrap()
+        .contains("<h2>Register</h2>"));
+}
+
 // Web based register user to the web site
 
 // CLI register user (including sending email)

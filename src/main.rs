@@ -15,8 +15,13 @@ fn index() -> Template {
     Template::render("index", context! {})
 }
 
+#[get("/register")]
+fn register_get() -> Template {
+    Template::render("register", context! {})
+}
+
 #[post("/register", data = "<input>")]
-fn register(input: Form<RegistrationForm<'_>>) -> Template {
+fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     println!("input: {:?} {:?}", input.email, input.name);
     // email: lowerase, remove spaces from sides
     // validate format @
@@ -26,7 +31,7 @@ fn register(input: Form<RegistrationForm<'_>>) -> Template {
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, register])
+        .mount("/", routes![index, register_get, register_post])
         .attach(Template::fairing())
 }
 

@@ -1,7 +1,1 @@
 <h1>Welcome to the Rust meeting server</h1>
-<h2>Register</h2>
-<form method="POST" action="/register">
-Name: <input name="name" id="name" type="text">
-email: <input name="email" id="email" type="email">
-<input type="submit" value="Register">
-</form>
