@@ -7,21 +7,29 @@
 ## Plan
 
 * First implement whatever is necessary to organize the Rust-Maven online meetings.
-* Then extend it to organize the Rust Israel meetings.
+* Then extend it to organize the Rust Israel meetings and maybe some other meetings I organize.
 * Then talk to other Rust groups and see if I can win them over one by one.
-* then talk to Python groups and see if I can win them over one by one.
+* Then talk to Python groups and see if I can win them over one by one.
 * Then extend it to other technology related group.
-
 
 ## Fees
 
-* The organization that I invite initially will get a lifetime free hosting.
-* Later, if the platform is successful I'll think if other free structures for new groups.
+* The organizations that I invite will get a lifetime free hosting. These will include some sponsored links: Promotion of my own Rust, Python, etc. courses and job offers.
+* Later, if the platform is successful and the costs start to rise I'll think of a fee structure for new groups.
+
+## Costs
+
+* The biggest cost will be the time spent on developing and maintaining the platform.
+* Support for the users.
+* UI Design, graphics
+* Hosting is probably less than $50 / month for a very long time.
+* Email sending - depending on the service, but it won't go over $50/month for quite some time either.
 
 ## Financing
 
-* Ask for donation from the users.
-* Use the platform to offer training courses.
+* I hope that many people, especially in the Rust community, but also in the wider Open Source community will find the project valuable to support it financially.
+* The platform will help promoting my training courses, that can generate income.
+* Income from companies that would like to promote their job offers through the system.
 
 ## Development
 
@@ -40,6 +48,11 @@ pre-commit install
 ## Requirements
 
 ### For the Rust-Maven online meetings
+
+* Buy domain name
+* Set up web site
+* Text of the first event read from a YAML file
+
 
 * I can assume only a few tens maybe a few hundred people for the first few months so I think I can start with a filesystem based "database".
 
