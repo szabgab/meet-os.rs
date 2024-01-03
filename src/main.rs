@@ -91,10 +91,10 @@ fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 
 #[get("/event/<id>")]
 fn event_get(id: usize) -> Template {
-    let events = load_events();
+    let event = load_event(id);
 
     let body = markdown::to_html_with_options(
-        &events[id - 1].body,
+        &event.body,
         &markdown::Options {
             compile: markdown::CompileOptions {
                 allow_dangerous_html: true,
@@ -108,7 +108,7 @@ fn event_get(id: usize) -> Template {
     Template::render(
         "event",
         context! {
-            event: &events[id-1],
+            event: &event,
             body: body,
         },
     )
