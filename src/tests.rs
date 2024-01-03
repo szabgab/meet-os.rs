@@ -7,10 +7,8 @@ fn index_page() {
     let response = client.get("/").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
-    assert!(response
-        .into_string()
-        .unwrap()
-        .contains("Welcome to the Rust meeting server"));
+    let body = response.into_string().unwrap();
+    assert!(body.contains("Welcome to the Rust meeting server"));
 }
 
 #[test]
