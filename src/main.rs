@@ -43,12 +43,17 @@ fn load_events() -> Vec<Event> {
     vec![data]
 }
 
-// TODO load n groups to display on the front page
-fn load_groups() -> Vec<Group> {
-    let filename = "data/groups/1.yaml";
+fn load_group(id: usize) -> Group {
+    let filename = format!("data/groups/{}.yaml", id);
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data.id = "1".to_string();
+    data
+}
+
+// TODO load n groups to display on the front page
+fn load_groups() -> Vec<Group> {
+    let data = load_group(1);
     vec![data]
 }
 
