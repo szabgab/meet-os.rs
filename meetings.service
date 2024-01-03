@@ -5,9 +5,9 @@ Description=Meetings Service
 Type=simple
 User=root
 Group=root
-ExecStart=/home/gabor/rust/meetings
+ExecStart=/home/gabor/work/meetings.rs/target/release/meetings
 Restart=always
-WorkingDirectory=/tmp
+WorkingDirectory=/home/gabor/work/meetings.rs
 Nice=19
 LimitNOFILE=16384
 
