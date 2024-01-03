@@ -24,4 +24,8 @@ body: >
   Soon, hopefully within days I'll add the registration system to this web site and then you'll be able to register
   and get notification of the event. For now, mark it in your calendar.
 
+
+  If you'd like to be notified when the registration is open follow [this issue](https://github.com/szabgab/meetings.rs/issues/3).
+
+
   Check the timezone! The time is given in UTC.
