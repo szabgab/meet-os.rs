@@ -1,0 +1,38 @@
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">{{title}}</h1>
+       
+      Your privacy is important to us, but this is a public meeting place so you have to understand and accept that most of the information you share here will be public.
+      <p>
+
+      <b>email</b>
+      When you register we ask for your email address. This information will be kept private. Only the site administrators will have access to it.
+
+      <p>
+      When you register to one of the group you also consent to share your email address with the owner of and all the administrators of the specific group.
+      <p>
+
+      <b>password</b>
+      That will be kept secret and hashed in the database.
+      <p>
+
+      <b>name</b>
+      It will be seen publicly.
+      <p>
+      Your name will appear among the members of the site. If you register to a group it will be listed among the members of the group.
+      If you register to an event your name will be listed among the registrants of the event.
+      <p>
+      <b>other information</b>
+      For now we are not collecting any other information about you, but as we might add more fields to the personal profile we'll treat them by default as public.
+
+      <h2>Analytic</h2>
+      We use Google Analytics to understand the behaviour of the visitors. We don't collect any personal via Google Analytics.
+    </div>
+  </div>
+</section>
+
+
+{% include "incl/footer" %}

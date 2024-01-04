@@ -103,6 +103,16 @@ fn about() -> Template {
     )
 }
 
+#[get("/privacy")]
+fn privacy() -> Template {
+    Template::render(
+        "privacy",
+        context! {
+            title: "Privacy Policy",
+        },
+    )
+}
+
 #[get("/register")]
 fn register_get() -> Template {
     Template::render(
@@ -218,6 +228,7 @@ fn rocket() -> _ {
             routes![
                 index,
                 about,
+                privacy,
                 register_get,
                 register_post,
                 event_get,
