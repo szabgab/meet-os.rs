@@ -52,6 +52,36 @@ fn register_page() {
         .contains("<title>Register</title>"));
 }
 
+#[test]
+fn about_page() {
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/about").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    let body = response.into_string().unwrap();
+    assert!(body.contains(r#"<title>About Meet-OS</title>"#));
+}
+
+#[test]
+fn soc_page() {
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/soc").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    let body = response.into_string().unwrap();
+    assert!(body.contains(r#"<title>Standard of Conduct</title>"#));
+}
+
+#[test]
+fn privacy_page() {
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/privacy").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    let body = response.into_string().unwrap();
+    assert!(body.contains(r#"<title>Privacy Policy</title>"#));
+}
+
 // Web based register user to the web site
 
 // CLI register user (including sending email)
