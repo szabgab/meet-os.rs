@@ -113,6 +113,16 @@ fn privacy() -> Template {
     )
 }
 
+#[get("/soc")]
+fn soc() -> Template {
+    Template::render(
+        "soc",
+        context! {
+            title: "Standard of Conduct",
+        },
+    )
+}
+
 #[get("/register")]
 fn register_get() -> Template {
     Template::render(
@@ -229,6 +239,7 @@ fn rocket() -> _ {
                 index,
                 about,
                 privacy,
+                soc,
                 register_get,
                 register_post,
                 event_get,

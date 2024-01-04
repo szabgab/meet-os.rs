@@ -2,6 +2,7 @@
   <div class="content has-text-centered">
     <div class="list is-hoverable">
        <a href="/privacy">Privacy Policy</a> |
+       <a href="/soc">Standard of Conduct</a> |
        <a href="https://github.com/szabgab/meetings.rs">source</a>
     </div>
   </div>
