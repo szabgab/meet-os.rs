@@ -13,6 +13,11 @@ struct PrivateConfig {
     sendgrid_api_key: String,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+struct PublicConfig {
+    google_analytics: String,
+}
+
 // TODO is there a better way to set the id of the event to the filename?
 #[derive(Deserialize, Serialize, Debug)]
 struct Event {
@@ -89,6 +94,7 @@ fn index() -> Template {
             title: "Meet-OS",
             events: events,
             groups: groups,
+            config: get_public_config(),
         },
     )
 }
@@ -99,6 +105,7 @@ fn about() -> Template {
         "about",
         context! {
             title: "About Meet-OS",
+            config: get_public_config(),
         },
     )
 }
@@ -109,6 +116,7 @@ fn privacy() -> Template {
         "privacy",
         context! {
             title: "Privacy Policy",
+            config: get_public_config(),
         },
     )
 }
@@ -119,6 +127,7 @@ fn soc() -> Template {
         "soc",
         context! {
             title: "Standard of Conduct",
+            config: get_public_config(),
         },
     )
 }
@@ -128,7 +137,8 @@ fn register_get() -> Template {
     Template::render(
         "register",
         context! {
-            title: "Register"
+            title: "Register",
+            config: get_public_config(),
         },
     )
 }
@@ -137,6 +147,13 @@ fn get_private_config() -> PrivateConfig {
     let filename = "private.yaml";
     let raw_string = read_to_string(filename).unwrap();
     let data: PrivateConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data
+}
+
+fn get_public_config() -> PublicConfig {
+    let filename = "config.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data
 }
 
@@ -168,7 +185,10 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 
     sendgrid(&private.sendgrid_api_key, &from, to_address, subject, text).await;
 
-    Template::render("register", context! {title: "Register"})
+    Template::render(
+        "register",
+        context! {title: "Register", config: get_public_config()},
+    )
 }
 
 fn markdown2html(text: &str) -> Result<String, String> {
@@ -198,6 +218,7 @@ fn event_get(id: usize) -> Template {
             event: &event,
             body: body,
             group: group,
+            config: get_public_config(),
         },
     )
 }
@@ -216,6 +237,7 @@ fn group_get(id: usize) -> Template {
             group: &group,
             description: description,
             events: events,
+            config: get_public_config(),
         },
     )
 }
