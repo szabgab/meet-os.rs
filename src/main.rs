@@ -50,6 +50,14 @@ fn load_event(id: usize) -> Event {
     data
 }
 
+fn get_events_by_group_id(id: usize) -> Vec<Event> {
+    let events = load_events();
+    events
+        .into_iter()
+        .filter(|event| event.group_id == id)
+        .collect()
+}
+
 // TODO load n events to display on the front page, which n events?
 fn load_events() -> Vec<Event> {
     let data = load_event(1);
@@ -177,6 +185,7 @@ fn event_get(id: usize) -> Template {
 #[get("/group/<id>")]
 fn group_get(id: usize) -> Template {
     let group = load_group(id);
+    let events = get_events_by_group_id(id);
 
     let description = markdown2html(&group.description).unwrap();
 
@@ -186,6 +195,7 @@ fn group_get(id: usize) -> Template {
             title: &group.name,
             group: &group,
             description: description,
+            events: events,
         },
     )
 }

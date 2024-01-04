@@ -35,6 +35,9 @@ fn group_page() {
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
     assert!(body.contains(r#"<h1 class="title is-3">Rust Maven</h1>"#));
+    assert!(body.contains(
+        r#"<li><a href="/event/1">2024-01-21T17:00:00 - Web development with Rocket</a></li>"#
+    ));
 }
 
 #[test]

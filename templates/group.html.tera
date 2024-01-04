@@ -5,6 +5,13 @@
     <div class="content">
        <h1 class="title is-3">{{group.name}}</h1>
         {{description | safe}}
+
+        <h2>Events</h2>
+        <ul>
+          {% for event in events %}
+            <li><a href="/event/{{event.id}}">{{event.date}} - {{event.title}}</a></li>
+          {% endfor %}
+        </ul>
     </div>
   </div>
 </section>
