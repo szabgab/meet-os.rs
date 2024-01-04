@@ -9,4 +9,8 @@
 
   </head>
   <body>
-    {% include "incl/navigation" %}
+    <section class="section">
+      <div class="container">
+         {% include "incl/navigation" %}
+      </div>
+    </section>
