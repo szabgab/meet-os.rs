@@ -1,8 +1,9 @@
 <footer class="footer">
   <div class="content has-text-centered">
-    <p>
-      <a href="https://github.com/szabgab/meetings.rs">source</a>
-    </p>
+    <div class="list is-hoverable">
+       <a href="/privacy">Privacy Policy</a> |
+       <a href="https://github.com/szabgab/meetings.rs">source</a>
+    </div>
   </div>
 </footer>
   </body>
