@@ -49,10 +49,10 @@ fn register_page() {
     let response = client.get("/register").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
-    assert!(response
-        .into_string()
-        .unwrap()
-        .contains("<title>Register</title>"));
+    let html = response.into_string().unwrap();
+    assert!(html.contains("<title>Register</title>"));
+    assert!(html.contains(r#"Name: <input name="name" id="name" type="text">"#));
+    assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
 }
 
 #[test]
@@ -84,5 +84,3 @@ fn privacy_page() {
     let body = response.into_string().unwrap();
     assert!(body.contains(r#"<title>Privacy Policy</title>"#));
 }
-
-// Web based register user to the web site
