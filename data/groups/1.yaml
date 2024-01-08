@@ -1,4 +1,5 @@
 name: Rust Maven
+location: Virtual
 description: |
   This group is a virtual group without any specific location in the world.
 

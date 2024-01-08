@@ -35,6 +35,7 @@ struct Group {
     #[serde(default = "get_empty_string")]
     id: String,
     name: String,
+    location: String,
     description: String,
 }
 

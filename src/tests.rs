@@ -40,6 +40,7 @@ fn group_page() {
     assert!(body.contains(
         r#"<li><a href="/event/1">2024-01-21T17:00:00 - Web development with Rocket</a></li>"#
     ));
+    assert!(body.contains(r#"<div><b>Location</b>: Virtual</div>"#));
 }
 
 #[test]
