@@ -1,5 +1,6 @@
 title: Web development with Rocket
 date: "2024-01-21T17:00:00"
+location: Virtual
 group_id: 1
 body: |
   Rust is primarily a system-language, but there are plenty of web framework for Rust.

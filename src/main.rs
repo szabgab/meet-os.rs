@@ -25,6 +25,7 @@ struct Event {
     id: String,
     title: String,
     date: String,
+    location: String,
     group_id: usize,
     body: String,
 }

@@ -25,6 +25,8 @@ fn event_page() {
     let body = response.into_string().unwrap();
     assert!(body.contains(r#"<h1 class="title is-3">Web development with Rocket</h1>"#));
     assert!(body.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
+    assert!(body.contains(r#"<div><b>Date</b>: 2024-01-21T17:00:00 UTC</div>"#));
+    assert!(body.contains(r#"<div><b>Location</b>: Virtual</div>"#));
 }
 
 #[test]

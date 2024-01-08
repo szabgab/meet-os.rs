@@ -6,7 +6,8 @@
     <div class="content">
        <h1 class="title is-3">{{event.title}}</h1>
 
-       Date: {{event.date}} UTC
+       <div><b>Date</b>: {{event.date}} UTC</div>
+       <div><b>Location</b>: {{event.location}}</div>
 
        {{body | safe}}
 
