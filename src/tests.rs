@@ -25,7 +25,7 @@ fn event_page() {
     let body = response.into_string().unwrap();
     assert!(body.contains(r#"<h1 class="title is-3">Web development with Rocket</h1>"#));
     assert!(body.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
-    assert!(body.contains(r#"<div><b>Date</b>: 2024-01-21T17:00:00 UTC</div>"#));
+    assert!(body.contains(r#"<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"#));
     assert!(body.contains(r#"<div><b>Location</b>: Virtual</div>"#));
 }
 
@@ -38,7 +38,7 @@ fn group_page() {
     let body = response.into_string().unwrap();
     assert!(body.contains(r#"<h1 class="title is-3">Rust Maven</h1>"#));
     assert!(body.contains(
-        r#"<li><a href="/event/1">2024-01-21T17:00:00 - Web development with Rocket</a></li>"#
+        r#"<li><a href="/event/1">2024-02-04T17:00:00 - Web development with Rocket</a></li>"#
     ));
     assert!(body.contains(r#"<div><b>Location</b>: Virtual</div>"#));
 }
