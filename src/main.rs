@@ -50,7 +50,7 @@ struct RegistrationForm<'r> {
 }
 
 fn load_event(id: usize) -> Event {
-    let filename = format!("data/events/{}.yaml", id);
+    let filename = format!("data/events/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data.id = String::from("1");
@@ -72,7 +72,7 @@ fn load_events() -> Vec<Event> {
 }
 
 fn load_group(id: usize) -> Group {
-    let filename = format!("data/groups/{}.yaml", id);
+    let filename = format!("data/groups/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data.id = String::from("1");
