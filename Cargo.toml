@@ -37,7 +37,6 @@ path = "src/cli.rs"
 pedantic = { priority = -1, level = "deny" }
 no_effect_underscore_binding = "allow"
 uninlined_format_args = "allow"
-manual_string_new = "allow"
 
 suspicious = { priority = -1, level = "deny" }
 

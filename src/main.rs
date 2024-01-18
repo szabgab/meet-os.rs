@@ -40,7 +40,7 @@ struct Group {
 }
 
 fn get_empty_string() -> String {
-    String::from("")
+    String::new()
 }
 
 #[derive(FromForm)]
