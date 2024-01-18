@@ -40,7 +40,32 @@ uninlined_format_args = "allow"
 manual_string_new = "allow"
 needless_raw_string_hashes = "allow"
 
-#unwrap_used = "deny"
-#expect_used = "deny"
-#unwrap_or_default = "deny"
+suspicious = { priority = -1, level = "deny" }
 
+complexity = { priority = -1, level = "deny" }
+
+perf = { priority = -1, level = "deny" }
+
+style = { priority = -1, level = "deny" }
+
+restriction  = { priority = -1, level = "deny" }
+single_call_fn = "allow"
+str_to_string = "allow"
+missing_docs_in_private_items = "allow"
+shadow_same = "allow"
+redundant_type_annotations = "allow"
+let_underscore_must_use = "allow"
+implicit_return = "allow"
+unwrap_used = "allow"
+use_debug = "allow"
+print_stdout = "allow"
+expect_used = "allow"
+shadow_reuse = "allow"
+unwrap_in_result = "allow"
+blanket_clippy_restriction_lints = "allow" # huh?
+pub_use = "allow"
+needless_raw_strings = "allow"
+single_char_lifetime_names = "allow"
+
+cargo  = { priority = -1, level = "deny" }
+multiple_crate_versions = "allow"
