@@ -33,8 +33,14 @@ path = "src/main.rs"
 name = "cli"
 path = "src/cli.rs"
 
-#[lints.clippy]
+[lints.clippy]
+pedantic = { priority = -1, level = "deny" }
+no_effect_underscore_binding = "allow"
+uninlined_format_args = "allow"
+manual_string_new = "allow"
+needless_raw_string_hashes = "allow"
+
 #unwrap_used = "deny"
 #expect_used = "deny"
-
+#unwrap_or_default = "deny"
 
