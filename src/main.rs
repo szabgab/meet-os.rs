@@ -1,13 +1,26 @@
 #[macro_use]
 extern crate rocket;
 
+use std::env;
+use std::fs::read_to_string;
+use std::fs::File;
+use std::io::Write;
+
 use rocket::form::Form;
 use rocket::log;
+use rocket::serde::uuid::Uuid;
 use rocket_dyn_templates::{context, Template};
 use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
-use std::fs::read_to_string;
+
+struct User {
+    email: String,
+    name: String,
+    code: String,
+    verified: bool,
+    date: String,
+}
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -163,16 +176,38 @@ fn get_public_config() -> PublicConfig {
 #[post("/register", data = "<input>")]
 async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     log::info_!("rocket input: {:?} {:?}", input.email, input.name);
+
     // email: lowerase, remove spaces from sides
     // validate format @
+    let email = input.email.to_lowercase().trim().to_owned();
+    if !validator::validate_email(&email) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config: get_public_config()},
+        );
+    }
+    let code = Uuid::new_v4();
+
+    let user = User {
+        name: input.name.to_owned(),
+        email,
+        code: format!("{code}"),
+        date: "date".to_owned(), // TODO get current timestamp
+        verified: false,
+    };
+    store_user(&user);
+
     let subject = "Verify your Meet-OS registration!";
-    let text = "Hi,
+    let text = format!(
+        r#"Hi,
     Someone used your email to register on the Meet-OS web site.
-    If it was you, please click on this link to verify your email address.
-
-
+    If it was you, please <a href="https://meet-os.com/verify/{code}">click on this link</a> to verify your email address.
+    <p>
+    <p>
     If it was not you, we would like to apolozie. You don't need to do anything. We'll discard your registration if it is not validated.
     ";
+    "#
+    );
 
     let private = get_private_config();
 
@@ -186,11 +221,39 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
         email: input.email.to_owned(),
     };
 
-    sendgrid(&private.sendgrid_api_key, &from, to_address, subject, text).await;
+    if env::var("TEST_APP").is_err() {
+        sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
+    }
 
     Template::render(
-        "register",
-        context! {title: "Register", config: get_public_config()},
+        "message",
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config: get_public_config()},
+    )
+
+    // Template::render(
+    //     "register",
+    //     context! {title: "Register", config: get_public_config()},
+    // )
+}
+
+fn store_user(user: &User) {
+    let current_dir = env::current_dir().unwrap();
+    let file = current_dir.join("users.json");
+    let mut fh = File::create(file).unwrap();
+    writeln!(
+        &mut fh,
+        "{},{},{},{},{}",
+        user.name, user.email, user.date, user.verified, user.code
+    )
+    .unwrap();
+}
+
+#[get("/verify/<code>")]
+fn verify(code: &str) -> Template {
+    rocket::log::info_!("code: {code}");
+    Template::render(
+        "message",
+        context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},
     )
 }
 
@@ -269,7 +332,8 @@ fn rocket() -> _ {
                 register_post,
                 event_get,
                 group_get,
-                js_files
+                js_files,
+                verify
             ],
         )
         .attach(Template::fairing())

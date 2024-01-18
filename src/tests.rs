@@ -1,4 +1,4 @@
-use rocket::http::Status;
+use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 
 #[test]
@@ -53,6 +53,46 @@ fn register_page() {
     assert!(html.contains("<title>Register</title>"));
     assert!(html.contains(r#"Name: <input name="name" id="name" type="text">"#));
     assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
+}
+
+#[test]
+fn register_with_bad_email_address() {
+    std::env::set_var("TEST_APP", "1");
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client
+        .post("/register")
+        .header(ContentType::Form)
+        .body("name=Foo Bar&email=meet-os.com")
+        .dispatch();
+
+    assert_eq!(response.status(), Status::Ok); // TODO should this stay 200 OK?
+    let html = response.into_string().unwrap();
+    // TODO make these tests parse the HTML and verify the extracted title tag!
+    //assert_eq!(html, "");
+    assert!(html.contains("<title>Invalid email address</title>"));
+    assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+}
+
+#[test]
+fn register_user() {
+    std::env::set_var("TEST_APP", "1");
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client
+        .post("/register")
+        .header(ContentType::Form)
+        .body("name=Foo Bar&email=foo@meet-os.com")
+        .dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    let html = response.into_string().unwrap();
+    assert!(html.contains("<title>We sent you an email</title>"));
+    assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
+
+    let response = client.get("/verify/abc").dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    let html = response.into_string().unwrap();
+    assert!(html.contains("<title>Thank you for registering</title>"));
+    assert!(html.contains("Your email was verified."));
 }
 
 #[test]
