@@ -24,11 +24,12 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
 surrealdb = { version = "1.0", features = ["kv-rocksdb"] }
-tempdir = "0.3"
 tokio = { version = "1.35", features = ["macros", "rt-multi-thread"] }
 markdown = { git = "https://github.com/wooorm/markdown-rs.git" }
 uuid = { version = "1.6.1", features = ["v4"] }
 validator = "0.16.1"
+regex = "1.10"
+tempfile = "3.9.0"
 
 [[bin]]
 name = "meetings"

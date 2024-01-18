@@ -1,6 +1,5 @@
 use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
-use tempdir::TempDir;
 
 #[test]
 fn index_page() {
@@ -58,11 +57,11 @@ fn register_page() {
 
 #[test]
 fn register_with_bad_email_address() {
-    let tmp_dir = TempDir::new("counter").unwrap();
+    let tmp_dir = tempfile::tempdir().unwrap();
     println!("tmp_dir: {:?}", tmp_dir);
-    std::env::set_var("DATABASE_PATH", tmp_dir.path());
+    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
 
-    std::env::set_var("TEST_APP", "1");
+    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client
         .post("/register")
@@ -80,11 +79,15 @@ fn register_with_bad_email_address() {
 
 #[test]
 fn register_user() {
-    let tmp_dir = TempDir::new("counter").unwrap();
-    println!("tmp_dir: {:?}", tmp_dir);
-    std::env::set_var("DATABASE_PATH", tmp_dir.path());
+    use regex::Regex;
 
-    std::env::set_var("TEST_APP", "1");
+    let tmp_dir = tempfile::tempdir().unwrap();
+
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
+
+    let email_file = tmp_dir.path().join("email.txt");
+    std::env::set_var("EMAIL_FILE", &email_file);
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client
         .post("/register")
@@ -97,11 +100,41 @@ fn register_user() {
     assert!(html.contains("<title>We sent you an email</title>"));
     assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
 
-    let response = client.get("/verify/abc").dispatch();
+    //assert_eq!(email_file.to_str().unwrap(), "");
+    let email = std::fs::read_to_string(email_file).unwrap();
+    // https://meet-os.com/verify/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let re = Regex::new(r"https://meet-os.com/verify/([a-z0-9-]+)").unwrap();
+
+    let code = match re.captures(&email) {
+        Some(value) => value[1].to_owned(),
+        None => panic!("Code not found in email"),
+    };
+
+    //assert_eq!(code, "code");
+
+    let response = client.get(format!("/verify/{code}")).dispatch();
     assert_eq!(response.status(), Status::Ok);
     let html = response.into_string().unwrap();
     assert!(html.contains("<title>Thank you for registering</title>"));
     assert!(html.contains("Your email was verified."));
+}
+
+#[test]
+fn verify_with_non_existent_code() {
+    let tmp_dir = tempfile::tempdir().unwrap();
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
+
+    let email_file = tmp_dir.path().join("email.txt");
+    std::env::set_var("EMAIL_FILE", &email_file);
+
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get("/verify/abc").dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "");
+    //assert!(html.contains("<title>Thank you for registering</title>"));
+    assert!(html.contains("Invalid code <b>abc</b>"));
 }
 
 #[test]

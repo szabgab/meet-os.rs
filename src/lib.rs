@@ -61,3 +61,28 @@ pub async fn add_user(user: &User) -> surrealdb::Result<()> {
         }
     }
 }
+
+pub async fn verify_code(code: &str) -> surrealdb::Result<bool> {
+    rocket::info!("verification code: '{code}'");
+    let db = get_database().await?;
+    let verified = true;
+    let response = db
+        .query("UPDATE ONLY user SET verified=$verified WHERE code=$code;")
+        .bind(("verified", verified))
+        .bind(("code", code))
+        .await?;
+
+    match response.check() {
+        Ok(entries) => {
+            //let entries: Vec<User> = entries.take(0)?;
+            // for entry in entries {
+            //     println!("{}: {}", entry.name, entry.phone);
+            // }
+
+            rocket::info!("verification ok");
+            Ok(entries.num_statements() == 1)
+            //Ok(false)
+        }
+        Err(err) => Err(err),
+    }
+}

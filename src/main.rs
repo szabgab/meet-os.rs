@@ -11,7 +11,7 @@ use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
 
-use meetings::{add_user, User};
+use meetings::{add_user, verify_code, User};
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -210,7 +210,13 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
         email: input.email.to_owned(),
     };
 
-    if env::var("TEST_APP").is_err() {
+    if let Ok(email_file) = env::var("EMAIL_FILE") {
+        use std::fs::File;
+        use std::io::Write;
+        rocket::info!("email_file: {email_file}");
+        let mut file = File::create(email_file).unwrap();
+        writeln!(&mut file, "{}", &text).unwrap();
+    } else {
         let private = get_private_config();
         sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
     }
@@ -227,11 +233,19 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 }
 
 #[get("/verify/<code>")]
-fn verify(code: &str) -> Template {
+async fn verify(code: &str) -> Template {
     rocket::info!("code: {code}");
+    if let Ok(val) = verify_code(code).await {
+        if val {
+            return Template::render(
+                "message",
+                context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},
+            );
+        }
+    }
     Template::render(
         "message",
-        context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},
+        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config: get_public_config()},
     )
 }
 
