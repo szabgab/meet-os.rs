@@ -14,13 +14,7 @@ use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
 
-struct User {
-    email: String,
-    name: String,
-    code: String,
-    verified: bool,
-    date: String,
-}
+use meetings::User;
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {

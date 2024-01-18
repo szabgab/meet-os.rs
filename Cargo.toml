@@ -61,6 +61,7 @@ unwrap_in_result = "allow"
 blanket_clippy_restriction_lints = "allow" # huh?
 pub_use = "allow"
 single_char_lifetime_names = "allow"
+exhaustive-structs = "allow"
 
 cargo  = { priority = -1, level = "deny" }
 multiple_crate_versions = "allow"  # see https://rust-lang.github.io/rust-clippy/master/index.html#/multiple_crate_versions
