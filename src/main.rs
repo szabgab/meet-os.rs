@@ -209,8 +209,6 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     "#
     );
 
-    let private = get_private_config();
-
     // TODO: read from some config file
     let from = EmailAddress {
         name: String::from("Meet OS"),
@@ -222,6 +220,7 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     };
 
     if env::var("TEST_APP").is_err() {
+        let private = get_private_config();
         sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
     }
 
