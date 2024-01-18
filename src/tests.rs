@@ -1,5 +1,6 @@
 use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
+use tempdir::TempDir;
 
 #[test]
 fn index_page() {
@@ -57,6 +58,10 @@ fn register_page() {
 
 #[test]
 fn register_with_bad_email_address() {
+    let tmp_dir = TempDir::new("counter").unwrap();
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path());
+
     std::env::set_var("TEST_APP", "1");
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client
@@ -75,6 +80,10 @@ fn register_with_bad_email_address() {
 
 #[test]
 fn register_user() {
+    let tmp_dir = TempDir::new("counter").unwrap();
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path());
+
     std::env::set_var("TEST_APP", "1");
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client

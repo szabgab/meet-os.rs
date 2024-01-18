@@ -3,18 +3,15 @@ extern crate rocket;
 
 use std::env;
 use std::fs::read_to_string;
-use std::fs::File;
-use std::io::Write;
 
 use rocket::form::Form;
-use rocket::log;
 use rocket::serde::uuid::Uuid;
 use rocket_dyn_templates::{context, Template};
 use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
 
-use meetings::User;
+use meetings::{add_user, User};
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -169,7 +166,7 @@ fn get_public_config() -> PublicConfig {
 
 #[post("/register", data = "<input>")]
 async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
-    log::info_!("rocket input: {:?} {:?}", input.email, input.name);
+    rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
     // email: lowerase, remove spaces from sides
     // validate format @
@@ -189,7 +186,7 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
     };
-    store_user(&user);
+    add_user(&user).await.unwrap();
 
     let subject = "Verify your Meet-OS registration!";
     let text = format!(
@@ -229,21 +226,9 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     // )
 }
 
-fn store_user(user: &User) {
-    let current_dir = env::current_dir().unwrap();
-    let file = current_dir.join("users.json");
-    let mut fh = File::create(file).unwrap();
-    writeln!(
-        &mut fh,
-        "{},{},{},{},{}",
-        user.name, user.email, user.date, user.verified, user.code
-    )
-    .unwrap();
-}
-
 #[get("/verify/<code>")]
 fn verify(code: &str) -> Template {
-    rocket::log::info_!("code: {code}");
+    rocket::info!("code: {code}");
     Template::render(
         "message",
         context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},

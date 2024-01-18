@@ -23,6 +23,9 @@ sendgrid = { version = "0.19", features = ["async"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
+surrealdb = { version = "1.0", features = ["kv-rocksdb"] }
+tempdir = "0.3"
+tokio = { version = "1.35", features = ["macros", "rt-multi-thread"] }
 markdown = { git = "https://github.com/wooorm/markdown-rs.git" }
 uuid = { version = "1.6.1", features = ["v4"] }
 validator = "0.16.1"
@@ -62,6 +65,9 @@ blanket_clippy_restriction_lints = "allow" # huh?
 pub_use = "allow"
 single_char_lifetime_names = "allow"
 exhaustive-structs = "allow"
+question_mark_used = "allow"
+missing_inline_in_public_items = "allow"
+missing_errors_doc = "allow"
 
 cargo  = { priority = -1, level = "deny" }
 multiple_crate_versions = "allow"  # see https://rust-lang.github.io/rust-clippy/master/index.html#/multiple_crate_versions
