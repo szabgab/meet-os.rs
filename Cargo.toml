@@ -67,4 +67,4 @@ pub_use = "allow"
 single_char_lifetime_names = "allow"
 
 cargo  = { priority = -1, level = "deny" }
-multiple_crate_versions = "allow"
+multiple_crate_versions = "allow"  # see https://rust-lang.github.io/rust-clippy/master/index.html#/multiple_crate_versions
