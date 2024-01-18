@@ -2,6 +2,7 @@
 extern crate rocket;
 
 use rocket::form::Form;
+use rocket::log;
 use rocket_dyn_templates::{context, Template};
 use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
@@ -161,7 +162,7 @@ fn get_public_config() -> PublicConfig {
 
 #[post("/register", data = "<input>")]
 async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
-    println!("input: {:?} {:?}", input.email, input.name);
+    log::info_!("rocket input: {:?} {:?}", input.email, input.name);
     // email: lowerase, remove spaces from sides
     // validate format @
     let subject = "Verify your Meet-OS registration!";
