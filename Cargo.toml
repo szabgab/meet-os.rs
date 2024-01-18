@@ -50,7 +50,6 @@ style = { priority = -1, level = "deny" }
 
 restriction  = { priority = -1, level = "deny" }
 single_call_fn = "allow"
-str_to_string = "allow"
 missing_docs_in_private_items = "allow"
 shadow_same = "allow"
 redundant_type_annotations = "allow"

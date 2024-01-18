@@ -40,7 +40,7 @@ struct Group {
 }
 
 fn get_empty_string() -> String {
-    "".to_string()
+    String::from("")
 }
 
 #[derive(FromForm)]
@@ -53,7 +53,7 @@ fn load_event(id: usize) -> Event {
     let filename = format!("data/events/{}.yaml", id);
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.id = "1".to_string();
+    data.id = String::from("1");
     data
 }
 
@@ -75,7 +75,7 @@ fn load_group(id: usize) -> Group {
     let filename = format!("data/groups/{}.yaml", id);
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.id = "1".to_string();
+    data.id = String::from("1");
     data
 }
 
@@ -177,12 +177,12 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 
     // TODO: read from some config file
     let from = EmailAddress {
-        name: "Meet OS".to_string(),
-        email: "gabor@szabgab.com".to_string(),
+        name: String::from("Meet OS"),
+        email: String::from("gabor@szabgab.com"),
     };
     let to_address = &EmailAddress {
-        name: input.name.to_string(),
-        email: input.email.to_string(),
+        name: input.name.to_owned(),
+        email: input.email.to_owned(),
     };
 
     sendgrid(&private.sendgrid_api_key, &from, to_address, subject, text).await;
@@ -301,7 +301,7 @@ async fn sendgrid(
         .add_from_name(&from.name)
         .add_subject(subject)
         .add_html(html)
-        .add_header("x-cool".to_string(), "indeed")
+        .add_header("x-cool".to_owned(), "indeed")
         .add_x_smtpapi(&x_smtpapi);
 
     sg.send(mail_info).await.ok();
