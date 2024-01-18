@@ -165,13 +165,13 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     // email: lowerase, remove spaces from sides
     // validate format @
     let subject = "Verify your Meet-OS registration!";
-    let text = r#"Hi,
+    let text = "Hi,
     Someone used your email to register on the Meet-OS web site.
     If it was you, please click on this link to verify your email address.
 
 
     If it was not you, we would like to apolozie. You don't need to do anything. We'll discard your registration if it is not validated.
-    "#;
+    ";
 
     let private = get_private_config();
 

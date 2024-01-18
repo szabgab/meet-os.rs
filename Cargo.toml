@@ -64,7 +64,6 @@ shadow_reuse = "allow"
 unwrap_in_result = "allow"
 blanket_clippy_restriction_lints = "allow" # huh?
 pub_use = "allow"
-needless_raw_strings = "allow"
 single_char_lifetime_names = "allow"
 
 cargo  = { priority = -1, level = "deny" }
