@@ -15,6 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Show Rust version
+      run: rustc -Vv
+
     - name: Set up cargo cache
       uses: actions/cache@v3
       continue-on-error: false
