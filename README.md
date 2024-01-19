@@ -1,7 +1,7 @@
 # Meeting Rust
 
 
-* A platform to organize meetings
+* A platform to organize meetings at [Meet-OS](https://meet-os.com/)
 
 
 ## Plan
