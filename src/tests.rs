@@ -79,6 +79,7 @@ fn register_with_bad_email_address() {
 
 #[test]
 fn register_user() {
+    use meetings::get_user_by_email;
     use regex::Regex;
 
     let tmp_dir = tempfile::tempdir().unwrap();
@@ -100,6 +101,17 @@ fn register_user() {
     assert!(html.contains("<title>We sent you an email</title>"));
     assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
 
+    drop(client);
+    // Without dropping the client here we get an error on the next line
+    // value: Db(Tx("IO error: lock hold by current process, acquire time 1705858854 acquiring thread 58266: /tmp/.tmpVlNPFx/db/LOCK: No locks available"))
+    let res = tokio_test::block_on(get_user_by_email("foo@meet-os.com"))
+        .unwrap()
+        .unwrap();
+    assert_eq!(res.email, "foo@meet-os.com");
+    assert_eq!(res.name, "Foo Bar");
+    assert!(!res.verified);
+    // date? code?
+
     //assert_eq!(email_file.to_str().unwrap(), "");
     let email = std::fs::read_to_string(email_file).unwrap();
     // https://meet-os.com/verify/c0514ec6-c51e-4376-ae8e-df82ef79bcef
@@ -110,8 +122,9 @@ fn register_user() {
         None => panic!("Code not found in email"),
     };
 
-    //assert_eq!(code, "code");
+    assert_eq!(code, res.code);
 
+    let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get(format!("/verify/{code}")).dispatch();
     assert_eq!(response.status(), Status::Ok);
     let html = response.into_string().unwrap();

@@ -30,6 +30,7 @@ uuid = { version = "1.6.1", features = ["v4"] }
 validator = "0.16.1"
 regex = "1.10"
 tempfile = "3.9.0"
+tokio-test = "0.4.3"
 
 [[bin]]
 name = "meetings"

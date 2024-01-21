@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::engine::local::{Db, RocksDb};
 use surrealdb::Surreal;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct User {
     pub email: String,
     pub name: String,
@@ -33,6 +33,7 @@ async fn get_database() -> surrealdb::Result<Surreal<Db>> {
 }
 
 pub async fn add_user(user: &User) -> surrealdb::Result<()> {
+    rocket::info!("add user email: '{}'", user.email);
     let db = get_database().await?;
     let response = db
         .query(
@@ -82,6 +83,30 @@ pub async fn verify_code(code: &str) -> surrealdb::Result<bool> {
             rocket::info!("verification ok");
             Ok(entries.num_statements() == 1)
             //Ok(false)
+        }
+        Err(err) => Err(err),
+    }
+}
+
+pub async fn get_user_by_email(email: &str) -> surrealdb::Result<Option<User>> {
+    rocket::info!("get_user_by_email: '{email}'");
+    let db = get_database().await?;
+    rocket::info!("has db");
+    let response = db
+        .query("SELECT * FROM user WHERE email=$email;")
+        .bind(("email", email))
+        .await?;
+
+    match response.check() {
+        Ok(mut entries) => {
+            let entries: Vec<User> = entries.take(0)?;
+            match entries.first() {
+                Some(entry) => {
+                    rocket::info!("************* {}, {}", entry.name, entry.email);
+                    Ok(Some(entry.clone()))
+                }
+                None => Ok(None),
+            }
         }
         Err(err) => Err(err),
     }
