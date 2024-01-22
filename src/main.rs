@@ -71,6 +71,20 @@ fn load_groups() -> Vec<Group> {
     vec![data]
 }
 
+fn get_private_config() -> PrivateConfig {
+    let filename = "private.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let data: PrivateConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data
+}
+
+fn get_public_config() -> PublicConfig {
+    let filename = "config.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data
+}
+
 #[get("/")]
 fn index() -> Template {
     let events = load_events();
@@ -129,20 +143,6 @@ fn register_get() -> Template {
             config: get_public_config(),
         },
     )
-}
-
-fn get_private_config() -> PrivateConfig {
-    let filename = "private.yaml";
-    let raw_string = read_to_string(filename).unwrap();
-    let data: PrivateConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data
-}
-
-fn get_public_config() -> PublicConfig {
-    let filename = "config.yaml";
-    let raw_string = read_to_string(filename).unwrap();
-    let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data
 }
 
 #[post("/register", data = "<input>")]
