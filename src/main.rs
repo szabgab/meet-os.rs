@@ -2,9 +2,12 @@
 extern crate rocket;
 
 use std::env;
-use std::fs::read_to_string;
+use std::fs::{read_to_string, File};
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 use rocket::form::Form;
+use rocket::fs::NamedFile;
 use rocket::serde::uuid::Uuid;
 use rocket_dyn_templates::{context, Template};
 use sendgrid::SGClient;
@@ -199,8 +202,6 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     };
 
     if let Ok(email_file) = env::var("EMAIL_FILE") {
-        use std::fs::File;
-        use std::io::Write;
         rocket::info!("email_file: {email_file}");
         let mut file = File::create(email_file).unwrap();
         writeln!(&mut file, "{}", &text).unwrap();
@@ -274,9 +275,6 @@ fn group_get(id: usize) -> Template {
         },
     )
 }
-
-use rocket::fs::NamedFile;
-use std::path::{Path, PathBuf};
 
 #[get("/js/<file..>")]
 async fn js_files(file: PathBuf) -> Option<NamedFile> {
