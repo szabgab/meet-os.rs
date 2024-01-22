@@ -11,7 +11,7 @@ use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
 
-use meetings::{add_user, verify_code, User};
+use meetings::{add_user, verify_code, Event, Group, User};
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -21,31 +21,6 @@ struct PrivateConfig {
 #[derive(Deserialize, Serialize, Debug)]
 struct PublicConfig {
     google_analytics: String,
-}
-
-// TODO is there a better way to set the id of the event to the filename?
-#[derive(Deserialize, Serialize, Debug)]
-struct Event {
-    #[serde(default = "get_empty_string")]
-    id: String,
-    title: String,
-    date: String,
-    location: String,
-    group_id: usize,
-    body: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-struct Group {
-    #[serde(default = "get_empty_string")]
-    id: String,
-    name: String,
-    location: String,
-    description: String,
-}
-
-fn get_empty_string() -> String {
-    String::new()
 }
 
 #[derive(FromForm)]
