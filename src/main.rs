@@ -13,7 +13,9 @@ use rocket::serde::uuid::Uuid;
 use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
-use meetings::{add_user, sendgrid, verify_code, EmailAddress, Event, Group, User};
+use meetings::{
+    add_user, get_user_by_email, sendgrid, verify_code, EmailAddress, Event, Group, User,
+};
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -238,6 +240,26 @@ async fn verify(code: &str, cookies: &CookieJar<'_>) -> Template {
     )
 }
 
+#[get("/profile")]
+async fn show_profile(cookies: &CookieJar<'_>) -> Template {
+    if let Some(cookie) = cookies.get_private("meet-os") {
+        let email = cookie.value();
+        rocket::info!("cookie value received from user: {email}");
+        if let Ok(Some(user)) = get_user_by_email(email).await {
+            rocket::info!("email: {}", user.email);
+            return Template::render(
+                "profile",
+                context! {title: "Profile", user: user, config: get_public_config()},
+            );
+        }
+    }
+
+    Template::render(
+        "message",
+        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config: get_public_config()},
+    )
+}
+
 #[get("/event/<id>")]
 fn event_get(id: usize) -> Template {
     let event = load_event(id);
@@ -298,6 +320,7 @@ fn rocket() -> _ {
                 event_get,
                 group_get,
                 js_files,
+                show_profile,
                 verify
             ],
         )

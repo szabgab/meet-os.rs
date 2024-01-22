@@ -1,0 +1,12 @@
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">{{user.name}}</h1>
+        <div><b>email</b>: {{user.email}}</div>
+    </div>
+  </div>
+</section>
+
+{% include "incl/footer" %}

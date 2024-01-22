@@ -82,6 +82,8 @@ fn register_user() {
     use meetings::get_user_by_email;
     use regex::Regex;
 
+    let email_address = "foo@meet-os.com";
+
     let tmp_dir = tempfile::tempdir().unwrap();
 
     println!("tmp_dir: {:?}", tmp_dir);
@@ -127,6 +129,16 @@ fn register_user() {
     assert_eq!(code, res.code);
 
     let client = Client::tracked(super::rocket()).unwrap();
+
+    // Access the profile without a cookie
+    let response = client.get(format!("/profile")).dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "");
+    assert!(html.contains("<title>Missing cookie</title>"));
+    assert!(html.contains("It seems you are not logged in"));
+
+    // Verify the email
     let response = client.get(format!("/verify/{code}")).dispatch();
     assert_eq!(response.status(), Status::Ok);
     let cookie = response.headers().get_one("set-cookie").unwrap();
@@ -134,6 +146,17 @@ fn register_user() {
     let html = response.into_string().unwrap();
     assert!(html.contains("<title>Thank you for registering</title>"));
     assert!(html.contains("Your email was verified."));
+
+    // Access the profile with the cookie
+    let response = client
+        .get(format!("/profile"))
+        .private_cookie(("meet-os", email_address))
+        .dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "x");
+    assert!(html.contains("<title>Profile</title>"));
+    assert!(html.contains(r#"<h1 class="title is-3">Foo Bar</h1>"#));
 }
 
 #[test]
