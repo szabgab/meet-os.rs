@@ -85,6 +85,19 @@ fn get_public_config() -> PublicConfig {
     data
 }
 
+fn markdown2html(text: &str) -> Result<String, String> {
+    markdown::to_html_with_options(
+        text,
+        &markdown::Options {
+            compile: markdown::CompileOptions {
+                allow_dangerous_html: true,
+                ..markdown::CompileOptions::default()
+            },
+            ..markdown::Options::gfm()
+        },
+    )
+}
+
 #[get("/")]
 fn index() -> Template {
     let events = load_events();
@@ -227,19 +240,6 @@ async fn verify(code: &str) -> Template {
     Template::render(
         "message",
         context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config: get_public_config()},
-    )
-}
-
-fn markdown2html(text: &str) -> Result<String, String> {
-    markdown::to_html_with_options(
-        text,
-        &markdown::Options {
-            compile: markdown::CompileOptions {
-                allow_dangerous_html: true,
-                ..markdown::CompileOptions::default()
-            },
-            ..markdown::Options::gfm()
-        },
     )
 }
 
