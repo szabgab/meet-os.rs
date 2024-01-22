@@ -2,7 +2,7 @@ use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 
 #[test]
-fn index_page() {
+fn home() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/").dispatch();
 
