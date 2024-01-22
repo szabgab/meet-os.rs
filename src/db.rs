@@ -55,7 +55,7 @@ pub async fn add_user(user: &User) -> surrealdb::Result<()> {
     }
 }
 
-pub async fn verify_code(code: &str) -> surrealdb::Result<bool> {
+pub async fn verify_code(code: &str) -> surrealdb::Result<Option<User>> {
     rocket::info!("verification code: '{code}'");
     let db = get_database().await?;
     let verified = true;
@@ -66,15 +66,15 @@ pub async fn verify_code(code: &str) -> surrealdb::Result<bool> {
         .await?;
 
     match response.check() {
-        Ok(entries) => {
-            //let entries: Vec<User> = entries.take(0)?;
-            // for entry in entries {
-            //     println!("{}: {}", entry.name, entry.phone);
-            // }
-
-            rocket::info!("verification ok");
-            Ok(entries.num_statements() == 1)
-            //Ok(false)
+        Ok(mut entries) => {
+            let entries: Vec<User> = entries.take(0)?;
+            match entries.first() {
+                Some(entry) => {
+                    rocket::info!("verification ok {}, {}", entry.name, entry.email);
+                    Ok(Some(entry.clone()))
+                }
+                None => Ok(None),
+            }
         }
         Err(err) => Err(err),
     }

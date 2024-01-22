@@ -222,13 +222,12 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 #[get("/verify/<code>")]
 async fn verify(code: &str) -> Template {
     rocket::info!("code: {code}");
-    if let Ok(val) = verify_code(code).await {
-        if val {
-            return Template::render(
-                "message",
-                context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},
-            );
-        }
+    if let Ok(Some(user)) = verify_code(code).await {
+        rocket::info!("verified: {}", user.email);
+        return Template::render(
+            "message",
+            context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},
+        );
     }
     Template::render(
         "message",
