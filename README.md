@@ -14,21 +14,27 @@
 
 ## Fees
 
-* The organizations that I invite will get a lifetime free hosting. These will include some sponsored links: Promotion of my own Rust, Python, etc. courses and job offers.
-* Later, if the platform is successful and the costs start to rise I'll think of a fee structure for new groups.
+* The organizations that I invite will get a lifetime free hosting. These will probably include some sponsored links. e.g. link to my own Rust, Python, etc. courses and job offers of sponsors.
+* Later, if the platform is successful and the costs start to rise I'll think of a fee structure for new groups and we might add some features that will be enabled only for corporations.
+
+## Source code, License, reusability
+
+* The license of the source code is MIT OR Apache-2.0.
+* Some of the text and the branding will have a different license.
+* This will allow reuse of the application while making sure others can't legally pretend to run the same service.
 
 ## Costs
 
 * The biggest cost will be the time spent on developing and maintaining the platform.
 * Support for the users.
-* UI Design, graphics
-* Hosting is probably less than $50 / month for a very long time.
+* UI Design, graphics.
+* Hosting is probably less than $50 / month for a long time.
 * Email sending - depending on the service, but it won't go over $50/month for quite some time either.
 
 ## Financing
 
 * I hope that many people, especially in the Rust community, but also in the wider Open Source community will find the project valuable to support it financially.
-* The platform will help promoting my training courses, that can generate income.
+* The platform will help promoting the training courses of Gabor Szabo, the main author. That can generate income.
 * Income from companies that would like to promote their job offers through the system.
 
 ## Development
