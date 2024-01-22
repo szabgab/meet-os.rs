@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 pub mod db;
 pub use db::*;
 
+pub mod notifications;
+pub use notifications::*;
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct User {
     pub email: String,
