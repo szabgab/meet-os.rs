@@ -29,6 +29,12 @@ struct RegistrationForm<'r> {
     email: &'r str,
 }
 
+#[derive(Debug)]
+struct EmailAddress {
+    name: String,
+    email: String,
+}
+
 fn load_event(id: usize) -> Event {
     let filename = format!("data/events/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
@@ -304,12 +310,6 @@ fn rocket() -> _ {
             ],
         )
         .attach(Template::fairing())
-}
-
-#[derive(Debug)]
-struct EmailAddress {
-    name: String,
-    email: String,
 }
 
 async fn sendgrid(
