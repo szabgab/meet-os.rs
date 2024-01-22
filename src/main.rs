@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use rocket::form::Form;
 use rocket::fs::NamedFile;
+use rocket::http::CookieJar;
 use rocket::serde::uuid::Uuid;
 use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
@@ -220,10 +221,12 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 }
 
 #[get("/verify/<code>")]
-async fn verify(code: &str) -> Template {
+async fn verify(code: &str, cookies: &CookieJar<'_>) -> Template {
     rocket::info!("code: {code}");
+
     if let Ok(Some(user)) = verify_code(code).await {
         rocket::info!("verified: {}", user.email);
+        cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
         return Template::render(
             "message",
             context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},

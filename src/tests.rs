@@ -97,6 +97,8 @@ fn register_user() {
         .dispatch();
 
     assert_eq!(response.status(), Status::Ok);
+    assert!(response.headers().get_one("set-cookie").is_none());
+
     let html = response.into_string().unwrap();
     assert!(html.contains("<title>We sent you an email</title>"));
     assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
@@ -127,6 +129,8 @@ fn register_user() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get(format!("/verify/{code}")).dispatch();
     assert_eq!(response.status(), Status::Ok);
+    let cookie = response.headers().get_one("set-cookie").unwrap();
+    assert!(cookie.contains("meet-os="));
     let html = response.into_string().unwrap();
     assert!(html.contains("<title>Thank you for registering</title>"));
     assert!(html.contains("Your email was verified."));
