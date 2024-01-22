@@ -37,6 +37,11 @@
 * The platform will help promoting the training courses of Gabor Szabo, the main author. That can generate income.
 * Income from companies that would like to promote their job offers through the system.
 
+
+## Community
+
+There is now a [Zulip stream](https://osdc.zulipchat.com/#narrow/stream/422181-meet-os) for discussion.
+
 ## Development
 
 
