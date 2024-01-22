@@ -11,7 +11,7 @@ use sendgrid::SGClient;
 use sendgrid::{Destination, Mail};
 use serde::{Deserialize, Serialize};
 
-use meetings::{add_user, verify_code, Event, Group, User};
+use meetings::{add_user, verify_code, EmailAddress, Event, Group, User};
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -27,12 +27,6 @@ struct PublicConfig {
 struct RegistrationForm<'r> {
     name: &'r str,
     email: &'r str,
-}
-
-#[derive(Debug)]
-struct EmailAddress {
-    name: String,
-    email: String,
 }
 
 fn load_event(id: usize) -> Event {

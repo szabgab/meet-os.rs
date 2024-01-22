@@ -33,6 +33,12 @@ pub struct Group {
     pub description: String,
 }
 
+#[derive(Debug)]
+pub struct EmailAddress {
+    pub name: String,
+    pub email: String,
+}
+
 fn get_empty_string() -> String {
     String::new()
 }
