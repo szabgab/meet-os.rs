@@ -311,16 +311,16 @@ fn rocket() -> _ {
         .mount(
             "/",
             routes![
-                index,
                 about,
-                privacy,
-                soc,
-                register_get,
-                register_post,
                 event_get,
                 group_get,
+                index,
                 js_files,
+                privacy,
+                register_get,
+                register_post,
                 show_profile,
+                soc,
                 verify
             ],
         )
