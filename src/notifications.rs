@@ -12,8 +12,6 @@ pub async fn sendgrid(
 ) {
     let sg = SGClient::new(api_key);
 
-    let x_smtpapi = String::from(r#"{"unique_args":{"test":7}}"#);
-
     let mail_info = Mail::new()
         .add_to(Destination {
             address: &to.email,
@@ -22,9 +20,7 @@ pub async fn sendgrid(
         .add_from(&from.email)
         .add_from_name(&from.name)
         .add_subject(subject)
-        .add_html(html)
-        .add_header("x-cool".to_owned(), "indeed")
-        .add_x_smtpapi(&x_smtpapi);
+        .add_html(html);
 
     sg.send(mail_info).await.ok();
 }
