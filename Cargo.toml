@@ -26,11 +26,11 @@ serde_yaml = "0.9"
 surrealdb = { version = "1.0", features = ["kv-rocksdb"] }
 tokio = { version = "1.35", features = ["macros", "rt-multi-thread"] }
 markdown = { git = "https://github.com/wooorm/markdown-rs.git" }
-uuid = { version = "1.6.1", features = ["v4"] }
-validator = "0.16.1"
+uuid = { version = "1.6", features = ["v4"] }
+validator = "0.16"
 regex = "1.10"
-tempfile = "3.9.0"
-tokio-test = "0.4.3"
+tempfile = "3.9"
+tokio-test = "0.4"
 
 [[bin]]
 name = "meetings"
