@@ -286,7 +286,18 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
     };
-    add_user(&user).await.unwrap();
+    match add_user(&user).await {
+        Ok(result) => result,
+        Err(err) => {
+            rocket::info!("Error while trying to add user {err}");
+            // TODO special reporting when the email is already in the system
+            return Template::render(
+                "message",
+                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config: get_public_config()},
+            );
+        }
+    };
+
     let base_url = rocket::Config::figment()
         .extract_inner::<String>("base_url")
         .unwrap_or_default();

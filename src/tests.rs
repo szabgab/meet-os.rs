@@ -159,6 +159,20 @@ fn register_user() {
     //assert_eq!(html, "x");
     assert!(html.contains("<title>Profile</title>"));
     assert!(html.contains(r#"<h1 class="title is-3">Foo Bar</h1>"#));
+
+    // Try to register with email that is already in our system
+    // let client = Client::tracked(super::rocket()).unwrap();
+    let response = client
+        .post("/register")
+        .header(ContentType::Form)
+        .body("name=Peti Bar&email=foo@meet-os.com")
+        .dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    assert!(response.headers().get_one("set-cookie").is_none());
+    let html = response.into_string().unwrap();
+    assert!(html.contains("<title>Registration failed</title>"));
+    //assert_eq!(html, "x");
 }
 
 #[test]
