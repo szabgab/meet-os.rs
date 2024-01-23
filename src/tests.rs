@@ -159,20 +159,6 @@ fn register_user() {
     //assert_eq!(html, "x");
     assert!(html.contains("<title>Profile</title>"));
     assert!(html.contains(r#"<h1 class="title is-3">Foo Bar</h1>"#));
-
-    // Try to register with email that is already in our system
-    // let client = Client::tracked(super::rocket()).unwrap();
-    let response = client
-        .post("/register")
-        .header(ContentType::Form)
-        .body("name=Peti Bar&email=foo@meet-os.com")
-        .dispatch();
-
-    assert_eq!(response.status(), Status::Ok);
-    assert!(response.headers().get_one("set-cookie").is_none());
-    let html = response.into_string().unwrap();
-    assert!(html.contains("<title>Registration failed</title>"));
-    //assert_eq!(html, "x");
 }
 
 #[test]
@@ -221,4 +207,40 @@ fn privacy_page() {
     assert_eq!(response.status(), Status::Ok);
     let body = response.into_string().unwrap();
     assert!(body.contains(r#"<title>Privacy Policy</title>"#));
+}
+
+#[test]
+fn duplicate_email() {
+    use crate::{add_user, User};
+
+    let tmp_dir = tempfile::tempdir().unwrap();
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
+    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
+
+    let email = "test@meet-os.com";
+
+    let process = "register";
+    let user = User {
+        name: "Test Bar".to_owned(),
+        email: email.to_owned(),
+        process: process.to_owned(),
+        code: String::new(),
+        date: "date".to_owned(), // TODO get current timestamp
+        verified: false,
+    };
+    tokio_test::block_on(add_user(&user)).unwrap();
+
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client
+        .post("/register")
+        .header(ContentType::Form)
+        .body(format!("name=Peti Bar&email={email}"))
+        .dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    assert!(response.headers().get_one("set-cookie").is_none());
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "x");
+    assert!(html.contains("<title>Registration failed</title>"));
 }
