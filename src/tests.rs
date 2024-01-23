@@ -82,6 +82,7 @@ fn register_user() {
     use meetings::get_user_by_email;
     use regex::Regex;
 
+    std::env::set_var("ROCKET_CONFIG", "Debug.toml");
     let email_address = "foo@meet-os.com";
 
     let tmp_dir = tempfile::tempdir().unwrap();
@@ -119,8 +120,9 @@ fn register_user() {
     //assert_eq!(email_file.to_str().unwrap(), "");
     let email = std::fs::read_to_string(email_file).unwrap();
     // https://meet-os.com/verify/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-    let re = Regex::new(r"https://meet-os.com/verify/([a-z0-9-]+)").unwrap();
+    let re = Regex::new(r"http://localhost:8000/verify/([a-z0-9-]+)").unwrap();
 
+    log::info!("email: {email}");
     let code = match re.captures(&email) {
         Some(value) => value[1].to_owned(),
         None => panic!("Code not found in email"),

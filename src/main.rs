@@ -98,6 +98,8 @@ fn markdown2html(text: &str) -> Result<String, String> {
 
 #[get("/")]
 fn index() -> Template {
+    rocket::info!("home");
+
     let events = load_events();
     let groups = load_groups();
 
@@ -179,12 +181,15 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
         verified: false,
     };
     add_user(&user).await.unwrap();
+    let base_url = rocket::Config::figment()
+        .extract_inner::<String>("base_url")
+        .unwrap_or_default();
 
     let subject = "Verify your Meet-OS registration!";
     let text = format!(
         r#"Hi,
     Someone used your email to register on the Meet-OS web site.
-    If it was you, please <a href="https://meet-os.com/verify/{code}">click on this link</a> to verify your email address.
+    If it was you, please <a href="{base_url}/verify/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
     If it was not you, we would like to apolozie. You don't need to do anything. We'll discard your registration if it is not validated.

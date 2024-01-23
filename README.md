@@ -56,6 +56,8 @@ cd meeting.rs
 pre-commit install
 ```
 
+Configure the environment variable `ROCKET_CONFIG` to be `Debug.toml`.
+
 ## Requirements
 
 ### For the Rust-Maven online meetings
