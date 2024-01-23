@@ -338,7 +338,7 @@ async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template 
     rocket::info!("process: {process}, code: {code}");
 
     // TODO take the process into account at the verification
-    if let Ok(Some(user)) = verify_code(code).await {
+    if let Ok(Some(user)) = verify_code(process, code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
         return Template::render(

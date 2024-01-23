@@ -56,14 +56,15 @@ pub async fn add_user(user: &User) -> surrealdb::Result<()> {
     }
 }
 
-pub async fn verify_code(code: &str) -> surrealdb::Result<Option<User>> {
-    rocket::info!("verification code: '{code}'");
+pub async fn verify_code(process: &str, code: &str) -> surrealdb::Result<Option<User>> {
+    rocket::info!("verification code: '{code}' process = '{process}'");
     let db = get_database().await?;
     let verified = true;
     let response = db
-        .query("UPDATE ONLY user SET verified=$verified WHERE code=$code;")
+        .query("UPDATE ONLY user SET verified=$verified, code='' WHERE code=$code AND process=$process;")
         .bind(("verified", verified))
         .bind(("code", code))
+        .bind(("process", process))
         .await?;
 
     match response.check() {
@@ -71,7 +72,12 @@ pub async fn verify_code(code: &str) -> surrealdb::Result<Option<User>> {
             let entries: Vec<User> = entries.take(0)?;
             match entries.first() {
                 Some(entry) => {
-                    rocket::info!("verification ok {}, {}", entry.name, entry.email);
+                    rocket::info!(
+                        "verification ok '{}', '{}', '{}'",
+                        entry.name,
+                        entry.email,
+                        entry.process
+                    );
                     Ok(Some(entry.clone()))
                 }
                 None => Ok(None),
