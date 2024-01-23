@@ -119,8 +119,8 @@ fn register_user() {
 
     //assert_eq!(email_file.to_str().unwrap(), "");
     let email = std::fs::read_to_string(email_file).unwrap();
-    // https://meet-os.com/verify/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-    let re = Regex::new(r"http://localhost:8000/verify/([a-z0-9-]+)").unwrap();
+    // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let re = Regex::new(r"http://localhost:8000/verify/register/([a-z0-9-]+)").unwrap();
 
     log::info!("email: {email}");
     let code = match re.captures(&email) {
@@ -141,7 +141,7 @@ fn register_user() {
     assert!(html.contains("It seems you are not logged in"));
 
     // Verify the email
-    let response = client.get(format!("/verify/{code}")).dispatch();
+    let response = client.get(format!("/verify/register/{code}")).dispatch();
     assert_eq!(response.status(), Status::Ok);
     let cookie = response.headers().get_one("set-cookie").unwrap();
     assert!(cookie.contains("meet-os="));
@@ -171,7 +171,7 @@ fn verify_with_non_existent_code() {
     std::env::set_var("EMAIL_FILE", &email_file);
 
     let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/verify/abc").dispatch();
+    let response = client.get("/verify/register/abc").dispatch();
     assert_eq!(response.status(), Status::Ok);
     let html = response.into_string().unwrap();
     //assert_eq!(html, "");

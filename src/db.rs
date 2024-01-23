@@ -25,15 +25,16 @@ async fn get_database() -> surrealdb::Result<Surreal<Db>> {
 }
 
 pub async fn add_user(user: &User) -> surrealdb::Result<()> {
-    rocket::info!("add user email: '{}'", user.email);
+    rocket::info!("add user email: '{}' code: '{}'", user.email, user.code);
     let db = get_database().await?;
     let response = db
         .query(
-            "CREATE user SET name=$name, email=$email, date=$date, code=$code, verified=$verified;",
+            "CREATE user SET name=$name, email=$email, date=$date, process=$process, code=$code, verified=$verified;",
         )
         .bind(("name", &user.name))
         .bind(("email", &user.email))
         .bind(("date", &user.date))
+        .bind(("process", &user.process))
         .bind(("code", &user.code))
         .bind(("verified", user.verified))
         .await?;

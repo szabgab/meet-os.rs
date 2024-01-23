@@ -206,7 +206,8 @@ async fn login_post(input: Form<LoginForm<'_>>) -> Template {
 
     rocket::info!("email: {}", user.email);
 
-    let code = format!("login-{}", Uuid::new_v4());
+    let process = "login";
+    let code = Uuid::new_v4();
 
     // add_user(&user).await.unwrap();
     let base_url = rocket::Config::figment()
@@ -217,7 +218,7 @@ async fn login_post(input: Form<LoginForm<'_>>) -> Template {
     let text = format!(
         r#"Hi,
     Someone used your email to try to login the Meet-OS web site.
-    If it was you, please <a href="{base_url}/verify/{code}">click on this link</a> to finish the login process.
+    If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to finish the login process.
     <p>
     <p>
     If it was not you, we would like to apolozie. You don't need to do anything..
@@ -274,11 +275,13 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
             context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config: get_public_config()},
         );
     }
+    let process = "register";
     let code = Uuid::new_v4();
 
     let user = User {
         name: input.name.to_owned(),
         email,
+        process: process.to_owned(),
         code: format!("{code}"),
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
@@ -292,7 +295,7 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     let text = format!(
         r#"Hi,
     Someone used your email to register on the Meet-OS web site.
-    If it was you, please <a href="{base_url}/verify/{code}">click on this link</a> to verify your email address.
+    If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
     If it was not you, we would like to apolozie. You don't need to do anything. We'll discard your registration if it is not validated.
@@ -330,10 +333,11 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     // )
 }
 
-#[get("/verify/<code>")]
-async fn verify(code: &str, cookies: &CookieJar<'_>) -> Template {
-    rocket::info!("code: {code}");
+#[get("/verify/<process>/<code>")]
+async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template {
+    rocket::info!("process: {process}, code: {code}");
 
+    // TODO take the process into account at the verification
     if let Ok(Some(user)) = verify_code(code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
