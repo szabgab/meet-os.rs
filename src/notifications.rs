@@ -12,8 +12,7 @@ pub async fn sendgrid(
 ) {
     let sg = SGClient::new(api_key);
 
-    let mut x_smtpapi = String::new();
-    x_smtpapi.push_str(r#"{"unique_args":{"test":7}}"#);
+    let x_smtpapi = String::from(r#"{"unique_args":{"test":7}}"#);
 
     let mail_info = Mail::new()
         .add_to(Destination {
