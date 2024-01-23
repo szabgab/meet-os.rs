@@ -147,6 +147,16 @@ fn soc() -> Template {
     )
 }
 
+#[get("/logout")]
+fn logout_get(cookies: &CookieJar<'_>) -> Template {
+    // TODO shall we check if the cookie was even there?
+    cookies.remove_private("meet-os");
+    Template::render(
+        "message",
+        context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config()},
+    )
+}
+
 #[get("/register")]
 fn register_get() -> Template {
     Template::render(
@@ -321,6 +331,7 @@ fn rocket() -> _ {
                 group_get,
                 index,
                 js_files,
+                logout_get,
                 privacy,
                 register_get,
                 register_post,
