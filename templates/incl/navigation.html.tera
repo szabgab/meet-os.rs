@@ -11,12 +11,12 @@
       <div id="navbar-home" class="navbar-menu">
         <div class="navbar-start">
           <a href="/" class="navbar-item">Home</a>
-          <a href="/register" class="navbar-item">Register</a>
         </div>
-
         <div class="navbar-end">
           <div class="navbar-item">
           <div class="navbar-item has-dropdown is-hoverable">
+             <a href="/register" class="navbar-item">Register</a>
+             <a href="/login" class="navbar-item">Login</a>
              <a href="/logout" class="navbar-item">Logout</a>
              <a href="/profile" class="navbar-item">Profile</a>
              <a href="/about" class="navbar-item">About</a>

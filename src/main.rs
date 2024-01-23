@@ -33,6 +33,11 @@ struct RegistrationForm<'r> {
     email: &'r str,
 }
 
+#[derive(FromForm)]
+struct LoginForm<'r> {
+    email: &'r str,
+}
+
 fn load_event(id: usize) -> Event {
     let filename = format!("data/events/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
@@ -154,6 +159,94 @@ fn logout_get(cookies: &CookieJar<'_>) -> Template {
     Template::render(
         "message",
         context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config()},
+    )
+}
+
+#[get("/login")]
+fn login_get() -> Template {
+    Template::render(
+        "login",
+        context! {
+            title: "Login",
+            config: get_public_config(),
+        },
+    )
+}
+
+#[post("/login", data = "<input>")]
+async fn login_post(input: Form<LoginForm<'_>>) -> Template {
+    rocket::info!("rocket login: {:?}", input.email);
+
+    let email = input.email.to_lowercase().trim().to_owned();
+    if !validator::validate_email(&email) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config()},
+        );
+    }
+
+    let user: User = match get_user_by_email(&email).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => {
+                return Template::render(
+                    "message",
+                    context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config()},
+                )
+            }
+        },
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config()},
+            );
+        }
+    };
+
+    rocket::info!("email: {}", user.email);
+
+    let code = format!("login-{}", Uuid::new_v4());
+
+    // add_user(&user).await.unwrap();
+    let base_url = rocket::Config::figment()
+        .extract_inner::<String>("base_url")
+        .unwrap_or_default();
+
+    let subject = "Verify your Meet-OS login!";
+    let text = format!(
+        r#"Hi,
+    Someone used your email to try to login the Meet-OS web site.
+    If it was you, please <a href="{base_url}/verify/{code}">click on this link</a> to finish the login process.
+    <p>
+    <p>
+    If it was not you, we would like to apolozie. You don't need to do anything..
+    ";
+    "#
+    );
+
+    // TODO: read from some config file
+    let from = EmailAddress {
+        name: String::from("Meet OS"),
+        email: String::from("gabor@szabgab.com"),
+    };
+    let to_address = &EmailAddress {
+        name: user.name.clone(),
+        email: input.email.to_owned(),
+    };
+
+    if let Ok(email_file) = env::var("EMAIL_FILE") {
+        rocket::info!("email_file: {email_file}");
+        let mut file = File::create(email_file).unwrap();
+        writeln!(&mut file, "{}", &text).unwrap();
+    } else {
+        let private = get_private_config();
+        sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
+    }
+
+    Template::render(
+        "message",
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please click on the link to finish the login process.", to_address.email), config: get_public_config()},
     )
 }
 
@@ -332,6 +425,8 @@ fn rocket() -> _ {
                 index,
                 js_files,
                 logout_get,
+                login_get,
+                login_post,
                 privacy,
                 register_get,
                 register_post,
