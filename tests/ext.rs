@@ -20,8 +20,7 @@ fn check_html(document: &Html, tag: &str, text: &str) {
     );
 }
 
-#[test]
-fn external() {
+fn run_external(func: fn(&str)) {
     let tmp_dir = tempfile::tempdir().unwrap();
     let port = "8001";
     println!("tmp_dir: {:?}", tmp_dir);
@@ -35,7 +34,7 @@ fn external() {
             println!("Child PID: {}", child);
             std::thread::sleep(std::time::Duration::from_secs(1));
 
-            check_main_page(port);
+            func(port);
 
             signal::kill(Pid::from_raw(child), signal::Signal::SIGTERM).unwrap();
 
@@ -47,6 +46,11 @@ fn external() {
         }
         Err(_) => println!("Fork failed"),
     }
+}
+
+#[test]
+fn external() {
+    run_external(check_main_page);
 }
 
 fn check_main_page(port: &str) {
