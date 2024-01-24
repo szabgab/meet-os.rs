@@ -34,36 +34,8 @@ fn external() {
         Ok(Fork::Parent(child)) => {
             println!("Child PID: {}", child);
             std::thread::sleep(std::time::Duration::from_secs(1));
-            match reqwest::blocking::get(format!("http://localhost:{port}/")) {
-                Ok(res) => {
-                    assert_eq!(res.status(), 200);
-                    match res.text() {
-                        Ok(html) => {
-                            let document = Html::parse_document(&html);
-                            check_html(&document, "title", "Meet-OS");
-                            check_html(&document, "h1", "Welcome to the Rust meeting server");
 
-                            let selector = Selector::parse("li").unwrap();
-                            let element = document.select(&selector).next().unwrap();
-                            assert_eq!(
-                                element.inner_html(),
-                                r#"<a href="/event/1">Web development with Rocket</a>"#
-                            );
-                            let element = document.select(&selector).nth(1).unwrap();
-                            assert_eq!(
-                                element.inner_html(),
-                                r#"<a href="/group/1">Rust Maven</a>"#
-                            );
-
-                            //println!("{}", html)
-                        }
-                        Err(err) => assert_eq!(err.to_string(), ""),
-                    };
-                }
-                Err(err) => {
-                    assert_eq!(err.to_string(), "");
-                }
-            };
+            check_main_page(port);
 
             signal::kill(Pid::from_raw(child), signal::Signal::SIGTERM).unwrap();
 
@@ -75,4 +47,34 @@ fn external() {
         }
         Err(_) => println!("Fork failed"),
     }
+}
+
+fn check_main_page(port: &str) {
+    match reqwest::blocking::get(format!("http://localhost:{port}/")) {
+        Ok(res) => {
+            assert_eq!(res.status(), 200);
+            match res.text() {
+                Ok(html) => {
+                    let document = Html::parse_document(&html);
+                    check_html(&document, "title", "Meet-OS");
+                    check_html(&document, "h1", "Welcome to the Rust meeting server");
+
+                    let selector = Selector::parse("li").unwrap();
+                    let element = document.select(&selector).next().unwrap();
+                    assert_eq!(
+                        element.inner_html(),
+                        r#"<a href="/event/1">Web development with Rocket</a>"#
+                    );
+                    let element = document.select(&selector).nth(1).unwrap();
+                    assert_eq!(element.inner_html(), r#"<a href="/group/1">Rust Maven</a>"#);
+
+                    //println!("{}", html)
+                }
+                Err(err) => assert_eq!(err.to_string(), ""),
+            };
+        }
+        Err(err) => {
+            assert_eq!(err.to_string(), "");
+        }
+    };
 }
