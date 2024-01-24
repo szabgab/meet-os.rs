@@ -14,8 +14,8 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_login_code_to_user, add_user, get_user_by_email, sendgrid, verify_code, EmailAddress,
-    Event, Group, User,
+    add_login_code_to_user, add_user, get_database, get_user_by_email, sendgrid, verify_code,
+    EmailAddress, Event, Group, User,
 };
 
 #[derive(Deserialize, Debug)]
@@ -177,6 +177,16 @@ fn login_get() -> Template {
 #[post("/login", data = "<input>")]
 async fn login_post(input: Form<LoginForm<'_>>) -> Template {
     rocket::info!("rocket login: {:?}", input.email);
+    let db = match get_database().await {
+        Ok(db) => db,
+        Err(err) => {
+            rocket::info!("could not connect to database {err}");
+            return Template::render(
+                "message",
+                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
+            );
+        }
+    };
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
@@ -186,7 +196,7 @@ async fn login_post(input: Form<LoginForm<'_>>) -> Template {
         );
     }
 
-    let user: User = match get_user_by_email(&email).await {
+    let user: User = match get_user_by_email(&db, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
@@ -210,7 +220,7 @@ async fn login_post(input: Form<LoginForm<'_>>) -> Template {
     let process = "login";
     let code = Uuid::new_v4();
 
-    match add_login_code_to_user(&email, process, code.to_string().as_str()).await {
+    match add_login_code_to_user(&db, &email, process, code.to_string().as_str()).await {
         Ok(_result) => (),
         Err(err) => {
             rocket::info!("Error while trying to add user {err}");
@@ -277,6 +287,17 @@ fn register_get() -> Template {
 async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
+    let db = match get_database().await {
+        Ok(db) => db,
+        Err(err) => {
+            rocket::info!("could not connect to database {err}");
+            return Template::render(
+                "message",
+                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
+            );
+        }
+    };
+
     // email: lowerase, remove spaces from sides
     // validate format @
     let email = input.email.to_lowercase().trim().to_owned();
@@ -297,7 +318,7 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
     };
-    match add_user(&user).await {
+    match add_user(&db, &user).await {
         Ok(result) => result,
         Err(err) => {
             rocket::info!("Error while trying to add user {err}");
@@ -359,9 +380,19 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 #[get("/verify/<process>/<code>")]
 async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template {
     rocket::info!("process: {process}, code: {code}");
+    let db = match get_database().await {
+        Ok(db) => db,
+        Err(err) => {
+            rocket::info!("could not connect to database {err}");
+            return Template::render(
+                "message",
+                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
+            );
+        }
+    };
 
     // TODO take the process into account at the verification
-    if let Ok(Some(user)) = verify_code(process, code).await {
+    if let Ok(Some(user)) = verify_code(&db, process, code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
         let (title, message) = match process {
@@ -382,10 +413,21 @@ async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template 
 
 #[get("/profile")]
 async fn show_profile(cookies: &CookieJar<'_>) -> Template {
+    let db = match get_database().await {
+        Ok(db) => db,
+        Err(err) => {
+            rocket::info!("could not connect to database {err}");
+            return Template::render(
+                "message",
+                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
+            );
+        }
+    };
+
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
         rocket::info!("cookie value received from user: {email}");
-        if let Ok(Some(user)) = get_user_by_email(email).await {
+        if let Ok(Some(user)) = get_user_by_email(&db, email).await {
             rocket::info!("email: {}", user.email);
             return Template::render(
                 "profile",
