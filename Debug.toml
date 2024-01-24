@@ -3,3 +3,8 @@ secret_key = "qqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
 base_url = "http://localhost:8000"
 
 
+# We have this section to be able to try the --release flag during development
+[release]
+secret_key = "zqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
+base_url = "http://localhost:8000"
+log_level = "normal"
