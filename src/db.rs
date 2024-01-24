@@ -13,9 +13,12 @@ async fn get_database() -> surrealdb::Result<Surreal<Db>> {
         let current_dir = env::current_dir().unwrap();
         current_dir.join("db")
     };
+    rocket::info!("get_database from folder '{:?}'", database_folder);
 
     let db = Surreal::new::<RocksDb>(database_folder).await?;
+    rocket::info!("get_database connected");
     db.use_ns("counter_ns").use_db("counter_db").await?;
+    rocket::info!("get_database namespace set");
 
     // Maybe do this only when we create the database
     let _response = db
@@ -39,6 +42,7 @@ pub async fn add_user(user: &User) -> surrealdb::Result<()> {
         .bind(("verified", user.verified))
         .await?;
 
+    drop(db);
     match response.check() {
         Ok(_entries) => {
             //let entries: Vec<User> = entries.take(0)?;
@@ -67,6 +71,7 @@ pub async fn verify_code(process: &str, code: &str) -> surrealdb::Result<Option<
         .bind(("process", process))
         .await?;
 
+    drop(db);
     match response.check() {
         Ok(mut entries) => {
             let entries: Vec<User> = entries.take(0)?;
@@ -96,6 +101,7 @@ pub async fn get_user_by_email(email: &str) -> surrealdb::Result<Option<User>> {
         .bind(("email", email))
         .await?;
 
+    drop(db);
     match response.check() {
         Ok(mut entries) => {
             let entries: Vec<User> = entries.take(0)?;
@@ -127,6 +133,7 @@ pub async fn add_login_code_to_user(
         .bind(("code", code))
         .await?;
 
+    drop(db);
     match response.check() {
         Ok(mut entries) => {
             let entries: Vec<User> = entries.take(0)?;

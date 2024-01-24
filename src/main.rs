@@ -210,9 +210,16 @@ async fn login_post(input: Form<LoginForm<'_>>) -> Template {
     let process = "login";
     let code = Uuid::new_v4();
 
-    add_login_code_to_user(input.email, process, code.to_string().as_str())
-        .await
-        .unwrap();
+    match add_login_code_to_user(&email, process, code.to_string().as_str()).await {
+        Ok(_result) => (),
+        Err(err) => {
+            rocket::info!("Error while trying to add user {err}");
+            return Template::render(
+                "message",
+                context! {title: "Internal error", message: "Oups", config: get_public_config()},
+            );
+        }
+    };
 
     let base_url = rocket::Config::figment()
         .extract_inner::<String>("base_url")
