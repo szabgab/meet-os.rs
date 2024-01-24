@@ -5,43 +5,43 @@ use scraper::{Html, Selector};
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
-#[test]
-fn external() {
-    let tmp_dir = tempfile::tempdir().unwrap();
-    println!("tmp_dir: {:?}", tmp_dir);
-    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
-    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
-    std::env::set_var("ROCKET_PORT", "8001");
-
+fn compile() {
     let _result = Command::new("cargo")
         .args(["build"])
         .output()
         .expect("command failed to start");
-    println!("---- after compile");
+}
+
+fn check_html(document: &Html, tag: &str, text: &str) {
+    let selector = Selector::parse(tag).unwrap();
+    assert_eq!(
+        document.select(&selector).next().unwrap().inner_html(),
+        text
+    );
+}
+
+#[test]
+fn external() {
+    let tmp_dir = tempfile::tempdir().unwrap();
+    let port = "8001";
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
+    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
+    std::env::set_var("ROCKET_PORT", port);
+    compile();
 
     match fork() {
         Ok(Fork::Parent(child)) => {
             println!("Child PID: {}", child);
             std::thread::sleep(std::time::Duration::from_secs(1));
-            match reqwest::blocking::get("http://localhost:8001/") {
+            match reqwest::blocking::get(format!("http://localhost:{port}/")) {
                 Ok(res) => {
-                    println!("status: {:?}", res.status());
-                    //println!("server: {:?}", &res.headers()["server"]);
+                    assert_eq!(res.status(), 200);
                     match res.text() {
                         Ok(html) => {
                             let document = Html::parse_document(&html);
-                            let selector = Selector::parse("title").unwrap();
-                            for element in document.select(&selector) {
-                                assert_eq!(element.inner_html(), "Meet-OS")
-                            }
-
-                            let selector = Selector::parse("h1").unwrap();
-                            for element in document.select(&selector) {
-                                assert_eq!(
-                                    element.inner_html(),
-                                    "Welcome to the Rust meeting server"
-                                )
-                            }
+                            check_html(&document, "title", "Meet-OS");
+                            check_html(&document, "h1", "Welcome to the Rust meeting server");
 
                             let selector = Selector::parse("li").unwrap();
                             let element = document.select(&selector).next().unwrap();
@@ -61,7 +61,7 @@ fn external() {
                     };
                 }
                 Err(err) => {
-                    println!("Error {}", err);
+                    assert_eq!(err.to_string(), "");
                 }
             };
 
@@ -75,19 +75,4 @@ fn external() {
         }
         Err(_) => println!("Fork failed"),
     }
-    // println!("======================");
-    //     let res = match reqwest::blocking::get("http://localhost:8000/") {
-    //         Ok(res) => res,
-    //         Err(err) => {
-    //             println!("Error {}", err);
-    //             std::process::exit(1);
-    //         }
-    //     };
-
-    // let client = Client::tracked(super::rocket()).unwrap();
-    // let response = client.get("/privacy").dispatch();
-
-    // assert_eq!(response.status(), Status::Ok);
-    // let body = response.into_string().unwrap();
-    // assert!(body.contains(r#"<title>Privacy Policy</title>"#));
 }
