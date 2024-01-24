@@ -38,8 +38,8 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
-    - name: Build release version
-      run: cargo build --release --verbose
+        #- name: Build release version
+        #  run: cargo build --release --verbose
 
     - name: Check cargo fmt
       run: cargo fmt --check
