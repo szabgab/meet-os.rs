@@ -115,6 +115,7 @@ fn register_user() {
     assert_eq!(res.email, "foo@meet-os.com");
     assert_eq!(res.name, "Foo Bar");
     assert!(!res.verified);
+    assert_eq!(res.process, "register");
     // date? code?
 
     //assert_eq!(email_file.to_str().unwrap(), "");
@@ -243,4 +244,91 @@ fn duplicate_email() {
     let html = response.into_string().unwrap();
     //assert_eq!(html, "x");
     assert!(html.contains("<title>Registration failed</title>"));
+}
+
+#[test]
+fn login() {
+    use crate::{add_user, User};
+    use meetings::get_user_by_email;
+    use regex::Regex;
+
+    let tmp_dir = tempfile::tempdir().unwrap();
+    println!("tmp_dir: {:?}", tmp_dir);
+    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
+    let email_file = tmp_dir.path().join("email.txt");
+    std::env::set_var("EMAIL_FILE", &email_file);
+
+    let email_address = "test@meet-os.com";
+    let user_name = "Test Bar";
+
+    let process = "register";
+    let user = User {
+        name: user_name.to_owned(),
+        email: email_address.to_owned(),
+        process: process.to_owned(),
+        code: String::new(),
+        date: "date".to_owned(), // TODO get current timestamp
+        verified: true,
+    };
+    tokio_test::block_on(add_user(&user)).unwrap();
+
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client
+        .post("/login")
+        .header(ContentType::Form)
+        .body(format!("email={email_address}"))
+        .dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+    assert!(response.headers().get_one("set-cookie").is_none());
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "x");
+    assert!(html.contains("<title>We sent you an email</title>"));
+    assert!(html.contains("We sent you an email to <b>test@meet-os.com</b>"));
+    drop(client);
+
+    // get the user and check if there is a code and if the process is "login"
+    let res = tokio_test::block_on(get_user_by_email(email_address))
+        .unwrap()
+        .unwrap();
+    assert_eq!(res.email, email_address);
+    assert_eq!(res.name, user_name);
+    assert!(res.verified);
+    assert_eq!(res.process, "login");
+    //assert_eq!(res.code, "xx");
+
+    // get the email and extract the code from the link
+    let email = std::fs::read_to_string(email_file).unwrap();
+    // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let re = Regex::new(r"http://localhost:8000/verify/login/([a-z0-9-]+)").unwrap();
+
+    log::info!("email: {email}");
+    let code = match re.captures(&email) {
+        Some(value) => value[1].to_owned(),
+        None => panic!("Code not found in email"),
+    };
+
+    assert_eq!(code, res.code);
+
+    // "Click" on the link an verify the email
+    let client = Client::tracked(super::rocket()).unwrap();
+    let response = client.get(format!("/verify/login/{code}")).dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    let cookie = response.headers().get_one("set-cookie").unwrap();
+    assert!(cookie.contains("meet-os="));
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "x");
+    assert!(html.contains("<title>Welcome back</title>"));
+    assert!(html.contains(r#"<a href="/profile">profile</a>"#));
+
+    // Access the profile with the cookie
+    let response = client
+        .get(format!("/profile"))
+        .private_cookie(("meet-os", email_address))
+        .dispatch();
+    assert_eq!(response.status(), Status::Ok);
+    let html = response.into_string().unwrap();
+    //assert_eq!(html, "x");
+    assert!(html.contains("<title>Profile</title>"));
+    assert!(html.contains(format!(r#"<h1 class="title is-3">{user_name}</h1>"#).as_str()));
 }

@@ -14,7 +14,8 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_user, get_user_by_email, sendgrid, verify_code, EmailAddress, Event, Group, User,
+    add_login_code_to_user, add_user, get_user_by_email, sendgrid, verify_code, EmailAddress,
+    Event, Group, User,
 };
 
 #[derive(Deserialize, Debug)]
@@ -209,7 +210,10 @@ async fn login_post(input: Form<LoginForm<'_>>) -> Template {
     let process = "login";
     let code = Uuid::new_v4();
 
-    // add_user(&user).await.unwrap();
+    add_login_code_to_user(input.email, process, code.to_string().as_str())
+        .await
+        .unwrap();
+
     let base_url = rocket::Config::figment()
         .extract_inner::<String>("base_url")
         .unwrap_or_default();
@@ -344,6 +348,7 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
     // )
 }
 
+// TODO limit the possible values for the process to register and login
 #[get("/verify/<process>/<code>")]
 async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template {
     rocket::info!("process: {process}, code: {code}");
@@ -352,9 +357,14 @@ async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template 
     if let Ok(Some(user)) = verify_code(process, code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
+        let (title, message) = match process {
+            "register" => ("Thank you for registering", "Your email was verified."),
+            "login" => ("Welcome back", r#"<a href="/profile">profile</a>"#),
+            _ => ("Oups", "Big opus and TODO"),
+        };
         return Template::render(
             "message",
-            context! {title: "Thank you for registering", message: format!("Your email was verified."), config: get_public_config()},
+            context! {title: title, message: message, config: get_public_config()},
         );
     }
     Template::render(

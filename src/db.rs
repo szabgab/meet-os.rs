@@ -110,3 +110,34 @@ pub async fn get_user_by_email(email: &str) -> surrealdb::Result<Option<User>> {
         Err(err) => Err(err),
     }
 }
+
+pub async fn add_login_code_to_user(
+    email: &str,
+    process: &str,
+    code: &str,
+) -> surrealdb::Result<Option<User>> {
+    rocket::info!("add_login_code_to_user: '{email}', '{process}', '{code}'");
+
+    let db = get_database().await?;
+    rocket::info!("has db");
+    let response = db
+        .query("UPDATE user SET code=$code, process=$process WHERE email=$email;")
+        .bind(("email", email))
+        .bind(("process", process))
+        .bind(("code", code))
+        .await?;
+
+    match response.check() {
+        Ok(mut entries) => {
+            let entries: Vec<User> = entries.take(0)?;
+            match entries.first() {
+                Some(entry) => {
+                    rocket::info!("entry: '{}' '{}'", entry.email, entry.process);
+                    Ok(Some(entry.clone()))
+                }
+                None => Ok(None),
+            }
+        }
+        Err(err) => Err(err),
+    }
+}
