@@ -10,13 +10,16 @@ use rocket::form::Form;
 use rocket::fs::NamedFile;
 use rocket::http::CookieJar;
 use rocket::serde::uuid::Uuid;
+use rocket::State;
 use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_login_code_to_user, add_user, get_database, get_user_by_email, sendgrid, verify_code,
-    EmailAddress, Event, Group, User,
+    add_login_code_to_user, add_user, db, get_user_by_email, sendgrid, verify_code, EmailAddress,
+    Event, Group, User,
 };
+use surrealdb::engine::local::Db;
+use surrealdb::Surreal;
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
@@ -175,18 +178,8 @@ fn login_get() -> Template {
 }
 
 #[post("/login", data = "<input>")]
-async fn login_post(input: Form<LoginForm<'_>>) -> Template {
+async fn login_post(db: &State<Surreal<Db>>, input: Form<LoginForm<'_>>) -> Template {
     rocket::info!("rocket login: {:?}", input.email);
-    let db = match get_database().await {
-        Ok(db) => db,
-        Err(err) => {
-            rocket::info!("could not connect to database {err}");
-            return Template::render(
-                "message",
-                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
-            );
-        }
-    };
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
@@ -284,19 +277,8 @@ fn register_get() -> Template {
 }
 
 #[post("/register", data = "<input>")]
-async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
+async fn register_post(db: &State<Surreal<Db>>, input: Form<RegistrationForm<'_>>) -> Template {
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
-
-    let db = match get_database().await {
-        Ok(db) => db,
-        Err(err) => {
-            rocket::info!("could not connect to database {err}");
-            return Template::render(
-                "message",
-                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
-            );
-        }
-    };
 
     // email: lowerase, remove spaces from sides
     // validate format @
@@ -378,18 +360,13 @@ async fn register_post(input: Form<RegistrationForm<'_>>) -> Template {
 
 // TODO limit the possible values for the process to register and login
 #[get("/verify/<process>/<code>")]
-async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template {
+async fn verify(
+    db: &State<Surreal<Db>>,
+    process: &str,
+    code: &str,
+    cookies: &CookieJar<'_>,
+) -> Template {
     rocket::info!("process: {process}, code: {code}");
-    let db = match get_database().await {
-        Ok(db) => db,
-        Err(err) => {
-            rocket::info!("could not connect to database {err}");
-            return Template::render(
-                "message",
-                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
-            );
-        }
-    };
 
     // TODO take the process into account at the verification
     if let Ok(Some(user)) = verify_code(&db, process, code).await {
@@ -412,18 +389,7 @@ async fn verify(process: &str, code: &str, cookies: &CookieJar<'_>) -> Template 
 }
 
 #[get("/profile")]
-async fn show_profile(cookies: &CookieJar<'_>) -> Template {
-    let db = match get_database().await {
-        Ok(db) => db,
-        Err(err) => {
-            rocket::info!("could not connect to database {err}");
-            return Template::render(
-                "message",
-                context! {title: "Error", message: "Could not connect to database", config: get_public_config()},
-            );
-        }
-    };
-
+async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
         rocket::info!("cookie value received from user: {email}");
@@ -510,6 +476,7 @@ fn rocket() -> _ {
             ],
         )
         .attach(Template::fairing())
+        .attach(db::init())
 }
 
 #[cfg(test)]

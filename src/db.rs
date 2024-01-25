@@ -1,30 +1,28 @@
 use std::env;
-use std::path;
 
+use rocket::fairing::AdHoc;
 use surrealdb::engine::local::{Db, RocksDb};
 use surrealdb::Surreal;
 
 use crate::User;
 
-pub async fn get_database() -> surrealdb::Result<Surreal<Db>> {
-    let database_folder = if let Ok(val) = env::var("DATABASE_PATH") {
-        path::PathBuf::from(val)
-    } else {
-        let current_dir = env::current_dir().unwrap_or(path::PathBuf::from("."));
-        current_dir.join("db")
-    };
-    rocket::info!("get_database from folder '{:?}'", database_folder);
-
-    let db = Surreal::new::<RocksDb>(database_folder).await?;
-    rocket::info!("get_database connected");
-    db.use_ns("counter_ns").use_db("counter_db").await?;
-    rocket::info!("get_database namespace set");
-
-    // Maybe do this only when we create the database
-    let _response = db
-        .query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
-        .await?;
-    Ok(db)
+#[must_use]
+pub fn init() -> AdHoc {
+    AdHoc::on_ignite("Managed Database Connection", |rocket| async {
+        let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
+        rocket::info!("get_database from folder '{:?}'", database_folder);
+        let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
+        rocket::info!("get_database connected");
+        db.use_ns("counter_ns").use_db("counter_db").await.unwrap();
+        rocket::info!("get_database namespace set");
+        // Maybe do this only when we create the database
+        db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
+            .await
+            .unwrap()
+            .check()
+            .unwrap();
+        rocket.manage(db)
+    })
 }
 
 pub async fn add_user(db: &Surreal<Db>, user: &User) -> surrealdb::Result<()> {
