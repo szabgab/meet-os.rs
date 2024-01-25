@@ -21,6 +21,17 @@ fn check_html(document: &Html, tag: &str, text: &str) {
     );
 }
 
+fn check_html_list(document: &Html, tag: &str, text: Vec<&str>) {
+    let selector = Selector::parse(tag).unwrap();
+
+    let element = document.select(&selector).next().unwrap();
+    assert_eq!(element.inner_html(), text[0]);
+    for ix in 1..text.len() {
+        let element = document.select(&selector).nth(ix).unwrap();
+        assert_eq!(element.inner_html(), text[ix]);
+    }
+}
+
 fn run_external(func: fn(&str)) {
     let tmp_dir = tempfile::tempdir().unwrap();
     let port = "8001";
@@ -61,15 +72,14 @@ fn home() {
                         let document = Html::parse_document(&html);
                         check_html(&document, "title", "Meet-OS");
                         check_html(&document, "h1", "Welcome to the Rust meeting server");
-
-                        let selector = Selector::parse("li").unwrap();
-                        let element = document.select(&selector).next().unwrap();
-                        assert_eq!(
-                            element.inner_html(),
-                            r#"<a href="/event/1">Web development with Rocket</a>"#
+                        check_html_list(
+                            &document,
+                            "li",
+                            vec![
+                                r#"<a href="/event/1">Web development with Rocket</a>"#,
+                                r#"<a href="/group/1">Rust Maven</a>"#,
+                            ],
                         );
-                        let element = document.select(&selector).nth(1).unwrap();
-                        assert_eq!(element.inner_html(), r#"<a href="/group/1">Rust Maven</a>"#);
 
                         //println!("{}", html)
                     }
