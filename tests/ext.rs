@@ -80,6 +80,7 @@ fn home() {
                                 r#"<a href="/group/1">Rust Maven</a>"#,
                             ],
                         );
+                        check_html_list(&document, "h2", vec!["Events", "Groups"]);
 
                         //println!("{}", html)
                     }
