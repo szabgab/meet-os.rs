@@ -476,7 +476,7 @@ fn rocket() -> _ {
             ],
         )
         .attach(Template::fairing())
-        .attach(db::init())
+        .attach(db::fairing())
 }
 
 #[cfg(test)]
