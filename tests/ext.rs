@@ -36,7 +36,7 @@ fn run_external(func: fn(&str)) {
     let tmp_dir = tempfile::tempdir().unwrap();
     let port = "8001";
     println!("tmp_dir: {:?}", tmp_dir);
-    // std::env::set_var("ROCKET_CONFIG", "Debug.toml");
+    std::env::set_var("ROCKET_CONFIG", "Debug.toml");
     std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
     std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
     std::env::set_var("ROCKET_PORT", port);
