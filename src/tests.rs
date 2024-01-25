@@ -2,19 +2,6 @@ use rocket::http::Status;
 use rocket::local::blocking::Client;
 
 #[test]
-fn event_page() {
-    let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/event/1").dispatch();
-
-    assert_eq!(response.status(), Status::Ok);
-    let body = response.into_string().unwrap();
-    assert!(body.contains(r#"<h1 class="title is-3">Web development with Rocket</h1>"#));
-    assert!(body.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
-    assert!(body.contains(r#"<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"#));
-    assert!(body.contains(r#"<div><b>Location</b>: Virtual</div>"#));
-}
-
-#[test]
 fn group_page() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/group/1").dispatch();

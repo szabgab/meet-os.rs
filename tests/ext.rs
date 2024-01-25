@@ -346,4 +346,25 @@ fn register_with_bad_email_address() {
     });
 }
 
+#[test]
+fn event_page() {
+    run_external(|port| {
+        // register new user
+        let client = reqwest::blocking::Client::new();
+        let res = client
+            .get(format!("http://localhost:{port}/event/1"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+
+        let document = Html::parse_document(&html);
+        // TODO title
+        check_html(&document, "h1", "Web development with Rocket");
+        assert!(html.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
+        assert!(html.contains(r#"<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"#));
+        assert!(html.contains(r#"<div><b>Location</b>: Virtual</div>"#));
+    });
+}
+
 // TODO try to login with an email address that was not registered
