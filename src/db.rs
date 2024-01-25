@@ -14,11 +14,11 @@ use crate::User;
 pub fn fairing() -> AdHoc {
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
         let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
-        rocket::info!("get_database from folder '{:?}'", database_folder);
+        rocket::info!("db::fairing from folder '{:?}'", database_folder);
         let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
-        rocket::info!("get_database connected");
+        rocket::info!("db::fairing connected");
         db.use_ns("counter_ns").use_db("counter_db").await.unwrap();
-        rocket::info!("get_database namespace set");
+        rocket::info!("db::fairing namespace set");
         // Maybe do this only when we create the database
         db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
             .await
