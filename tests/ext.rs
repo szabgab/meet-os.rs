@@ -238,3 +238,87 @@ fn duplicate_email() {
         check_html(&document, "title", "Registration failed");
     });
 }
+
+#[test]
+fn login() {
+    run_external(|port| {
+        // register new user
+        let client = reqwest::blocking::Client::new();
+        let res = client
+            .post(format!("http://localhost:{port}/register"))
+            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        //println!("{:#?}", res.headers());
+        assert!(res.headers().get("set-cookie").is_none());
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        let res = client
+            .post(format!("http://localhost:{port}/login"))
+            .form(&[("email", "foo@meet-os.com")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        assert!(res.headers().get("set-cookie").is_none());
+        let html = res.text().unwrap();
+        let document = Html::parse_document(&html);
+        check_html(&document, "title", "We sent you an email");
+        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b>"));
+
+        // TODO: get the user from the database and check if there is a code and if the process is "login"
+
+        // get the email and extract the code from the link
+        let email_file = std::env::var("EMAIL_FILE").unwrap();
+        let email = std::fs::read_to_string(email_file).unwrap();
+        // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+        let re = Regex::new(r"http://localhost:8000/verify/login/([a-z0-9-]+)").unwrap();
+
+        log::info!("email: {email}");
+        let code = match re.captures(&email) {
+            Some(value) => value[1].to_owned(),
+            None => panic!("Code not found in email"),
+        };
+        println!("code: {code}");
+        //assert_eq!(code, res.code);
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        // "Click" on the link an verify the email
+        let res = client
+            .get(format!("http://localhost:{port}/verify/login/{code}"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
+        println!("cookie: {cookie}");
+        assert!(cookie.contains("meet-os="));
+        let re = Regex::new(r"meet-os=([^;]+);").unwrap();
+        let cookie_str = match re.captures(&cookie) {
+            Some(value) => value[1].to_owned(),
+            None => panic!("Code not found cookie"),
+        };
+        println!("cookie_str: {cookie_str}");
+
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        let document = Html::parse_document(&html);
+        check_html(&document, "title", "Welcome back");
+        assert!(html.contains(r#"<a href="/profile">profile</a>"#));
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        // Access the profile with the cookie
+        let response = client
+            .get(format!("http://localhost:{port}/profile"))
+            .header("Cookie", format!("meet-os={cookie_str}"))
+            .send()
+            .unwrap();
+        assert_eq!(response.status(), 200);
+        let html = response.text().unwrap();
+        //assert_eq!(html, "x");
+        let document = Html::parse_document(&html);
+        check_html(&document, "title", "Profile");
+        check_html(&document, "h1", "Foo Bar");
+    });
+}
+
+// TODO try to login with an email address that was not registered
