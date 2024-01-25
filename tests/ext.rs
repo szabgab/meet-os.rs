@@ -186,7 +186,7 @@ fn register_user() {
         //assert_eq!(html, "x");
         let document = Html::parse_document(&html);
         check_html(&document, "title", "Profile");
-        assert!(html.contains(r#"<h1 class="title is-3">Foo Bar</h1>"#));
+        check_html(&document, "h1", "Foo Bar");
     });
 }
 
