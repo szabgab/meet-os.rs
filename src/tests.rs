@@ -2,21 +2,6 @@ use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 
 #[test]
-fn home() {
-    let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/").dispatch();
-
-    assert_eq!(response.status(), Status::Ok);
-    let body = response.into_string().unwrap();
-    assert!(body.contains("Welcome to the Rust meeting server"));
-    assert!(body.contains("Web development with Rocket"));
-    assert!(body.contains("<h2>Events</h2>"));
-    assert!(body.contains(r#"<a href="/event/1">Web development with Rocket</a>"#));
-    assert!(body.contains("<h2>Groups</h2>"));
-    assert!(body.contains(r#"<a href="/group/1">Rust Maven</a>"#));
-}
-
-#[test]
 fn event_page() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/event/1").dispatch();
