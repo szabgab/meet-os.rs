@@ -103,18 +103,18 @@ fn register_user() {
 
         let email_file = std::env::var("EMAIL_FILE").unwrap();
 
-        let email = std::fs::read_to_string(email_file).unwrap();
+        let email_content = std::fs::read_to_string(email_file).unwrap();
         // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
         let re = Regex::new(r"http://localhost:8000/verify/register/([a-z0-9-]+)").unwrap();
 
-        log::info!("email: {email}");
-        let code = match re.captures(&email) {
+        println!("email content: {email_content}");
+        let code = match re.captures(&email_content) {
             Some(value) => value[1].to_owned(),
-            None => panic!("Code not found in email"),
+            None => panic!("Code not found in email: {email_content}"),
         };
 
         //assert_eq!(code, res.code);
-        log::info!("code: {code}");
+        println!("code: {code}");
         std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile without a cookie
