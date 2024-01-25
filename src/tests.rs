@@ -78,24 +78,6 @@ fn register_with_bad_email_address() {
 }
 
 #[test]
-fn verify_with_non_existent_code() {
-    let tmp_dir = tempfile::tempdir().unwrap();
-    println!("tmp_dir: {:?}", tmp_dir);
-    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
-
-    let email_file = tmp_dir.path().join("email.txt");
-    std::env::set_var("EMAIL_FILE", &email_file);
-
-    let client = Client::tracked(super::rocket()).unwrap();
-    let response = client.get("/verify/register/abc").dispatch();
-    assert_eq!(response.status(), Status::Ok);
-    let html = response.into_string().unwrap();
-    //assert_eq!(html, "");
-    //assert!(html.contains("<title>Thank you for registering</title>"));
-    assert!(html.contains("Invalid code <b>abc</b>"));
-}
-
-#[test]
 fn about_page() {
     let client = Client::tracked(super::rocket()).unwrap();
     let response = client.get("/about").dispatch();

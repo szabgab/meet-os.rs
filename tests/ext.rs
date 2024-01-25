@@ -179,3 +179,19 @@ fn register_user() {
         assert!(html.contains(r#"<h1 class="title is-3">Foo Bar</h1>"#));
     });
 }
+
+#[test]
+fn verify_with_non_existent_code() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let res = client
+            .get(format!("http://localhost:{port}/verify/register/abc"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "");
+        //assert!(html.contains("<title>Thank you for registering</title>"));
+        assert!(html.contains("Invalid code <b>abc</b>"));
+    });
+}
