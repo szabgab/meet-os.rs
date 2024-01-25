@@ -206,3 +206,35 @@ fn verify_with_non_existent_code() {
         assert!(html.contains("Invalid code <b>abc</b>"));
     });
 }
+
+#[test]
+fn duplicate_email() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let res = client
+            .post(format!("http://localhost:{port}/register"))
+            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        //println!("{:#?}", res.headers());
+        assert!(res.headers().get("set-cookie").is_none());
+        let html = res.text().unwrap();
+        let document = Html::parse_document(&html);
+        check_html(&document, "title", "We sent you an email");
+        assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        let res = client
+            .post(format!("http://localhost:{port}/register"))
+            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        //println!("{:#?}", res.headers());
+        assert!(res.headers().get("set-cookie").is_none());
+        let html = res.text().unwrap();
+        let document = Html::parse_document(&html);
+        check_html(&document, "title", "Registration failed");
+    });
+}

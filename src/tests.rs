@@ -93,44 +93,6 @@ fn privacy_page() {
 }
 
 // #[test]
-// fn duplicate_email() {
-//     use crate::{add_user, get_database, User};
-//     let tmp_dir = tempfile::tempdir().unwrap();
-//     println!("tmp_dir: {:?}", tmp_dir);
-//     std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
-//     std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
-
-//     let client = Client::tracked(super::rocket()).unwrap();
-
-//     let db = tokio_test::block_on(get_database()).unwrap();
-
-//     let email = "test@meet-os.com";
-
-//     let process = "register";
-//     let user = User {
-//         name: "Test Bar".to_owned(),
-//         email: email.to_owned(),
-//         process: process.to_owned(),
-//         code: String::new(),
-//         date: "date".to_owned(), // TODO get current timestamp
-//         verified: false,
-//     };
-//     tokio_test::block_on(add_user(&db, &user)).unwrap();
-
-//     let response = client
-//         .post("/register")
-//         .header(ContentType::Form)
-//         .body(format!("name=Peti Bar&email={email}"))
-//         .dispatch();
-
-//     assert_eq!(response.status(), Status::Ok);
-//     assert!(response.headers().get_one("set-cookie").is_none());
-//     let html = response.into_string().unwrap();
-//     //assert_eq!(html, "x");
-//     assert!(html.contains("<title>Registration failed</title>"));
-// }
-
-// #[test]
 // fn login() {
 //     use crate::{add_user, User};
 //     use meetings::{get_database, get_user_by_email};
