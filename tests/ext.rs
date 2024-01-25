@@ -3,6 +3,7 @@ use nix::sys::signal;
 use nix::unistd::Pid;
 use regex::Regex;
 use scraper::{Html, Selector};
+use std::net::TcpListener;
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
@@ -34,12 +35,15 @@ fn check_html_list(document: &Html, tag: &str, text: Vec<&str>) {
 
 fn run_external(func: fn(&str)) {
     let tmp_dir = tempfile::tempdir().unwrap();
-    let port = "8001";
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port().to_string();
+    drop(listener);
+    println!("port: {port}");
     println!("tmp_dir: {:?}", tmp_dir);
     std::env::set_var("ROCKET_CONFIG", "Debug.toml");
     std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
     std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
-    std::env::set_var("ROCKET_PORT", port);
+    std::env::set_var("ROCKET_PORT", &port);
     compile();
 
     match fork() {
@@ -47,7 +51,7 @@ fn run_external(func: fn(&str)) {
             println!("Child PID: {}", child);
             std::thread::sleep(std::time::Duration::from_secs(1));
 
-            func(port);
+            func(&port);
 
             signal::kill(Pid::from_raw(child), signal::Signal::SIGTERM).unwrap();
 
