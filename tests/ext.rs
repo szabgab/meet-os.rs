@@ -321,4 +321,25 @@ fn login() {
     });
 }
 
+#[test]
+fn register_with_bad_email_address() {
+    run_external(|port| {
+        // register new user
+        let client = reqwest::blocking::Client::new();
+        let res = client
+            .post(format!("http://localhost:{port}/register"))
+            .form(&[("name", "Foo Bar"), ("email", "meet-os.com")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200); // TODO should this stay 200 OK?
+
+        let html = res.text().unwrap();
+        // TODO make these tests parse the HTML and verify the extracted title tag!
+        //assert_eq!(html, "");
+        let document = Html::parse_document(&html);
+        check_html(&document, "title", "Invalid email address");
+        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+    });
+}
+
 // TODO try to login with an email address that was not registered

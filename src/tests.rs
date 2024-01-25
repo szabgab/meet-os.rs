@@ -1,4 +1,4 @@
-use rocket::http::{ContentType, Status};
+use rocket::http::Status;
 use rocket::local::blocking::Client;
 
 #[test]
@@ -38,28 +38,6 @@ fn register_page() {
     assert!(html.contains("<title>Register</title>"));
     assert!(html.contains(r#"Name: <input name="name" id="name" type="text">"#));
     assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
-}
-
-#[test]
-fn register_with_bad_email_address() {
-    let tmp_dir = tempfile::tempdir().unwrap();
-    println!("tmp_dir: {:?}", tmp_dir);
-    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
-
-    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
-    let client = Client::tracked(super::rocket()).unwrap();
-    let response = client
-        .post("/register")
-        .header(ContentType::Form)
-        .body("name=Foo Bar&email=meet-os.com")
-        .dispatch();
-
-    assert_eq!(response.status(), Status::Ok); // TODO should this stay 200 OK?
-    let html = response.into_string().unwrap();
-    // TODO make these tests parse the HTML and verify the extracted title tag!
-    //assert_eq!(html, "");
-    assert!(html.contains("<title>Invalid email address</title>"));
-    assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
 }
 
 #[test]
