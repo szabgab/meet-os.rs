@@ -189,7 +189,7 @@ async fn login_post(db: &State<Surreal<Db>>, input: Form<LoginForm<'_>>) -> Temp
         );
     }
 
-    let user: User = match get_user_by_email(&db, &email).await {
+    let user: User = match get_user_by_email(db, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
@@ -213,7 +213,7 @@ async fn login_post(db: &State<Surreal<Db>>, input: Form<LoginForm<'_>>) -> Temp
     let process = "login";
     let code = Uuid::new_v4();
 
-    match add_login_code_to_user(&db, &email, process, code.to_string().as_str()).await {
+    match add_login_code_to_user(db, &email, process, code.to_string().as_str()).await {
         Ok(_result) => (),
         Err(err) => {
             rocket::info!("Error while trying to add user {err}");
@@ -300,7 +300,7 @@ async fn register_post(db: &State<Surreal<Db>>, input: Form<RegistrationForm<'_>
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
     };
-    match add_user(&db, &user).await {
+    match add_user(db, &user).await {
         Ok(result) => result,
         Err(err) => {
             rocket::info!("Error while trying to add user {err}");
@@ -369,7 +369,7 @@ async fn verify(
     rocket::info!("process: {process}, code: {code}");
 
     // TODO take the process into account at the verification
-    if let Ok(Some(user)) = verify_code(&db, process, code).await {
+    if let Ok(Some(user)) = verify_code(db, process, code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
         let (title, message) = match process {
@@ -393,7 +393,7 @@ async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templ
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
         rocket::info!("cookie value received from user: {email}");
-        if let Ok(Some(user)) = get_user_by_email(&db, email).await {
+        if let Ok(Some(user)) = get_user_by_email(db, email).await {
             rocket::info!("email: {}", user.email);
             return Template::render(
                 "profile",
