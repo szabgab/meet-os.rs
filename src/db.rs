@@ -12,6 +12,7 @@ use crate::User;
 /// Panics when it fails to create the database folder or set up the database.
 #[must_use]
 pub fn fairing() -> AdHoc {
+    // TODO handle errors here properly by using AdHoc::try_on_ignite instead of AdHoc::on_ignite.
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
         let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
         rocket::info!("db::fairing from folder '{:?}'", database_folder);
