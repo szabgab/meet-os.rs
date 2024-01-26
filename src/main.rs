@@ -15,8 +15,9 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_login_code_to_user, add_user, db, get_events_by_group_id, get_user_by_email, load_event,
-    load_events, load_group, load_groups, sendgrid, verify_code, EmailAddress, User,
+    add_group, add_login_code_to_user, add_user, db, get_events_by_group_id, get_user_by_email,
+    load_event, load_events, load_group, load_groups, sendgrid, verify_code, EmailAddress, Group,
+    User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -24,11 +25,17 @@ use surrealdb::Surreal;
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
     sendgrid_api_key: String,
+    admins: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 struct PublicConfig {
     google_analytics: String,
+}
+
+#[derive(FromForm)]
+struct GroupForm<'r> {
+    name: &'r str,
 }
 
 #[derive(FromForm)]
@@ -417,6 +424,62 @@ async fn js_files(file: PathBuf) -> Option<NamedFile> {
         .ok()
 }
 
+#[get("/create-group")]
+async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
+    let private = get_private_config();
+    if let Some(cookie) = cookies.get_private("meet-os") {
+        let email = cookie.value();
+        rocket::info!("cookie value received from user: {email}");
+        if let Ok(Some(user)) = get_user_by_email(db, email).await {
+            rocket::info!("email: {}", user.email);
+            if private.admins.contains(&email.to_owned()) {
+                return Template::render(
+                    "create_group",
+                    context! {title: "Create Group", user: user, config: get_public_config()},
+                );
+            }
+            return Template::render(
+                "message",
+                context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config()},
+            );
+        }
+    }
+
+    Template::render(
+        "message",
+        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config()},
+    )
+}
+
+#[post("/create-group", data = "<input>")]
+async fn create_group_post(db: &State<Surreal<Db>>, input: Form<GroupForm<'_>>) -> Template {
+    rocket::info!("create_group_post: {:?}", input.name);
+
+    let id = "1";
+    let group = Group {
+        name: input.name.to_owned(),
+        location: "Virtual".to_owned(),
+        description: "New group".to_owned(),
+        id: id.to_owned(),
+    };
+
+    match add_group(db, &group).await {
+        Ok(result) => result,
+        Err(err) => {
+            rocket::info!("Error while trying to add group {err}");
+            return Template::render(
+                "message",
+                context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config: get_public_config()},
+            );
+        }
+    };
+
+    Template::render(
+        "message",
+        context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, id, group.name), config: get_public_config()},
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -424,6 +487,8 @@ fn rocket() -> _ {
             "/",
             routes![
                 about,
+                create_group_get,
+                create_group_post,
                 event_get,
                 group_get,
                 index,

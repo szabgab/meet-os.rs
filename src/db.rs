@@ -39,6 +39,14 @@ pub async fn add_user(db: &Surreal<Db>, user: &User) -> surrealdb::Result<()> {
     Ok(())
 }
 
+pub async fn add_group(db: &Surreal<Db>, group: &Group) -> surrealdb::Result<()> {
+    rocket::info!("add group: '{}'", group.name);
+
+    db.create(Resource::from("group")).content(group).await?;
+
+    Ok(())
+}
+
 pub async fn verify_code(
     db: &Surreal<Db>,
     process: &str,
