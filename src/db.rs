@@ -1,11 +1,12 @@
 use std::env;
+use std::fs::read_to_string;
 
 use rocket::fairing::AdHoc;
 use surrealdb::engine::local::{Db, RocksDb};
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::User;
+use crate::{Event, User};
 
 /// # Panics
 ///
@@ -107,4 +108,16 @@ pub async fn add_login_code_to_user(
     }
 
     Ok(entry)
+}
+
+/// # Panics
+///
+/// Panics when cant read file
+#[must_use]
+pub fn load_event(id: usize) -> Event {
+    let filename = format!("data/events/{id}.yaml");
+    let raw_string = read_to_string(filename).unwrap();
+    let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data.id = String::from("1");
+    data
 }

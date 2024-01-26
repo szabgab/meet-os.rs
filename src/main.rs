@@ -15,8 +15,8 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_login_code_to_user, add_user, db, get_user_by_email, sendgrid, verify_code, EmailAddress,
-    Event, Group, User,
+    add_login_code_to_user, add_user, db, get_user_by_email, load_event, sendgrid, verify_code,
+    EmailAddress, Event, Group, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -40,14 +40,6 @@ struct RegistrationForm<'r> {
 #[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
-}
-
-fn load_event(id: usize) -> Event {
-    let filename = format!("data/events/{id}.yaml");
-    let raw_string = read_to_string(filename).unwrap();
-    let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.id = String::from("1");
-    data
 }
 
 fn get_events_by_group_id(id: usize) -> Vec<Event> {
