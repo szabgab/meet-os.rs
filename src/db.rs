@@ -6,7 +6,7 @@ use surrealdb::engine::local::{Db, RocksDb};
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::{Event, User};
+use crate::{Event, Group, User};
 
 /// # Panics
 ///
@@ -136,4 +136,16 @@ pub fn get_events_by_group_id(id: usize) -> Vec<Event> {
         .into_iter()
         .filter(|event| event.group_id == id)
         .collect()
+}
+
+/// # Panics
+///
+/// Panics when cant read file
+#[must_use]
+pub fn load_group(id: usize) -> Group {
+    let filename = format!("data/groups/{id}.yaml");
+    let raw_string = read_to_string(filename).unwrap();
+    let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data.id = String::from("1");
+    data
 }

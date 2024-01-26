@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 use meetings::{
     add_login_code_to_user, add_user, db, get_events_by_group_id, get_user_by_email, load_event,
-    load_events, sendgrid, verify_code, EmailAddress, Group, User,
+    load_events, load_group, sendgrid, verify_code, EmailAddress, Group, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -40,14 +40,6 @@ struct RegistrationForm<'r> {
 #[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
-}
-
-fn load_group(id: usize) -> Group {
-    let filename = format!("data/groups/{id}.yaml");
-    let raw_string = read_to_string(filename).unwrap();
-    let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.id = String::from("1");
-    data
 }
 
 // TODO load n groups to display on the front page
