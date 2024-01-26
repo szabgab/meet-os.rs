@@ -66,3 +66,22 @@ pub fn run_external(func: fn(&str)) {
         Err(_) => println!("Fork failed"),
     }
 }
+
+
+pub fn check_profile_page(client: &reqwest::blocking::Client, url: &str, cookie_str: &str, h1: &str) {
+    let res = client
+        .get(format!("{url}/profile"))
+        .header("Cookie", format!("meet-os={cookie_str}"))
+        .send()
+        .unwrap();
+    assert_eq!(res.status(), 200);
+    let html = res.text().unwrap();
+
+    if h1.is_empty() {
+        check_html(&html, "title", "Missing cookie");
+        assert!(html.contains("It seems you are not logged in"));
+    } else {
+        check_html(&html, "title", "Profile");
+        check_html(&html, "h1", h1);
+    }
+}
