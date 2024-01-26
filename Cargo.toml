@@ -29,11 +29,11 @@ markdown = { git = "https://github.com/wooorm/markdown-rs.git" }
 uuid = { version = "1.6", features = ["v4"] }
 validator = "0.16"
 regex = "1.10"
-tempfile = "3.9"
+#tempfile = "3.9"
 tokio-test = "0.4"
 reqwest = { version = "0.11", features = ["blocking"] }
-fork = "0.1"
-nix = { version = "0.27", features = ["signal"] }
+#fork = "0.1"
+#nix = { version = "0.27", features = ["signal"] }
 scraper = "0.18"
 
 [[bin]]
@@ -43,6 +43,12 @@ path = "src/main.rs"
 [[bin]]
 name = "cli"
 path = "src/cli.rs"
+
+
+workspace = { members = ["utilities"] }
+
+[dev-dependencies]
+utilities = { path = "utilities" }
 
 [lints.clippy]
 pedantic = { priority = -1, level = "deny" }
