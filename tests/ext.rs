@@ -2,6 +2,19 @@ use regex::Regex;
 
 use utilities::{check_html, check_html_list, run_external};
 
+fn check_profile_page(client: reqwest::blocking::Client, url: &str, cookie_str: &str, h1: &str) {
+    let res = client
+        .get(format!("{url}/profile"))
+        .header("Cookie", format!("meet-os={cookie_str}"))
+        .send()
+        .unwrap();
+    assert_eq!(res.status(), 200);
+    let html = res.text().unwrap();
+    //assert_eq!(html, "x");
+    check_html(&html, "title", "Profile");
+    check_html(&html, "h1", h1);
+}
+
 #[test]
 fn home() {
     run_external(|port| {
@@ -118,19 +131,6 @@ fn register_user() {
     });
 }
 
-fn check_profile_page(client: reqwest::blocking::Client, url: &str, cookie_str: &str, h1: &str) {
-    let res = client
-        .get(format!("{url}/profile"))
-        .header("Cookie", format!("meet-os={cookie_str}"))
-        .send()
-        .unwrap();
-    assert_eq!(res.status(), 200);
-    let html = res.text().unwrap();
-    //assert_eq!(html, "x");
-    check_html(&html, "title", "Profile");
-    check_html(&html, "h1", h1);
-}
-
 #[test]
 fn verify_with_non_existent_code() {
     run_external(|port| {
@@ -180,6 +180,8 @@ fn duplicate_email() {
 #[test]
 fn login() {
     run_external(|port| {
+        let url = format!("http://localhost:{port}/");
+
         // register new user
         let client = reqwest::blocking::Client::new();
         let res = client
@@ -243,16 +245,7 @@ fn login() {
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
-        let response = client
-            .get(format!("http://localhost:{port}/profile"))
-            .header("Cookie", format!("meet-os={cookie_str}"))
-            .send()
-            .unwrap();
-        assert_eq!(response.status(), 200);
-        let html = response.text().unwrap();
-        //assert_eq!(html, "x");
-        check_html(&html, "title", "Profile");
-        check_html(&html, "h1", "Foo Bar");
+        check_profile_page(client, &url, &cookie_str, "Foo Bar");
     });
 }
 
