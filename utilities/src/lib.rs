@@ -14,7 +14,8 @@ fn compile() {
         .expect("command failed to start");
 }
 
-pub fn check_html(document: &Html, tag: &str, text: &str) {
+pub fn check_html(html: &str, tag: &str, text: &str) {
+    let document = Html::parse_document(html);
     let selector = Selector::parse(tag).unwrap();
     assert_eq!(
         document.select(&selector).next().unwrap().inner_html(),
@@ -22,7 +23,8 @@ pub fn check_html(document: &Html, tag: &str, text: &str) {
     );
 }
 
-pub fn check_html_list(document: &Html, tag: &str, text: Vec<&str>) {
+pub fn check_html_list(html: &str, tag: &str, text: Vec<&str>) {
+    let document = Html::parse_document(html);
     let selector = Selector::parse(tag).unwrap();
 
     let element = document.select(&selector).next().unwrap();

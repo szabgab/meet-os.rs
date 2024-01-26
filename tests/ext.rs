@@ -1,7 +1,5 @@
 use regex::Regex;
-use scraper::Html;
 
-//extern crate utilities;
 use utilities::{check_html, check_html_list, run_external};
 
 #[test]
@@ -12,18 +10,17 @@ fn home() {
                 assert_eq!(res.status(), 200);
                 match res.text() {
                     Ok(html) => {
-                        let document = Html::parse_document(&html);
-                        check_html(&document, "title", "Meet-OS");
-                        check_html(&document, "h1", "Welcome to the Rust meeting server");
+                        check_html(&html, "title", "Meet-OS");
+                        check_html(&html, "h1", "Welcome to the Rust meeting server");
                         check_html_list(
-                            &document,
+                            &html,
                             "li",
                             vec![
                                 r#"<a href="/event/1">Web development with Rocket</a>"#,
                                 r#"<a href="/group/1">Rust Maven</a>"#,
                             ],
                         );
-                        check_html_list(&document, "h2", vec!["Events", "Groups"]);
+                        check_html_list(&html, "h2", vec!["Events", "Groups"]);
 
                         //println!("{}", html)
                     }
@@ -51,8 +48,7 @@ fn register_user() {
         assert!(res.headers().get("set-cookie").is_none());
 
         let html = res.text().unwrap();
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "We sent you an email");
+        check_html(&html, "title", "We sent you an email");
         assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
 
         let email_file = std::env::var("EMAIL_FILE").unwrap();
@@ -79,8 +75,7 @@ fn register_user() {
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         //assert_eq!(html, "");
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Missing cookie");
+        check_html(&html, "title", "Missing cookie");
         assert!(html.contains("It seems you are not logged in"));
         std::thread::sleep(std::time::Duration::from_millis(500));
 
@@ -114,8 +109,7 @@ fn register_user() {
         println!("cookie_str: {cookie_str}");
 
         let html = res.text().unwrap();
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Thank you for registering");
+        check_html(&html, "title", "Thank you for registering");
         assert!(html.contains("Your email was verified."));
         std::thread::sleep(std::time::Duration::from_millis(500));
 
@@ -128,9 +122,8 @@ fn register_user() {
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Profile");
-        check_html(&document, "h1", "Foo Bar");
+        check_html(&html, "title", "Profile");
+        check_html(&html, "h1", "Foo Bar");
     });
 }
 
@@ -163,8 +156,7 @@ fn duplicate_email() {
         //println!("{:#?}", res.headers());
         assert!(res.headers().get("set-cookie").is_none());
         let html = res.text().unwrap();
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "We sent you an email");
+        check_html(&html, "title", "We sent you an email");
         assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
         std::thread::sleep(std::time::Duration::from_millis(500));
 
@@ -177,8 +169,7 @@ fn duplicate_email() {
         //println!("{:#?}", res.headers());
         assert!(res.headers().get("set-cookie").is_none());
         let html = res.text().unwrap();
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Registration failed");
+        check_html(&html, "title", "Registration failed");
     });
 }
 
@@ -205,8 +196,7 @@ fn login() {
         assert_eq!(res.status(), 200);
         assert!(res.headers().get("set-cookie").is_none());
         let html = res.text().unwrap();
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "We sent you an email");
+        check_html(&html, "title", "We sent you an email");
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b>"));
 
         // TODO: get the user from the database and check if there is a code and if the process is "login"
@@ -244,8 +234,7 @@ fn login() {
 
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Welcome back");
+        check_html(&html, "title", "Welcome back");
         assert!(html.contains(r#"<a href="/profile">profile</a>"#));
         std::thread::sleep(std::time::Duration::from_millis(500));
 
@@ -258,9 +247,8 @@ fn login() {
         assert_eq!(response.status(), 200);
         let html = response.text().unwrap();
         //assert_eq!(html, "x");
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Profile");
-        check_html(&document, "h1", "Foo Bar");
+        check_html(&html, "title", "Profile");
+        check_html(&html, "h1", "Foo Bar");
     });
 }
 
@@ -279,8 +267,7 @@ fn register_with_bad_email_address() {
         let html = res.text().unwrap();
         // TODO make these tests parse the HTML and verify the extracted title tag!
         //assert_eq!(html, "");
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Invalid email address");
+        check_html(&html, "title", "Invalid email address");
         assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
     });
 }
@@ -295,10 +282,8 @@ fn event_page() {
             .unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
-
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Web development with Rocket");
-        check_html(&document, "h1", "Web development with Rocket");
+        check_html(&html, "title", "Web development with Rocket");
+        check_html(&html, "h1", "Web development with Rocket");
         assert!(html.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
         assert!(html.contains(r#"<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"#));
         assert!(html.contains(r#"<div><b>Location</b>: Virtual</div>"#));
@@ -316,9 +301,8 @@ fn group_page() {
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
 
-        let document = Html::parse_document(&html);
-        check_html(&document, "title", "Rust Maven");
-        check_html(&document, "h1", "Rust Maven");
+        check_html(&html, "title", "Rust Maven");
+        check_html(&html, "h1", "Rust Maven");
         assert!(html.contains(
             r#"<li><a href="/event/1">2024-02-04T17:00:00 - Web development with Rocket</a></li>"#
         ));

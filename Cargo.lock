@@ -2231,7 +2231,6 @@ dependencies = [
  "reqwest",
  "rocket",
  "rocket_dyn_templates",
- "scraper",
  "sendgrid",
  "serde",
  "serde_json",
