@@ -13,7 +13,7 @@ fn register_page() {
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         check_html(&html, "title", "Register");
-        //check_html(&html, "h1", "Web development with Rocket");
+        check_html(&html, "h1", "Register");
         assert!(html.contains(r#"Name: <input name="name" id="name" type="text">"#));
         assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
     });
