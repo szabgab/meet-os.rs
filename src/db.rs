@@ -128,3 +128,12 @@ pub fn load_events() -> Vec<Event> {
     let data = load_event(1);
     vec![data]
 }
+
+#[must_use]
+pub fn get_events_by_group_id(id: usize) -> Vec<Event> {
+    let events = load_events();
+    events
+        .into_iter()
+        .filter(|event| event.group_id == id)
+        .collect()
+}

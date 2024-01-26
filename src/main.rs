@@ -15,8 +15,8 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_login_code_to_user, add_user, db, get_user_by_email, load_event, load_events, sendgrid,
-    verify_code, EmailAddress, Event, Group, User,
+    add_login_code_to_user, add_user, db, get_events_by_group_id, get_user_by_email, load_event,
+    load_events, sendgrid, verify_code, EmailAddress, Group, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -40,14 +40,6 @@ struct RegistrationForm<'r> {
 #[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
-}
-
-fn get_events_by_group_id(id: usize) -> Vec<Event> {
-    let events = load_events();
-    events
-        .into_iter()
-        .filter(|event| event.group_id == id)
-        .collect()
 }
 
 fn load_group(id: usize) -> Group {
