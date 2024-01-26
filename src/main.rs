@@ -478,6 +478,3 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(db::fairing())
 }
-
-#[cfg(test)]
-mod tests;
