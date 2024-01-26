@@ -2,7 +2,7 @@ use regex::Regex;
 
 use utilities::{check_html, check_html_list, run_external};
 
-fn check_profile_page(client: reqwest::blocking::Client, url: &str, cookie_str: &str, h1: &str) {
+fn check_profile_page(client: &reqwest::blocking::Client, url: &str, cookie_str: &str, h1: &str) {
     let res = client
         .get(format!("{url}/profile"))
         .header("Cookie", format!("meet-os={cookie_str}"))
@@ -10,9 +10,14 @@ fn check_profile_page(client: reqwest::blocking::Client, url: &str, cookie_str: 
         .unwrap();
     assert_eq!(res.status(), 200);
     let html = res.text().unwrap();
-    //assert_eq!(html, "x");
-    check_html(&html, "title", "Profile");
-    check_html(&html, "h1", h1);
+
+    if h1.is_empty() {
+        check_html(&html, "title", "Missing cookie");
+        assert!(html.contains("It seems you are not logged in"));
+    } else {
+        check_html(&html, "title", "Profile");
+        check_html(&html, "h1", h1);
+    }
 }
 
 #[test]
@@ -127,7 +132,7 @@ fn register_user() {
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
-        check_profile_page(client, &url, &cookie_str, "Foo Bar");
+        check_profile_page(&client, &url, &cookie_str, "Foo Bar");
     });
 }
 
@@ -245,7 +250,22 @@ fn login() {
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
-        check_profile_page(client, &url, &cookie_str, "Foo Bar");
+        check_profile_page(&client, &url, &cookie_str, "Foo Bar");
+
+        let res = client
+            .get(format!("http://localhost:{port}/logout"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Logged out");
+        check_html(&html, "h1", "Logged out");
+
+        // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
+        // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
+        // If we want to make sure that the user cannot access the system any more we'll have to manage the login information
+        // on the server side.
+        //check_profile_page(&client, &url, &cookie_str, "");
     });
 }
 
