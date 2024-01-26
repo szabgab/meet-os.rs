@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 use meetings::{
     add_login_code_to_user, add_user, db, get_events_by_group_id, get_user_by_email, load_event,
-    load_events, load_group, sendgrid, verify_code, EmailAddress, Group, User,
+    load_events, load_group, load_groups, sendgrid, verify_code, EmailAddress, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -40,12 +40,6 @@ struct RegistrationForm<'r> {
 #[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
-}
-
-// TODO load n groups to display on the front page
-fn load_groups() -> Vec<Group> {
-    let data = load_group(1);
-    vec![data]
 }
 
 fn get_private_config() -> PrivateConfig {

@@ -149,3 +149,10 @@ pub fn load_group(id: usize) -> Group {
     data.id = String::from("1");
     data
 }
+
+// TODO load n groups to display on the front page
+#[must_use]
+pub fn load_groups() -> Vec<Group> {
+    let data = load_group(1);
+    vec![data]
+}
