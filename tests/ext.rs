@@ -5,7 +5,8 @@ use utilities::{check_html, check_html_list, check_profile_page, run_external};
 #[test]
 fn home() {
     run_external(|port| {
-        match reqwest::blocking::get(format!("http://localhost:{port}/")) {
+        let url = format!("http://localhost:{port}");
+        match reqwest::blocking::get(format!("{url}/")) {
             Ok(res) => {
                 assert_eq!(res.status(), 200);
                 match res.text() {
@@ -38,8 +39,9 @@ fn home() {
 fn register_user() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}");
         let res = client
-            .post(format!("http://localhost:{port}/register"))
+            .post(format!("{url}/register"))
             .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
             .send()
             .unwrap();
@@ -68,10 +70,7 @@ fn register_user() {
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile without a cookie
-        let res = client
-            .get(format!("http://localhost:{port}/profile"))
-            .send()
-            .unwrap();
+        let res = client.get(format!("{url}/profile")).send().unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         //assert_eq!(html, "");
@@ -92,7 +91,6 @@ fn register_user() {
         //     // date? code?
 
         //     // Verify the email
-        let url = format!("http://localhost:{port}/");
         let res = client
             .get(format!("{url}/verify/register/{code}"))
             .send()
@@ -122,8 +120,9 @@ fn register_user() {
 fn verify_with_non_existent_code() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
         let res = client
-            .get(format!("http://localhost:{port}/verify/register/abc"))
+            .get(format!("{url}/verify/register/abc"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -138,8 +137,9 @@ fn verify_with_non_existent_code() {
 fn duplicate_email() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
         let res = client
-            .post(format!("http://localhost:{port}/register"))
+            .post(format!("{url}/register"))
             .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
             .send()
             .unwrap();
@@ -152,7 +152,7 @@ fn duplicate_email() {
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let res = client
-            .post(format!("http://localhost:{port}/register"))
+            .post(format!("{url}/register"))
             .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
             .send()
             .unwrap();
@@ -172,7 +172,7 @@ fn login() {
         // register new user
         let client = reqwest::blocking::Client::new();
         let res = client
-            .post(format!("http://localhost:{port}/register"))
+            .post(format!("{url}/register"))
             .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
             .send()
             .unwrap();
@@ -182,7 +182,7 @@ fn login() {
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let res = client
-            .post(format!("http://localhost:{port}/login"))
+            .post(format!("{url}/login"))
             .form(&[("email", "foo@meet-os.com")])
             .send()
             .unwrap();
@@ -211,7 +211,7 @@ fn login() {
 
         // "Click" on the link an verify the email
         let res = client
-            .get(format!("http://localhost:{port}/verify/login/{code}"))
+            .get(format!("{url}/verify/login/{code}"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -234,10 +234,7 @@ fn login() {
         // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
 
-        let res = client
-            .get(format!("http://localhost:{port}/logout"))
-            .send()
-            .unwrap();
+        let res = client.get(format!("{url}/logout")).send().unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         check_html(&html, "title", "Logged out");
@@ -256,8 +253,9 @@ fn register_with_bad_email_address() {
     run_external(|port| {
         // register new user
         let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
         let res = client
-            .post(format!("http://localhost:{port}/register"))
+            .post(format!("{url}/register"))
             .form(&[("name", "Foo Bar"), ("email", "meet-os.com")])
             .send()
             .unwrap();
@@ -275,10 +273,8 @@ fn register_with_bad_email_address() {
 fn event_page() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
-        let res = client
-            .get(format!("http://localhost:{port}/event/1"))
-            .send()
-            .unwrap();
+        let url = format!("http://localhost:{port}/");
+        let res = client.get(format!("{url}/event/1")).send().unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         check_html(&html, "title", "Web development with Rocket");
@@ -293,10 +289,8 @@ fn event_page() {
 fn group_page() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
-        let res = client
-            .get(format!("http://localhost:{port}/group/1"))
-            .send()
-            .unwrap();
+        let url = format!("http://localhost:{port}/");
+        let res = client.get(format!("{url}/group/1")).send().unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
 
