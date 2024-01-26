@@ -65,7 +65,7 @@ fn register_user() {
 
         //assert_eq!(code, res.code);
         println!("code: {code}");
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile without a cookie
         let res = client
@@ -77,7 +77,7 @@ fn register_user() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Missing cookie");
         assert!(html.contains("It seems you are not logged in"));
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // TODO. shall we access the database directly and check the data there too?
         //     // Without dropping the client here we get an error on the next line
@@ -111,7 +111,7 @@ fn register_user() {
         let html = res.text().unwrap();
         check_html(&html, "title", "Thank you for registering");
         assert!(html.contains("Your email was verified."));
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
         let res = client
@@ -158,7 +158,7 @@ fn duplicate_email() {
         let html = res.text().unwrap();
         check_html(&html, "title", "We sent you an email");
         assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let res = client
             .post(format!("http://localhost:{port}/register"))
@@ -186,7 +186,7 @@ fn login() {
         assert_eq!(res.status(), 200);
         //println!("{:#?}", res.headers());
         assert!(res.headers().get("set-cookie").is_none());
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let res = client
             .post(format!("http://localhost:{port}/login"))
@@ -214,7 +214,7 @@ fn login() {
         };
         println!("code: {code}");
         //assert_eq!(code, res.code);
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // "Click" on the link an verify the email
         let res = client
@@ -236,7 +236,7 @@ fn login() {
         //assert_eq!(html, "x");
         check_html(&html, "title", "Welcome back");
         assert!(html.contains(r#"<a href="/profile">profile</a>"#));
-        std::thread::sleep(std::time::Duration::from_millis(500));
+        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
         let response = client
