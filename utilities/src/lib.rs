@@ -5,7 +5,7 @@ use std::net::TcpListener;
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 use scraper::{Html, Selector};
-
+use regex::Regex;
 
 fn compile() {
     let _result = Command::new("cargo")
@@ -85,3 +85,36 @@ pub fn check_profile_page(client: &reqwest::blocking::Client, url: &str, cookie_
         check_html(&html, "h1", h1);
     }
 }
+
+pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name: &str, email: &str) -> String {
+    let res = client
+    .post(format!("{url}/register"))
+    .form(&[("name", name), ("email", email)])
+    .send()
+    .unwrap();
+    assert_eq!(res.status(), 200);
+
+    let email_file = std::env::var("EMAIL_FILE").unwrap();
+    let email_content = std::fs::read_to_string(email_file).unwrap();
+    let re = Regex::new(r"http://localhost:8000/verify/register/([a-z0-9-]+)").unwrap();
+    let code = match re.captures(&email_content) {
+        Some(value) => value[1].to_owned(),
+        None => panic!("Code not found in email: {email_content}"),
+    };
+    println!("code: {code}");
+
+    let res = client
+    .get(format!("{url}/verify/register/{code}"))
+    .send()
+    .unwrap();
+    assert_eq!(res.status(), 200);
+    let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
+    let re = Regex::new(r"meet-os=([^;]+);").unwrap();
+    let cookie_str = match re.captures(&cookie) {
+        Some(value) => value[1].to_owned(),
+        None => panic!("Code not found cookie"),
+    };
+    println!("cookie_str: {cookie_str}");
+    return cookie_str;
+}
+

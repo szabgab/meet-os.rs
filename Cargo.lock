@@ -4960,6 +4960,7 @@ version = "0.1.0"
 dependencies = [
  "fork",
  "nix",
+ "regex",
  "reqwest",
  "scraper",
  "tempfile",

@@ -17,4 +17,5 @@ fork = "0.1"
 nix = { version = "0.27", features = ["signal"] }
 scraper = "0.18"
 tempfile = "3.9"
+regex = "1.10"
 reqwest = { version = "0.11", features = ["blocking"] }

@@ -1,6 +1,8 @@
 use regex::Regex;
 
-use utilities::{check_html, check_html_list, check_profile_page, run_external};
+use utilities::{
+    check_html, check_html_list, check_profile_page, register_user_helper, run_external,
+};
 
 #[test]
 fn home() {
@@ -167,19 +169,12 @@ fn duplicate_email() {
 #[test]
 fn login() {
     run_external(|port| {
+        let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        // register new user
-        let client = reqwest::blocking::Client::new();
-        let res = client
-            .post(format!("{url}/register"))
-            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        //println!("{:#?}", res.headers());
-        assert!(res.headers().get("set-cookie").is_none());
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
+        let _cookie_str = register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com");
+        //println!("cookie: {cookie_str}");
+        //check_profile_page(&client, &url, &cookie_str, "Peti Bar");
 
         let res = client
             .post(format!("{url}/login"))
@@ -304,3 +299,22 @@ fn group_page() {
 }
 
 // TODO try to login with an email address that was not registered
+
+#[test]
+fn login_with_unregistered_email() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
+
+        let res = client
+            .post(format!("{url}/login"))
+            .form(&[("email", "other@meet-os.com")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        assert!(res.headers().get("set-cookie").is_none());
+        let html = res.text().unwrap();
+        check_html(&html, "title", "No such user");
+        assert!(html.contains("No user with address <b>other@meet-os.com</b>"));
+    });
+}
