@@ -18,3 +18,34 @@ fn register_page() {
         assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
     });
 }
+
+#[test]
+fn fixed_pages() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+
+        let res = client
+            .get(format!("http://localhost:{port}/about"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "About Meet-OS");
+
+        let res = client
+            .get(format!("http://localhost:{port}/soc"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Standard of Conduct");
+
+        let res = client
+            .get(format!("http://localhost:{port}/privacy"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Privacy Policy");
+    });
+}
