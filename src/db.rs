@@ -121,3 +121,10 @@ pub fn load_event(id: usize) -> Event {
     data.id = String::from("1");
     data
 }
+
+// TODO load n events to display on the front page, which n events?
+#[must_use]
+pub fn load_events() -> Vec<Event> {
+    let data = load_event(1);
+    vec![data]
+}

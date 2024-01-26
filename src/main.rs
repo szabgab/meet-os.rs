@@ -15,8 +15,8 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_login_code_to_user, add_user, db, get_user_by_email, load_event, sendgrid, verify_code,
-    EmailAddress, Event, Group, User,
+    add_login_code_to_user, add_user, db, get_user_by_email, load_event, load_events, sendgrid,
+    verify_code, EmailAddress, Event, Group, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -48,12 +48,6 @@ fn get_events_by_group_id(id: usize) -> Vec<Event> {
         .into_iter()
         .filter(|event| event.group_id == id)
         .collect()
-}
-
-// TODO load n events to display on the front page, which n events?
-fn load_events() -> Vec<Event> {
-    let data = load_event(1);
-    vec![data]
 }
 
 fn load_group(id: usize) -> Group {
