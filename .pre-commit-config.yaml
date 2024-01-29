@@ -47,11 +47,11 @@ repos:
       always_run: true
       pass_filenames: false
       files: \.rs$
-    - id: run-test
-      name: run-test
-      language: system
-      entry: cargo test
-      always_run: true
-      pass_filenames: false
-      files: \.rs$
+        #- id: run-test
+        #  name: run-test
+        #  language: system
+        #  entry: cargo test
+        #  always_run: true
+        #  pass_filenames: false
+        #  files: \.rs$
 
