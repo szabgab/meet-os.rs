@@ -17,18 +17,25 @@ pub fn fairing() -> AdHoc {
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
         let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
         rocket::info!("db::fairing from folder '{:?}'", database_folder);
-        let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
-        rocket::info!("db::fairing connected");
-        db.use_ns("meet-os-ns").use_db("meet-os-db").await.unwrap();
-        rocket::info!("db::fairing namespace set");
-        // Maybe do this only when we create the database
-        db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
-            .await
-            .unwrap()
-            .check()
-            .unwrap();
+
+        let db = get_database(&database_folder).await;
         rocket.manage(db)
     })
+}
+
+/// # Panics
+///
+/// Panics when it fails to create the database folder or set up the database.
+pub async fn get_database(database_folder: &str) -> Surreal<Db> {
+    let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
+    db.use_ns("meet-os-ns").use_db("meet-os-db").await.unwrap();
+    // TODO: do this only when we create the database
+    db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
+        .await
+        .unwrap()
+        .check()
+        .unwrap();
+    db
 }
 
 pub async fn add_user(db: &Surreal<Db>, user: &User) -> surrealdb::Result<()> {
