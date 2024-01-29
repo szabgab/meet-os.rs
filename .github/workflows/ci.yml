@@ -36,7 +36,10 @@ jobs:
 
 
     - name: Run tests
-      run: cargo test --verbose
+      run: |
+        echo "admins:" > private.yaml
+        echo "  - foo@meet-os.com" >> private.yaml
+        cargo test --verbose
 
         #- name: Build release version
         #  run: cargo build --release --verbose
