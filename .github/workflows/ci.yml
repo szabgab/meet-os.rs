@@ -37,8 +37,9 @@ jobs:
 
     - name: Run tests
       run: |
-        echo "admins:" > private.yaml
-        echo "  - foo@meet-os.com" >> private.yaml
+        echo "sendgrid_api_key: not_really"  > private.yaml
+        echo "admins:"                      >> private.yaml
+        echo "  - foo@meet-os.com"          >> private.yaml
         cargo test --verbose
 
         #- name: Build release version
