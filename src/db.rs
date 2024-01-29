@@ -19,7 +19,7 @@ pub fn fairing() -> AdHoc {
         rocket::info!("db::fairing from folder '{:?}'", database_folder);
         let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
         rocket::info!("db::fairing connected");
-        db.use_ns("counter_ns").use_db("counter_db").await.unwrap();
+        db.use_ns("meet-os-ns").use_db("meet-os-db").await.unwrap();
         rocket::info!("db::fairing namespace set");
         // Maybe do this only when we create the database
         db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
