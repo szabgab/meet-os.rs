@@ -31,7 +31,7 @@ pub struct Event {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Group {
     #[serde(default = "get_empty_string")]
-    pub id: String,
+    pub gid: String,
     pub name: String,
     pub location: String,
     pub description: String,

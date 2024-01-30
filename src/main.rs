@@ -123,6 +123,18 @@ fn about(cookies: &CookieJar<'_>) -> Template {
     )
 }
 
+#[get("/admin")]
+fn admin(cookies: &CookieJar<'_>) -> Template {
+    Template::render(
+        "admin",
+        context! {
+            title: "Admin",
+            config: get_public_config(),
+            logged_in: logged_in(cookies),
+        },
+    )
+}
+
 #[get("/privacy")]
 fn privacy(cookies: &CookieJar<'_>) -> Template {
     Template::render(
@@ -458,16 +470,30 @@ async fn js_files(file: PathBuf) -> Option<NamedFile> {
 
 #[get("/groups")]
 async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
-    if let Ok(groups) = get_groups_from_database(db).await {
-        return Template::render(
+    match get_groups_from_database(db).await {
+        Ok(groups) => Template::render(
             "groups",
             context! {title: "Groups", groups: groups, config: get_public_config(), logged_in: logged_in(cookies),},
-        );
+        ),
+        Err(err) => {
+            rocket::error!("Error {err}");
+            Template::render(
+                "message",
+                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+            )
+        }
     }
-    Template::render(
-        "message",
-        context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
-    )
+
+    // if let Ok(groups) = get_groups_from_database(db).await {
+    //     return Template::render(
+    //         "groups",
+    //         context! {title: "Groups", groups: groups, config: get_public_config(), logged_in: logged_in(cookies),},
+    //     );
+    // }
+    // Template::render(
+    //     "message",
+    //     context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+    // )
 }
 
 #[get("/create-group")]
@@ -505,12 +531,20 @@ async fn create_group_post(
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
 
-    let id = "1";
+    let id = match get_groups_from_database(db).await {
+        Ok(groups) => groups.len().saturating_add(1),
+        Err(err) => {
+            rocket::info!("Error while trying to add group {err}");
+            1
+        }
+    };
+
+    rocket::info!("group_id: {id}");
     let group = Group {
         name: input.name.to_owned(),
         location: "Virtual".to_owned(),
         description: "New group".to_owned(),
-        id: id.to_owned(),
+        gid: id.to_string(),
     };
 
     match add_group(db, &group).await {
@@ -537,6 +571,7 @@ fn rocket() -> _ {
             "/",
             routes![
                 about,
+                admin,
                 create_group_get,
                 create_group_post,
                 event_get,

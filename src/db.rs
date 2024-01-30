@@ -161,7 +161,7 @@ pub fn load_group(id: usize) -> Group {
     let filename = format!("data/groups/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.id = String::from("1");
+    data.gid = String::from("1");
     data
 }
 
@@ -174,7 +174,13 @@ pub fn load_groups() -> Vec<Group> {
 
 pub async fn get_groups_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Group>> {
     rocket::info!("get_groups_from_database");
-    let mut response = db.query("SELECT * FROM groups;").await?;
+    let mut response = db.query("SELECT * FROM group;").await?;
+    rocket::info!("groups before ***");
     let entries: Vec<Group> = response.take(0)?;
+    rocket::info!("groups ***");
+    for ent in &entries {
+        rocket::info!("g name {}", ent.name);
+    }
+    rocket::info!("groups {:?}", entries);
     Ok(entries)
 }

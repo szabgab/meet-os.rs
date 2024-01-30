@@ -12,7 +12,7 @@ use utilities::{check_html, register_user_helper, run_external};
 // everyone can access the /groups page
 
 #[test]
-fn create_group() {
+fn create_group_by_admin() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
@@ -22,7 +22,7 @@ fn create_group() {
         let peti_cookie_str = register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com");
         println!("peti_cookie_str: {peti_cookie_str}");
 
-        // Access the Group creation page with unauthorized user
+        // Access the Group creation page with authorized user
         let res = client
             .get(format!("{url}/create-group"))
             .header("Cookie", format!("meet-os={foo_cookie_str}"))
@@ -34,6 +34,24 @@ fn create_group() {
         //assert_eq!(html, "x");
         check_html(&html, "title", "Create Group");
         check_html(&html, "h1", "Create Group");
+
+        // Create a Group
+        let res = client
+            .post(format!("{url}/create-group"))
+            .form(&[("name", "Rust Maven")])
+            .header("Cookie", format!("meet-os={foo_cookie_str}"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+
+        // List the groups
+        let res = client.get(format!("{url}/groups")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
     });
 }
 
@@ -65,7 +83,7 @@ fn create_group_unauthorized() {
 fn create_group_guest() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
+        let url = format!("http://localhost:{port}");
 
         // Access the Group creation page without user
         let res = client.get(format!("{url}/create-group")).send().unwrap();

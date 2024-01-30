@@ -21,7 +21,7 @@
 
        <ul>
        {% for group in groups %}
-           <li><a href="/group/{{ group.id }}">{{ group.name }}</a></li>
+           <li><a href="/group/{{ group.gid }}">{{ group.name }}</a></li>
        {% endfor %}
        </ul>
 

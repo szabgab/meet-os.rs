@@ -11,7 +11,7 @@
 
        {{body | safe}}
 
-       Organized by <a href="/group/{{ group.id }}">{{ group.name }}</a>.
+       Organized by <a href="/group/{{ group.gid }}">{{ group.name }}</a>.
     </div>
   </div>
 </section>
