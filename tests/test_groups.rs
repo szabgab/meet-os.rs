@@ -52,6 +52,24 @@ fn create_group_by_admin() {
         assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
+
+        let res = client
+            .post(format!("{url}/create-group"))
+            .form(&[("name", "Python Maven")])
+            .header("Cookie", format!("meet-os={foo_cookie_str}"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+
+        // List the groups
+        let res = client.get(format!("{url}/groups")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/2">Python Maven</a></li>"#));
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
     });
 }
 
@@ -76,6 +94,26 @@ fn create_group_unauthorized() {
         //assert_eq!(html, "x");
         check_html(&html, "title", "Unauthorized");
         check_html(&html, "h1", "Unauthorized");
+
+        // Create group should fail
+        let res = client
+            .post(format!("{url}/create-group"))
+            .form(&[("name", "Rust Maven")])
+            .header("Cookie", format!("meet-os={peti_cookie_str}"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        check_html(&html, "title", "Unauthorized");
+        check_html(&html, "h1", "Unauthorized");
+
+        // List the groups
+        let res = client.get(format!("{url}/groups")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        assert!(!html.contains("/group/1"));
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
     });
 }
 
@@ -99,5 +137,27 @@ fn create_group_guest() {
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
         assert!(!html.contains("/group/")); // No link to any group
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
+
+        // Create group should fail
+        let res = client
+            .post(format!("{url}/create-group"))
+            .form(&[("name", "Rust Maven")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+
+        // // List the groups
+        let res = client.get(format!("{url}/groups")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        assert!(!html.contains("/group/1"));
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
     });
 }
