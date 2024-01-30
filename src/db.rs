@@ -171,3 +171,10 @@ pub fn load_groups() -> Vec<Group> {
     let data = load_group(1);
     vec![data]
 }
+
+pub async fn get_groups_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Group>> {
+    rocket::info!("get_groups_from_database");
+    let mut response = db.query("SELECT * FROM groups;").await?;
+    let entries: Vec<Group> = response.take(0)?;
+    Ok(entries)
+}

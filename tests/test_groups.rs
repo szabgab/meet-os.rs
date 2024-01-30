@@ -2,6 +2,15 @@
 
 use utilities::{check_html, register_user_helper, run_external};
 
+// GET /create-group show form
+// POST /create-group verify name, add group to database
+// GET /groups  list all the groups from the database
+
+// guest cannot access the /create-group pages
+// regular user cannot access the /create-group pages
+// only admin user can access the /create-group pages
+// everyone can access the /groups page
+
 #[test]
 fn create_group() {
     run_external(|port| {
@@ -37,15 +46,6 @@ fn create_group_unauthorized() {
         let peti_cookie_str = register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com");
         println!("peti_cookie_str: {peti_cookie_str}");
 
-        // Access the Group creation page without user
-        let res = client.get(format!("{url}/create-group")).send().unwrap();
-        assert_eq!(res.status(), 200);
-
-        let html = res.text().unwrap();
-        //assert_eq!(html, "x");
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-
         // Access the Group creation page with unauthorized user
         let res = client
             .get(format!("{url}/create-group"))
@@ -58,5 +58,28 @@ fn create_group_unauthorized() {
         //assert_eq!(html, "x");
         check_html(&html, "title", "Unauthorized");
         check_html(&html, "h1", "Unauthorized");
+    });
+}
+
+#[test]
+fn create_group_guest() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
+
+        // Access the Group creation page without user
+        let res = client.get(format!("{url}/create-group")).send().unwrap();
+        assert_eq!(res.status(), 200);
+
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+
+        let res = client.get(format!("{url}/groups")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        assert!(!html.contains("/group/")); // No link to any group
     });
 }

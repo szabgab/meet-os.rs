@@ -15,9 +15,9 @@ use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 use meetings::{
-    add_group, add_login_code_to_user, add_user, db, get_events_by_group_id, get_user_by_email,
-    load_event, load_events, load_group, load_groups, sendgrid, verify_code, EmailAddress, Group,
-    User,
+    add_group, add_login_code_to_user, add_user, db, get_events_by_group_id,
+    get_groups_from_database, get_user_by_email, load_event, load_events, load_group, load_groups,
+    sendgrid, verify_code, EmailAddress, Group, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -456,6 +456,20 @@ async fn js_files(file: PathBuf) -> Option<NamedFile> {
         .ok()
 }
 
+#[get("/groups")]
+async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
+    if let Ok(groups) = get_groups_from_database(db).await {
+        return Template::render(
+            "groups",
+            context! {title: "Groups", groups: groups, config: get_public_config(), logged_in: logged_in(cookies),},
+        );
+    }
+    Template::render(
+        "message",
+        context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+    )
+}
+
 #[get("/create-group")]
 async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
     let private = get_private_config();
@@ -526,6 +540,7 @@ fn rocket() -> _ {
                 create_group_get,
                 create_group_post,
                 event_get,
+                groups_get,
                 group_get,
                 index,
                 js_files,
