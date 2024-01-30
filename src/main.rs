@@ -539,36 +539,50 @@ async fn create_group_post(
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
 
-    let id = match get_groups_from_database(db).await {
-        Ok(groups) => groups.len().saturating_add(1),
-        Err(err) => {
-            rocket::info!("Error while trying to add group {err}");
-            1
-        }
-    };
+    if let Some(login) = logged_in(cookies) {
+        rocket::info!("cookie value received from user: {}", login.email);
+        if let Some(_user) = is_admin(db, &login.email).await {
+            let id = match get_groups_from_database(db).await {
+                Ok(groups) => groups.len().saturating_add(1),
+                Err(err) => {
+                    rocket::info!("Error while trying to add group {err}");
+                    1
+                }
+            };
 
-    rocket::info!("group_id: {id}");
-    let group = Group {
-        name: input.name.to_owned(),
-        location: "Virtual".to_owned(),
-        description: "New group".to_owned(),
-        gid: id.to_string(),
-    };
+            rocket::info!("group_id: {id}");
+            let group = Group {
+                name: input.name.to_owned(),
+                location: "Virtual".to_owned(),
+                description: "New group".to_owned(),
+                gid: id.to_string(),
+            };
 
-    match add_group(db, &group).await {
-        Ok(result) => result,
-        Err(err) => {
-            rocket::info!("Error while trying to add group {err}");
+            match add_group(db, &group).await {
+                Ok(result) => result,
+                Err(err) => {
+                    rocket::info!("Error while trying to add group {err}");
+                    return Template::render(
+                        "message",
+                        context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config: get_public_config(), logged_in: logged_in(cookies),},
+                    );
+                }
+            };
+
             return Template::render(
                 "message",
-                context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, id, group.name), config: get_public_config(), logged_in: logged_in(cookies),},
             );
         }
-    };
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: logged_in(cookies),},
+        );
+    }
 
     Template::render(
         "message",
-        context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, id, group.name), config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: logged_in(cookies),},
     )
 }
 
