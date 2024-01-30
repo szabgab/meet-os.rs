@@ -53,13 +53,13 @@ fn register_user() {
 
         let html = res.text().unwrap();
         check_html(&html, "title", "We sent you an email");
-        assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
+        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
 
         let email_file = std::env::var("EMAIL_FILE").unwrap();
 
         let email_content = std::fs::read_to_string(email_file).unwrap();
         // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-        let re = Regex::new(r"http://localhost:8000/verify/register/([a-z0-9-]+)").unwrap();
+        let re = Regex::new("http://localhost:8000/verify/register/([a-z0-9-]+)").unwrap();
 
         println!("email content: {email_content}");
         let code = match re.captures(&email_content) {
@@ -101,8 +101,8 @@ fn register_user() {
         let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
         println!("cookie: {cookie}");
         assert!(cookie.contains("meet-os="));
-        let re = Regex::new(r"meet-os=([^;]+);").unwrap();
-        let cookie_str = match re.captures(&cookie) {
+        let re = Regex::new("meet-os=([^;]+);").unwrap();
+        let cookie_str = match re.captures(cookie) {
             Some(value) => value[1].to_owned(),
             None => panic!("Code not found cookie"),
         };
@@ -150,7 +150,7 @@ fn duplicate_email() {
         assert!(res.headers().get("set-cookie").is_none());
         let html = res.text().unwrap();
         check_html(&html, "title", "We sent you an email");
-        assert!(html.contains(r#"We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."#));
+        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let res = client
@@ -193,7 +193,7 @@ fn login() {
         let email_file = std::env::var("EMAIL_FILE").unwrap();
         let email = std::fs::read_to_string(email_file).unwrap();
         // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-        let re = Regex::new(r"http://localhost:8000/verify/login/([a-z0-9-]+)").unwrap();
+        let re = Regex::new("http://localhost:8000/verify/login/([a-z0-9-]+)").unwrap();
 
         log::info!("email: {email}");
         let code = match re.captures(&email) {
@@ -213,8 +213,8 @@ fn login() {
         let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
         println!("cookie: {cookie}");
         assert!(cookie.contains("meet-os="));
-        let re = Regex::new(r"meet-os=([^;]+);").unwrap();
-        let cookie_str = match re.captures(&cookie) {
+        let re = Regex::new("meet-os=([^;]+);").unwrap();
+        let cookie_str = match re.captures(cookie) {
             Some(value) => value[1].to_owned(),
             None => panic!("Code not found cookie"),
         };
@@ -275,8 +275,8 @@ fn event_page() {
         check_html(&html, "title", "Web development with Rocket");
         check_html(&html, "h1", "Web development with Rocket");
         assert!(html.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
-        assert!(html.contains(r#"<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"#));
-        assert!(html.contains(r#"<div><b>Location</b>: Virtual</div>"#));
+        assert!(html.contains("<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"));
+        assert!(html.contains("<div><b>Location</b>: Virtual</div>"));
     });
 }
 
@@ -294,7 +294,7 @@ fn group_page() {
         assert!(html.contains(
             r#"<li><a href="/event/1">2024-02-04T17:00:00 - Web development with Rocket</a></li>"#
         ));
-        assert!(html.contains(r#"<div><b>Location</b>: Virtual</div>"#));
+        assert!(html.contains("<div><b>Location</b>: Virtual</div>"));
     });
 }
 
