@@ -15,11 +15,14 @@
         <div class="navbar-end">
           <div class="navbar-item">
           <div class="navbar-item has-dropdown is-hoverable">
-             <a href="/register" class="navbar-item">Register</a>
-             <a href="/login" class="navbar-item">Login</a>
-             <a href="/logout" class="navbar-item">Logout</a>
-             <a href="/profile" class="navbar-item">Profile</a>
-             <a href="/about" class="navbar-item">About</a>
+            {% if logged_in %}
+              <a href="/logout" class="navbar-item">Logout</a>
+              <a href="/profile" class="navbar-item">Profile</a>
+            {% else %}
+              <a href="/register" class="navbar-item">Register</a>
+              <a href="/login" class="navbar-item">Login</a>
+            {% endif %}
+            <a href="/about" class="navbar-item">About</a>
           </div>
         </div>
         </div>
