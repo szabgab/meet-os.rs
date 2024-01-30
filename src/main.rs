@@ -496,25 +496,33 @@ async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templat
     // )
 }
 
+async fn is_admin(db: &State<Surreal<Db>>, email: &str) -> Option<User> {
+    if let Ok(Some(user)) = get_user_by_email(db, email).await {
+        rocket::info!("email: {}", user.email);
+        let private = get_private_config();
+        if private.admins.contains(&email.to_owned()) {
+            return Some(user);
+        }
+    }
+
+    None
+}
+
 #[get("/create-group")]
 async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
-    let private = get_private_config();
-    if let Some(cookie) = cookies.get_private("meet-os") {
-        let email = cookie.value();
-        rocket::info!("cookie value received from user: {email}");
-        if let Ok(Some(user)) = get_user_by_email(db, email).await {
-            rocket::info!("email: {}", user.email);
-            if private.admins.contains(&email.to_owned()) {
-                return Template::render(
-                    "create_group",
-                    context! {title: "Create Group", user: user, config: get_public_config(), logged_in: logged_in(cookies),},
-                );
-            }
+    if let Some(login) = logged_in(cookies) {
+        rocket::info!("cookie value received from user: {}", login.email);
+        if let Some(user) = is_admin(db, &login.email).await {
             return Template::render(
-                "message",
-                context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: logged_in(cookies),},
+                "create_group",
+                context! {title: "Create Group", user: user, config: get_public_config(), logged_in: logged_in(cookies),},
             );
         }
+
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: logged_in(cookies),},
+        );
     }
 
     Template::render(
