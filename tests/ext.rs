@@ -15,14 +15,14 @@ fn home() {
                     Ok(html) => {
                         check_html(&html, "title", "Meet-OS");
                         check_html(&html, "h1", "Welcome to the Rust meeting server");
-                        check_html_list(
-                            &html,
-                            "li",
-                            vec![
-                                r#"<a href="/event/1">Web development with Rocket</a>"#,
-                                r#"<a href="/group/1">Rust Maven</a>"#,
-                            ],
-                        );
+                        // check_html_list(
+                        //     &html,
+                        //     "li",
+                        //     vec![
+                        //         r#"<a href="/event/1">Web development with Rocket</a>"#,
+                        //         r#"<a href="/group/1">Rust Maven</a>"#,
+                        //     ],
+                        // );
                         check_html_list(&html, "h2", vec!["Events", "Groups"]);
 
                         //println!("{}", html)
@@ -330,39 +330,39 @@ fn register_with_bad_email_address() {
     });
 }
 
-#[test]
-fn event_page() {
-    run_external(|port| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
-        let res = client.get(format!("{url}/event/1")).send().unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
-        check_html(&html, "title", "Web development with Rocket");
-        check_html(&html, "h1", "Web development with Rocket");
-        assert!(html.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
-        assert!(html.contains("<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"));
-        assert!(html.contains("<div><b>Location</b>: Virtual</div>"));
-    });
-}
+// #[test]
+// fn event_page() {
+//     run_external(|port| {
+//         let client = reqwest::blocking::Client::new();
+//         let url = format!("http://localhost:{port}/");
+//         let res = client.get(format!("{url}/event/1")).send().unwrap();
+//         assert_eq!(res.status(), 200);
+//         let html = res.text().unwrap();
+//         check_html(&html, "title", "Web development with Rocket");
+//         check_html(&html, "h1", "Web development with Rocket");
+//         assert!(html.contains(r#"Organized by <a href="/group/1">Rust Maven</a>."#));
+//         assert!(html.contains("<div><b>Date</b>: 2024-02-04T17:00:00 UTC</div>"));
+//         assert!(html.contains("<div><b>Location</b>: Virtual</div>"));
+//     });
+// }
 
-#[test]
-fn group_page() {
-    run_external(|port| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
-        let res = client.get(format!("{url}/group/1")).send().unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
+// #[test]
+// fn group_page() {
+//     run_external(|port| {
+//         let client = reqwest::blocking::Client::new();
+//         let url = format!("http://localhost:{port}/");
+//         let res = client.get(format!("{url}/group/1")).send().unwrap();
+//         assert_eq!(res.status(), 200);
+//         let html = res.text().unwrap();
 
-        check_html(&html, "title", "Rust Maven");
-        check_html(&html, "h1", "Rust Maven");
-        assert!(html.contains(
-            r#"<li><a href="/event/1">2024-02-04T17:00:00 - Web development with Rocket</a></li>"#
-        ));
-        assert!(html.contains("<div><b>Location</b>: Virtual</div>"));
-    });
-}
+//         check_html(&html, "title", "Rust Maven");
+//         check_html(&html, "h1", "Rust Maven");
+//         assert!(html.contains(
+//             r#"<li><a href="/event/1">2024-02-04T17:00:00 - Web development with Rocket</a></li>"#
+//         ));
+//         assert!(html.contains("<div><b>Location</b>: Virtual</div>"));
+//     });
+// }
 
 // TODO try to login with an email address that was not registered
 

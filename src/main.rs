@@ -20,9 +20,9 @@ use pbkdf2::{
 };
 
 use meetings::{
-    add_group, add_user, db, get_events_by_group_id, get_groups_from_database, get_user_by_email,
-    load_event, load_events, load_group, load_groups, sendgrid, verify_code, EmailAddress, Group,
-    User,
+    add_group, add_user, db, get_events_by_group_id, get_events_from_database,
+    get_groups_from_database, get_user_by_email, load_event, load_group, sendgrid, verify_code,
+    EmailAddress, Group, User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -100,13 +100,20 @@ fn logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
 }
 
 #[get("/")]
-fn index(cookies: &CookieJar<'_>) -> Template {
+async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Result<Template, Template> {
     rocket::info!("home");
 
-    let events = load_events();
-    let groups = load_groups();
+    let events = get_events_from_database(db).await.map_err(|err| {
+        rocket::error!("Error: {err}");
+        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},)
+    })?;
 
-    Template::render(
+    let groups = get_groups_from_database(db).await.map_err(|err| {
+        rocket::error!("Error: {err}");
+        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},)
+    })?;
+
+    Ok(Template::render(
         "index",
         context! {
             title: "Meet-OS",
@@ -115,7 +122,7 @@ fn index(cookies: &CookieJar<'_>) -> Template {
             config: get_public_config(),
             logged_in: logged_in(cookies),
         },
-    )
+    ))
 }
 
 #[get("/about")]

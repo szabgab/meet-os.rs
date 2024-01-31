@@ -184,3 +184,13 @@ pub async fn get_groups_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec
     rocket::info!("groups {:?}", entries);
     Ok(entries)
 }
+
+pub async fn get_events_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Event>> {
+    rocket::info!("get_groups_from_database");
+    let mut response = db.query("SELECT * FROM group;").await?;
+    let entries: Vec<Event> = response.take(0)?;
+    for ent in &entries {
+        rocket::info!("event name {}", ent.title);
+    }
+    Ok(entries)
+}
