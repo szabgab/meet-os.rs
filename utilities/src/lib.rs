@@ -86,10 +86,10 @@ pub fn check_profile_page(client: &reqwest::blocking::Client, url: &str, cookie_
     }
 }
 
-pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name: &str, email: &str) -> String {
+pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name: &str, email: &str, password: &str) -> String {
     let res = client
     .post(format!("{url}/register"))
-    .form(&[("name", name), ("email", email)])
+    .form(&[("name", name), ("email", email), ("password", password)])
     .send()
     .unwrap();
     assert_eq!(res.status(), 200);

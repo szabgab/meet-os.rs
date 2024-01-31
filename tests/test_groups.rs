@@ -17,9 +17,11 @@ fn create_group_by_admin() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let foo_cookie_str = register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com");
+        let foo_cookie_str =
+            register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123foo");
         println!("foo_cookie_str: {foo_cookie_str}");
-        let peti_cookie_str = register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com");
+        let peti_cookie_str =
+            register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com", "123peti");
         println!("peti_cookie_str: {peti_cookie_str}");
 
         // Access the Group creation page with authorized user
@@ -79,7 +81,8 @@ fn create_group_unauthorized() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let peti_cookie_str = register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com");
+        let peti_cookie_str =
+            register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com", "petibar");
         println!("peti_cookie_str: {peti_cookie_str}");
 
         // Access the Group creation page with unauthorized user

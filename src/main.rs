@@ -14,10 +14,15 @@ use rocket::State;
 use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
+use pbkdf2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Pbkdf2,
+};
+
 use meetings::{
-    add_group, add_login_code_to_user, add_user, db, get_events_by_group_id,
-    get_groups_from_database, get_user_by_email, load_event, load_events, load_group, load_groups,
-    sendgrid, verify_code, EmailAddress, Group, User,
+    add_group, add_user, db, get_events_by_group_id, get_groups_from_database, get_user_by_email,
+    load_event, load_events, load_group, load_groups, sendgrid, verify_code, EmailAddress, Group,
+    User,
 };
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -42,11 +47,13 @@ struct GroupForm<'r> {
 struct RegistrationForm<'r> {
     name: &'r str,
     email: &'r str,
+    password: &'r str,
 }
 
 #[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
+    password: &'r str,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -218,60 +225,122 @@ async fn login_post(
 
     rocket::info!("email: {}", user.email);
 
-    let process = "login";
-    let code = Uuid::new_v4();
+    let password = input.password.trim().as_bytes();
 
-    match add_login_code_to_user(db, &email, process, code.to_string().as_str()).await {
-        Ok(_result) => (),
+    let parsed_hash = match PasswordHash::new(&user.password) {
+        Ok(val) => val,
         Err(err) => {
-            rocket::info!("Error while trying to add user {err}");
+            rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Oups", config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
             );
         }
     };
 
-    let base_url = rocket::Config::figment()
-        .extract_inner::<String>("base_url")
-        .unwrap_or_default();
-
-    let subject = "Verify your Meet-OS login!";
-    let text = format!(
-        r#"Hi,
-    Someone used your email to try to login the Meet-OS web site.
-    If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to finish the login process.
-    <p>
-    <p>
-    If it was not you, we would like to apolozie. You don't need to do anything..
-    ";
-    "#
-    );
-
-    // TODO: read from some config file
-    let from = EmailAddress {
-        name: String::from("Meet OS"),
-        email: String::from("gabor@szabgab.com"),
-    };
-    let to_address = &EmailAddress {
-        name: user.name.clone(),
-        email: input.email.to_owned(),
-    };
-
-    if let Ok(email_file) = env::var("EMAIL_FILE") {
-        rocket::info!("email_file: {email_file}");
-        let mut file = File::create(email_file).unwrap();
-        writeln!(&mut file, "{}", &text).unwrap();
+    if Pbkdf2.verify_password(password, &parsed_hash).is_ok() {
+        cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
+        Template::render(
+            "message",
+            context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config: get_public_config(), logged_in: logged_in(cookies),},
+        )
     } else {
-        let private = get_private_config();
-        sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
+        Template::render(
+            "message",
+            context! {title: "Invalid password", message: "Invalid password", config: get_public_config(), logged_in: logged_in(cookies),},
+        )
     }
-
-    Template::render(
-        "message",
-        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please click on the link to finish the login process.", to_address.email), config: get_public_config(), logged_in: logged_in(cookies),},
-    )
 }
+
+// #[post("/reset-password", data = "<input>")]
+// async fn reset_password_post(
+//     cookies: &CookieJar<'_>,
+//     db: &State<Surreal<Db>>,
+//     input: Form<LoginForm<'_>>,
+// ) -> Template {
+//     rocket::info!("rocket login: {:?}", input.email);
+
+//     let email = input.email.to_lowercase().trim().to_owned();
+//     if !validator::validate_email(&email) {
+//         return Template::render(
+//             "message",
+//             context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config(), logged_in: logged_in(cookies),},
+//         );
+//     }
+
+//     let user: User = match get_user_by_email(db, &email).await {
+//         Ok(user) => match user {
+//             Some(user) => user,
+//             None => {
+//                 return Template::render(
+//                     "message",
+//                     context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
+//                 )
+//             }
+//         },
+//         Err(err) => {
+//             rocket::error!("Error: {err}");
+//             return Template::render(
+//                 "message",
+//                 context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
+//             );
+//         }
+//     };
+
+//     let process = "login";
+//     let code = Uuid::new_v4();
+
+//     match add_login_code_to_user(db, &email, process, code.to_string().as_str()).await {
+//         Ok(_result) => (),
+//         Err(err) => {
+//             rocket::info!("Error while trying to add user {err}");
+//             return Template::render(
+//                 "message",
+//                 context! {title: "Internal error", message: "Oups", config: get_public_config(), logged_in: logged_in(cookies),},
+//             );
+//         }
+//     };
+
+//     let base_url = rocket::Config::figment()
+//         .extract_inner::<String>("base_url")
+//         .unwrap_or_default();
+
+//     let subject = "Verify your Meet-OS login!";
+//     let text = format!(
+//         r#"Hi,
+//     Someone used your email to try to login the Meet-OS web site.
+//     If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to finish the login process.
+//     <p>
+//     <p>
+//     If it was not you, we would like to apolozie. You don't need to do anything..
+//     ";
+//     "#
+//     );
+
+//     // TODO: read from some config file
+//     let from = EmailAddress {
+//         name: String::from("Meet OS"),
+//         email: String::from("gabor@szabgab.com"),
+//     };
+//     let to_address = &EmailAddress {
+//         name: user.name.clone(),
+//         email: input.email.to_owned(),
+//     };
+
+//     if let Ok(email_file) = env::var("EMAIL_FILE") {
+//         rocket::info!("email_file: {email_file}");
+//         let mut file = File::create(email_file).unwrap();
+//         writeln!(&mut file, "{}", &text).unwrap();
+//     } else {
+//         let private = get_private_config();
+//         sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
+//     }
+
+//     Template::render(
+//         "message",
+//         context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please click on the link to finish the login process.", to_address.email), config: get_public_config(), logged_in: logged_in(cookies),},
+//     )
+// }
 
 #[get("/register")]
 fn register_get(cookies: &CookieJar<'_>) -> Template {
@@ -302,12 +371,32 @@ async fn register_post(
             context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config: get_public_config(), logged_in: logged_in(cookies),},
         );
     }
+    let password = input.password.trim().as_bytes();
+    let pw_min_length = 6;
+    if password.len() < pw_min_length {
+        return Template::render(
+            "message",
+            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: logged_in(cookies),},
+        );
+    }
     let process = "register";
     let code = Uuid::new_v4();
+    let salt = SaltString::generate(&mut OsRng);
+    let hashed_password = match Pbkdf2.hash_password(password, &salt) {
+        Ok(val) => val.to_string(),
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: logged_in(cookies),},
+            );
+        }
+    };
 
     let user = User {
         name: input.name.to_owned(),
         email,
+        password: hashed_password,
         process: process.to_owned(),
         code: format!("{code}"),
         date: "date".to_owned(), // TODO get current timestamp

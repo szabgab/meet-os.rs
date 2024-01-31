@@ -9,6 +9,7 @@ pub use notifications::*;
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct User {
     pub email: String,
+    pub password: String,
     pub name: String,
     pub code: String,
     pub process: String,

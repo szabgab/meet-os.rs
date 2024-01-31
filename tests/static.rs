@@ -14,8 +14,13 @@ fn register_page() {
         let html = res.text().unwrap();
         check_html(&html, "title", "Register");
         check_html(&html, "h1", "Register");
-        assert!(html.contains(r#"Name: <input name="name" id="name" type="text">"#));
-        assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
+        assert!(html.contains(
+            r#"<tr><td>Name:</td><td><input name="name" id="name" type="text"></td></tr>"#
+        ));
+        assert!(html.contains(
+            r#"<tr><td>Email:</td><td><input name="email" id="email" type="email"></td></tr>"#
+        ));
+        assert!(html.contains(r#"<tr><td>Password:</td><td><input name="password" id="password" type="password"></td></tr>"#));
     });
 }
 

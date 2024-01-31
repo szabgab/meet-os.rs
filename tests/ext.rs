@@ -44,7 +44,11 @@ fn register_user() {
         let url = format!("http://localhost:{port}");
         let res = client
             .post(format!("{url}/register"))
-            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
+            .form(&[
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -142,7 +146,11 @@ fn duplicate_email() {
         let url = format!("http://localhost:{port}/");
         let res = client
             .post(format!("{url}/register"))
-            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
+            .form(&[
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -155,7 +163,11 @@ fn duplicate_email() {
 
         let res = client
             .post(format!("{url}/register"))
-            .form(&[("name", "Foo Bar"), ("email", "foo@meet-os.com")])
+            .form(&[
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -167,49 +179,23 @@ fn duplicate_email() {
 }
 
 #[test]
-fn login() {
+fn login_user() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let _cookie_str = register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com");
+        let _cookie_str =
+            register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123456");
         //println!("cookie: {cookie_str}");
         //check_profile_page(&client, &url, &cookie_str, "Peti Bar");
 
         let res = client
             .post(format!("{url}/login"))
-            .form(&[("email", "foo@meet-os.com")])
+            .form(&[("email", "foo@meet-os.com"), ("password", "123456")])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
-        assert!(res.headers().get("set-cookie").is_none());
-        let html = res.text().unwrap();
-        check_html(&html, "title", "We sent you an email");
-        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b>"));
 
-        // TODO: get the user from the database and check if there is a code and if the process is "login"
-
-        // get the email and extract the code from the link
-        let email_file = std::env::var("EMAIL_FILE").unwrap();
-        let email = std::fs::read_to_string(email_file).unwrap();
-        // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-        let re = Regex::new("http://localhost:8000/verify/login/([a-z0-9-]+)").unwrap();
-
-        log::info!("email: {email}");
-        let code = match re.captures(&email) {
-            Some(value) => value[1].to_owned(),
-            None => panic!("Code not found in email"),
-        };
-        println!("code: {code}");
-        //assert_eq!(code, res.code);
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
-
-        // "Click" on the link an verify the email
-        let res = client
-            .get(format!("{url}/verify/login/{code}"))
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
         let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
         println!("cookie: {cookie}");
         assert!(cookie.contains("meet-os="));
@@ -224,9 +210,8 @@ fn login() {
         //assert_eq!(html, "x");
         check_html(&html, "title", "Welcome back");
         assert!(html.contains(r#"<a href="/profile">profile</a>"#));
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
-        // Access the profile with the cookie
+        // // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
 
         let res = client.get(format!("{url}/logout")).send().unwrap();
@@ -243,6 +228,83 @@ fn login() {
     });
 }
 
+// #[test]
+// fn login() {
+//     run_external(|port| {
+//         let client = reqwest::blocking::Client::new();
+//         let url = format!("http://localhost:{port}/");
+
+//         let _cookie_str = register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123456");
+//         //println!("cookie: {cookie_str}");
+//         //check_profile_page(&client, &url, &cookie_str, "Peti Bar");
+
+//         let res = client
+//             .post(format!("{url}/login"))
+//             .form(&[("email", "foo@meet-os.com")])
+//             .send()
+//             .unwrap();
+//         assert_eq!(res.status(), 200);
+//         assert!(res.headers().get("set-cookie").is_none());
+//         let html = res.text().unwrap();
+//         check_html(&html, "title", "We sent you an email");
+//         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b>"));
+
+//         // TODO: get the user from the database and check if there is a code and if the process is "login"
+
+//         // get the email and extract the code from the link
+//         let email_file = std::env::var("EMAIL_FILE").unwrap();
+//         let email = std::fs::read_to_string(email_file).unwrap();
+//         // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+//         let re = Regex::new("http://localhost:8000/verify/login/([a-z0-9-]+)").unwrap();
+
+//         log::info!("email: {email}");
+//         let code = match re.captures(&email) {
+//             Some(value) => value[1].to_owned(),
+//             None => panic!("Code not found in email"),
+//         };
+//         println!("code: {code}");
+//         //assert_eq!(code, res.code);
+//         //        std::thread::sleep(std::time::Duration::from_millis(500));
+
+//         // "Click" on the link an verify the email
+//         let res = client
+//             .get(format!("{url}/verify/login/{code}"))
+//             .send()
+//             .unwrap();
+//         assert_eq!(res.status(), 200);
+//         let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
+//         println!("cookie: {cookie}");
+//         assert!(cookie.contains("meet-os="));
+//         let re = Regex::new("meet-os=([^;]+);").unwrap();
+//         let cookie_str = match re.captures(cookie) {
+//             Some(value) => value[1].to_owned(),
+//             None => panic!("Code not found cookie"),
+//         };
+//         println!("cookie_str: {cookie_str}");
+
+//         let html = res.text().unwrap();
+//         //assert_eq!(html, "x");
+//         check_html(&html, "title", "Welcome back");
+//         assert!(html.contains(r#"<a href="/profile">profile</a>"#));
+//         //        std::thread::sleep(std::time::Duration::from_millis(500));
+
+//         // Access the profile with the cookie
+//         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
+
+//         let res = client.get(format!("{url}/logout")).send().unwrap();
+//         assert_eq!(res.status(), 200);
+//         let html = res.text().unwrap();
+//         check_html(&html, "title", "Logged out");
+//         check_html(&html, "h1", "Logged out");
+
+//         // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
+//         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
+//         // If we want to make sure that the user cannot access the system any more we'll have to manage the login information
+//         // on the server side.
+//         //check_profile_page(&client, &url, &cookie_str, "");
+//     });
+// }
+
 #[test]
 fn register_with_bad_email_address() {
     run_external(|port| {
@@ -251,7 +313,11 @@ fn register_with_bad_email_address() {
         let url = format!("http://localhost:{port}/");
         let res = client
             .post(format!("{url}/register"))
-            .form(&[("name", "Foo Bar"), ("email", "meet-os.com")])
+            .form(&[
+                ("name", "Foo Bar"),
+                ("email", "meet-os.com"),
+                ("password", "123456"),
+            ])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200); // TODO should this stay 200 OK?
@@ -308,7 +374,7 @@ fn login_with_unregistered_email() {
 
         let res = client
             .post(format!("{url}/login"))
-            .form(&[("email", "other@meet-os.com")])
+            .form(&[("email", "other@meet-os.com"), ("password", "123456")])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);

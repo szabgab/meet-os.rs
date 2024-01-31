@@ -7,6 +7,7 @@
 
         <form method="POST" action="/login">
         Email: <input name="email" id="email" type="email">
+        Password: <input name="password" id="password" type="password">
         <input type="submit" value="Login">
         </form>
     

@@ -6,8 +6,11 @@
        <h1 class="title is-3">Register</h1>
 
         <form method="POST" action="/register">
-        Name: <input name="name" id="name" type="text">
-        Email: <input name="email" id="email" type="email">
+        <table>
+        <tr><td>Name:</td><td><input name="name" id="name" type="text"></td></tr>
+        <tr><td>Email:</td><td><input name="email" id="email" type="email"></td></tr>
+        <tr><td>Password:</td><td><input name="password" id="password" type="password"></td></tr>
+        </table>
         <input type="submit" value="Register">
         </form>
     

@@ -2227,6 +2227,7 @@ dependencies = [
  "clap",
  "log",
  "markdown",
+ "pbkdf2",
  "regex",
  "reqwest",
  "rocket",
