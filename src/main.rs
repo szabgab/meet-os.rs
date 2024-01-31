@@ -20,7 +20,7 @@ use pbkdf2::{
 };
 
 use meetings::{
-    add_group, add_user, db, get_events_by_group_id, get_events_from_database,
+    add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
     get_groups_from_database, get_user_by_email, load_event, load_group, sendgrid, verify_code,
     EmailAddress, Group, User,
 };
@@ -41,6 +41,8 @@ struct PublicConfig {
 #[derive(FromForm)]
 struct GroupForm<'r> {
     name: &'r str,
+    location: &'r str,
+    description: &'r str,
 }
 
 #[derive(FromForm)]
@@ -537,10 +539,29 @@ fn event_get(cookies: &CookieJar<'_>, id: usize) -> Template {
     )
 }
 
-#[get("/group/<id>")]
-fn group_get(cookies: &CookieJar<'_>, id: usize) -> Template {
-    let group = load_group(id);
-    let events = get_events_by_group_id(id);
+#[get("/group/<gid>")]
+async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize) -> Template {
+    rocket::info!("group_get: {gid}");
+    let group = match get_group_by_gid(db, gid).await {
+        Ok(group) => match group {
+            Some(group) => group,
+            None => {
+                return Template::render(
+                    "message",
+                    context! {title: "No such group", message: "No such group", config: get_public_config(), logged_in: logged_in(cookies),},
+                )
+            } // TODO 404
+        },
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+            );
+        }
+    };
+
+    let events = get_events_by_group_id(db, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
 
@@ -638,7 +659,7 @@ async fn create_group_post(
     if let Some(login) = logged_in(cookies) {
         rocket::info!("cookie value received from user: {}", login.email);
         if let Some(_user) = is_admin(db, &login.email).await {
-            let id = match get_groups_from_database(db).await {
+            let gid = match get_groups_from_database(db).await {
                 Ok(groups) => groups.len().saturating_add(1),
                 Err(err) => {
                     rocket::info!("Error while trying to add group {err}");
@@ -646,12 +667,12 @@ async fn create_group_post(
                 }
             };
 
-            rocket::info!("group_id: {id}");
+            rocket::info!("group_id: {gid}");
             let group = Group {
                 name: input.name.to_owned(),
-                location: "Virtual".to_owned(),
-                description: "New group".to_owned(),
-                gid: id.to_string(),
+                location: input.location.to_owned(),
+                description: input.description.to_owned(),
+                gid,
             };
 
             match add_group(db, &group).await {
@@ -667,7 +688,7 @@ async fn create_group_post(
 
             return Template::render(
                 "message",
-                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, id, group.name), config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config: get_public_config(), logged_in: logged_in(cookies),},
             );
         }
         return Template::render(

@@ -40,7 +40,14 @@ fn create_group_by_admin() {
         // Create a Group
         let res = client
             .post(format!("{url}/create-group"))
-            .form(&[("name", "Rust Maven")])
+            .form(&[
+                ("name", "Rust Maven"),
+                ("location", "Virtual"),
+                (
+                    "description",
+                    "Text with [link](https://rust.code-maven.com/)",
+                ),
+            ])
             .header("Cookie", format!("meet-os={foo_cookie_str}"))
             .send()
             .unwrap();
@@ -57,7 +64,11 @@ fn create_group_by_admin() {
 
         let res = client
             .post(format!("{url}/create-group"))
-            .form(&[("name", "Python Maven")])
+            .form(&[
+                ("name", "Python Maven"),
+                ("location", "Other"),
+                ("description", "Text with [link](https://code-maven.com/)"),
+            ])
             .header("Cookie", format!("meet-os={foo_cookie_str}"))
             .send()
             .unwrap();
@@ -101,7 +112,11 @@ fn create_group_unauthorized() {
         // Create group should fail
         let res = client
             .post(format!("{url}/create-group"))
-            .form(&[("name", "Rust Maven")])
+            .form(&[
+                ("name", "Rust Maven"),
+                ("location", "Virtual"),
+                ("description", "nope"),
+            ])
             .header("Cookie", format!("meet-os={peti_cookie_str}"))
             .send()
             .unwrap();
@@ -146,7 +161,11 @@ fn create_group_guest() {
         // Create group should fail
         let res = client
             .post(format!("{url}/create-group"))
-            .form(&[("name", "Rust Maven")])
+            .form(&[
+                ("name", "Rust Maven"),
+                ("location", ""),
+                ("description", ""),
+            ])
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);

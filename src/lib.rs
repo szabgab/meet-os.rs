@@ -31,8 +31,8 @@ pub struct Event {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Group {
-    #[serde(default = "get_empty_string")]
-    pub gid: String,
+    #[serde(default = "get_usize_zero")]
+    pub gid: usize,
     pub name: String,
     pub location: String,
     pub description: String,
@@ -46,4 +46,8 @@ pub struct EmailAddress {
 
 fn get_empty_string() -> String {
     String::new()
+}
+
+fn get_usize_zero() -> usize {
+    0
 }

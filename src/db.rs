@@ -145,12 +145,14 @@ pub fn load_events() -> Vec<Event> {
 }
 
 #[must_use]
-pub fn get_events_by_group_id(id: usize) -> Vec<Event> {
-    let events = load_events();
-    events
-        .into_iter()
-        .filter(|event| event.group_id == id)
-        .collect()
+pub async fn get_events_by_group_id(db: &Surreal<Db>, gid: usize) -> Vec<Event> {
+    match get_events_from_database(db).await {
+        Ok(events) => events
+            .into_iter()
+            .filter(|event| event.group_id == gid)
+            .collect(),
+        Err(_) => vec![],
+    }
 }
 
 /// # Panics
@@ -161,7 +163,7 @@ pub fn load_group(id: usize) -> Group {
     let filename = format!("data/groups/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.gid = String::from("1");
+    data.gid = 1;
     data
 }
 
@@ -175,14 +177,27 @@ pub fn load_groups() -> Vec<Group> {
 pub async fn get_groups_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Group>> {
     rocket::info!("get_groups_from_database");
     let mut response = db.query("SELECT * FROM group;").await?;
-    rocket::info!("groups before ***");
     let entries: Vec<Group> = response.take(0)?;
-    rocket::info!("groups ***");
     for ent in &entries {
-        rocket::info!("g name {}", ent.name);
+        rocket::info!("group name {}", ent.name);
     }
-    rocket::info!("groups {:?}", entries);
     Ok(entries)
+}
+
+pub async fn get_group_by_gid(db: &Surreal<Db>, gid: usize) -> surrealdb::Result<Option<Group>> {
+    rocket::info!("get_group_by_gid: '{gid}'");
+    let mut response = db
+        .query("SELECT * FROM group WHERE gid=$gid;")
+        .bind(("gid", gid))
+        .await?;
+
+    let entry: Option<Group> = response.take(0)?;
+
+    if let Some(entry) = entry.as_ref() {
+        rocket::info!("Group name: {}", entry.name);
+    }
+
+    Ok(entry)
 }
 
 pub async fn get_events_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Event>> {
