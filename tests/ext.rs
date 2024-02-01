@@ -76,7 +76,6 @@ fn register_user() {
 
         //assert_eq!(code, res.code);
         println!("code: {code}");
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile without a cookie
         let res = client.get(format!("{url}/profile")).send().unwrap();
@@ -86,7 +85,6 @@ fn register_user() {
         check_html(&html, "title", "Missing cookie");
         assert!(html.contains("It seems you are not logged in"));
         check_guest_menu(&html);
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // TODO. shall we access the database directly and check the data there too?
         //     // Without dropping the client here we get an error on the next line
@@ -120,7 +118,6 @@ fn register_user() {
         check_html(&html, "title", "Thank you for registering");
         assert!(html.contains("Your email was verified."));
         //check_logged_in_menu(&html);
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
@@ -165,7 +162,6 @@ fn duplicate_email() {
         check_guest_menu(&html);
         check_html(&html, "title", "We sent you an email");
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
-        //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         let res = client
             .post(format!("{url}/register"))
@@ -272,7 +268,6 @@ fn login_user() {
 //         };
 //         println!("code: {code}");
 //         //assert_eq!(code, res.code);
-//         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
 //         // "Click" on the link an verify the email
 //         let res = client
