@@ -1,7 +1,8 @@
 use regex::Regex;
 
 use utilities::{
-    check_guest_menu, check_html, check_profile_page, register_user_helper, run_external,
+    check_guest_menu, check_html, check_logged_in_menu, check_profile_page, register_user_helper,
+    run_external,
 };
 
 #[test]
@@ -82,7 +83,7 @@ fn register_user() {
         let html = res.text().unwrap();
         check_html(&html, "title", "Thank you for registering");
         assert!(html.contains("Your email was verified."));
-        //check_logged_in_menu(&html);
+        check_logged_in_menu(&html);
 
         // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
@@ -177,7 +178,7 @@ fn login_user() {
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
         check_html(&html, "title", "Welcome back");
-        //check_logged_in_menu(&html);
+        check_logged_in_menu(&html);
 
         // // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");

@@ -27,7 +27,7 @@ pub fn check_logged_in_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
     assert!(!html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
 
-    assert!(html.contains(r#"<a href="/profile" class="navbar-item">Profile</a>#));
+    assert!(html.contains(r#"<a href="/profile" class="navbar-item">Profile</a>"#));
     assert!(html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
 }
 
