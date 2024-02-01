@@ -14,6 +14,12 @@ fn compile() {
         .expect("command failed to start");
 }
 
+
+pub fn check_logged_in_menu(html: &str) {
+    assert!(html.contains(r#"<a href="/profile">profile</a>"#));
+    assert!(html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+}
+
 pub fn check_html(html: &str, tag: &str, text: &str) {
     let document = Html::parse_document(html);
     let selector = Selector::parse(tag).unwrap();

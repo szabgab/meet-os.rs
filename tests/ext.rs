@@ -1,7 +1,8 @@
 use regex::Regex;
 
 use utilities::{
-    check_html, check_html_list, check_profile_page, register_user_helper, run_external,
+    check_html, check_html_list, check_logged_in_menu, check_profile_page, register_user_helper,
+    run_external,
 };
 
 #[test]
@@ -209,7 +210,7 @@ fn login_user() {
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
         check_html(&html, "title", "Welcome back");
-        assert!(html.contains(r#"<a href="/profile">profile</a>"#));
+        check_logged_in_menu(&html);
 
         // // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
@@ -285,8 +286,7 @@ fn login_user() {
 //         let html = res.text().unwrap();
 //         //assert_eq!(html, "x");
 //         check_html(&html, "title", "Welcome back");
-//         assert!(html.contains(r#"<a href="/profile">profile</a>"#));
-//         //        std::thread::sleep(std::time::Duration::from_millis(500));
+//         check_logged_in_menu(&html);
 
 //         // Access the profile with the cookie
 //         check_profile_page(&client, &url, &cookie_str, "Foo Bar");

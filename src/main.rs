@@ -251,7 +251,7 @@ async fn login_post(
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
         Template::render(
             "message",
-            context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config: get_public_config(), logged_in: CookieUser {email}},
         )
     } else {
         Template::render(
