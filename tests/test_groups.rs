@@ -149,6 +149,7 @@ fn create_group_guest() {
         //assert_eq!(html, "x");
         check_html(&html, "title", "Not logged in");
         check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("It seems you are not logged in"));
 
         let res = client.get(format!("{url}/groups")).send().unwrap();
         assert_eq!(res.status(), 200);
@@ -172,6 +173,7 @@ fn create_group_guest() {
         let html = res.text().unwrap();
         check_html(&html, "title", "Not logged in");
         check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("It seems you are not logged in"));
 
         // // List the groups
         let res = client.get(format!("{url}/groups")).send().unwrap();
