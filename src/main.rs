@@ -202,61 +202,58 @@ async fn login_post(
     cookies: &CookieJar<'_>,
     db: &State<Surreal<Db>>,
     input: Form<LoginForm<'_>>,
-) -> Template {
+) -> Result<Template, Template> {
     rocket::info!("rocket login: {:?}", input.email);
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
-        return Template::render(
+        return Ok(Template::render(
             "message",
             context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config(), logged_in: logged_in(cookies),},
-        );
+        ));
     }
 
     let user = match get_user_by_email(db, &email).await {
         Ok(user) => user,
         Err(err) => {
             rocket::error!("Error: {err}");
-            return Template::render(
+            return Ok(Template::render(
                 "message",
                 context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
-            );
+            ));
         }
     };
 
     let Some(user) = user else {
-        return Template::render(
+        return Ok(Template::render(
             "message",
             context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
-        );
+        ));
     };
 
     rocket::info!("email: {}", user.email);
 
     let password = input.password.trim().as_bytes();
 
-    let parsed_hash = match PasswordHash::new(&user.password) {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
-            );
-        }
-    };
+    let parsed_hash = PasswordHash::new(&user.password).map_err(|err| {
+        rocket::error!("Error: {err}");
+        Template::render(
+            "message",
+            context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+        )
+    })?;
 
     if Pbkdf2.verify_password(password, &parsed_hash).is_ok() {
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
-        Template::render(
+        Ok(Template::render(
             "message",
             context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config: get_public_config(), logged_in: CookieUser {email}},
-        )
+        ))
     } else {
-        Template::render(
+        Ok(Template::render(
             "message",
             context! {title: "Invalid password", message: "Invalid password", config: get_public_config(), logged_in: logged_in(cookies),},
-        )
+        ))
     }
 }
 
