@@ -213,16 +213,8 @@ async fn login_post(
         );
     }
 
-    let user: User = match get_user_by_email(db, &email).await {
-        Ok(user) => match user {
-            Some(user) => user,
-            None => {
-                return Template::render(
-                    "message",
-                    context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
-                )
-            }
-        },
+    let user = match get_user_by_email(db, &email).await {
+        Ok(user) => user,
         Err(err) => {
             rocket::error!("Error: {err}");
             return Template::render(
@@ -230,6 +222,13 @@ async fn login_post(
                 context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
             );
         }
+    };
+
+    let Some(user) = user else {
+        return Template::render(
+            "message",
+            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
+        );
     };
 
     rocket::info!("email: {}", user.email);
