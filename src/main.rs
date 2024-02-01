@@ -181,7 +181,7 @@ fn logout_get(cookies: &CookieJar<'_>) -> Template {
     cookies.remove_private("meet-os");
     Template::render(
         "message",
-        context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config(), logged_in: None::<CookieUser>,},
     )
 }
 
@@ -482,15 +482,15 @@ async fn verify(
     // TODO take the process into account at the verification
     if let Ok(Some(user)) = verify_code(db, process, code).await {
         rocket::info!("verified: {}", user.email);
-        cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
+        cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
         let (title, message) = match process {
             "register" => ("Thank you for registering", "Your email was verified."),
-            "login" => ("Welcome back", r#"<a href="/profile">profile</a>"#),
+            "login" => ("Welcome back", "Welcome back"),
             _ => ("Oups", "Big opus and TODO"),
         };
         return Template::render(
             "message",
-            context! {title: title, message: message, config: get_public_config(),logged_in: logged_in(cookies),},
+            context! {title: title, message: message, config: get_public_config(), logged_in: CookieUser {email: user.email},},
         );
     }
     Template::render(

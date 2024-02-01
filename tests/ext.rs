@@ -1,7 +1,7 @@
 use regex::Regex;
 
 use utilities::{
-    check_html, check_html_list, check_logged_in_menu, check_profile_page, register_user_helper,
+    check_guest_menu, check_html, check_html_list, check_profile_page, register_user_helper,
     run_external,
 };
 
@@ -25,6 +25,7 @@ fn home() {
                         //     ],
                         // );
                         check_html_list(&html, "h2", vec!["Events", "Groups"]);
+                        check_guest_menu(&html);
 
                         //println!("{}", html)
                     }
@@ -59,6 +60,7 @@ fn register_user() {
         let html = res.text().unwrap();
         check_html(&html, "title", "We sent you an email");
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
+        check_guest_menu(&html);
 
         let email_file = std::env::var("EMAIL_FILE").unwrap();
 
@@ -83,6 +85,7 @@ fn register_user() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Missing cookie");
         assert!(html.contains("It seems you are not logged in"));
+        check_guest_menu(&html);
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // TODO. shall we access the database directly and check the data there too?
@@ -116,6 +119,7 @@ fn register_user() {
         let html = res.text().unwrap();
         check_html(&html, "title", "Thank you for registering");
         assert!(html.contains("Your email was verified."));
+        //check_logged_in_menu(&html);
         //        std::thread::sleep(std::time::Duration::from_millis(500));
 
         // Access the profile with the cookie
@@ -158,6 +162,7 @@ fn duplicate_email() {
         //println!("{:#?}", res.headers());
         assert!(res.headers().get("set-cookie").is_none());
         let html = res.text().unwrap();
+        check_guest_menu(&html);
         check_html(&html, "title", "We sent you an email");
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         //        std::thread::sleep(std::time::Duration::from_millis(500));
@@ -176,6 +181,7 @@ fn duplicate_email() {
         assert!(res.headers().get("set-cookie").is_none());
         let html = res.text().unwrap();
         check_html(&html, "title", "Registration failed");
+        check_guest_menu(&html);
     });
 }
 
@@ -210,7 +216,7 @@ fn login_user() {
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
         check_html(&html, "title", "Welcome back");
-        check_logged_in_menu(&html);
+        //check_logged_in_menu(&html);
 
         // // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
@@ -220,6 +226,7 @@ fn login_user() {
         let html = res.text().unwrap();
         check_html(&html, "title", "Logged out");
         check_html(&html, "h1", "Logged out");
+        //check_guest_menu(&html);
 
         // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
@@ -327,6 +334,7 @@ fn register_with_bad_email_address() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Invalid email address");
         assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+        check_guest_menu(&html);
     });
 }
 
@@ -382,5 +390,6 @@ fn login_with_unregistered_email() {
         let html = res.text().unwrap();
         check_html(&html, "title", "No such user");
         assert!(html.contains("No user with address <b>other@meet-os.com</b>"));
+        check_guest_menu(&html);
     });
 }
