@@ -354,3 +354,27 @@ fn login_with_unregistered_email() {
         check_guest_menu(&html);
     });
 }
+
+#[test]
+fn login_with_bad_password() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
+
+        let _cookie_str =
+            register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123456");
+
+        let res = client
+            .post(format!("{url}/login"))
+            .form(&[("email", "foo@meet-os.com"), ("password", "123457")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        assert!(res.headers().get("set-cookie").is_none());
+
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Invalid password");
+        check_html(&html, "h1", "Invalid password");
+        check_guest_menu(&html);
+    });
+}
