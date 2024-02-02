@@ -385,21 +385,24 @@ async fn register_post(
 ) -> Template {
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
+    let config = get_public_config();
+
     // email: lowerase, remove spaces from sides
     // validate format @
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
         return Template::render(
             "message",
-            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config, logged_in: get_logged_in(cookies),},
         );
     }
+
     let password = input.password.trim().as_bytes();
     let pw_min_length = 6;
     if password.len() < pw_min_length {
         return Template::render(
             "message",
-            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, logged_in: get_logged_in(cookies),},
         );
     }
     let process = "register";
@@ -411,7 +414,7 @@ async fn register_post(
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: get_logged_in(cookies),},
+                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, logged_in: get_logged_in(cookies),},
             );
         }
     };
@@ -432,7 +435,7 @@ async fn register_post(
             // TODO special reporting when the email is already in the system
             return Template::render(
                 "message",
-                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
+                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config, logged_in: get_logged_in(cookies),},
             );
         }
     };
@@ -474,7 +477,7 @@ async fn register_post(
 
     Template::render(
         "message",
-        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config, logged_in: get_logged_in(cookies),},
     )
 
     // Template::render(
