@@ -690,6 +690,7 @@ async fn create_group_post(
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
+    let config = get_public_config();
 
     if let Some(login) = get_logged_in(cookies) {
         rocket::info!("cookie value received from user: {}", login.email);
@@ -716,25 +717,25 @@ async fn create_group_post(
                     rocket::info!("Error while trying to add group {err}");
                     return Template::render(
                         "message",
-                        context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config: get_public_config(), logged_in: get_logged_in(cookies),},
+                        context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config, logged_in: get_logged_in(cookies),},
                     );
                 }
             };
 
             return Template::render(
                 "message",
-                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config: get_public_config(), logged_in: get_logged_in(cookies),},
+                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, logged_in: get_logged_in(cookies),},
             );
         }
         return Template::render(
             "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: get_logged_in(cookies),},
+            context! {title: "Unauthorized", message: "Unauthorized", config, logged_in: get_logged_in(cookies),},
         );
     }
 
     Template::render(
         "message",
-        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: get_logged_in(cookies),},
+        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, logged_in: get_logged_in(cookies),},
     )
 }
 
