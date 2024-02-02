@@ -90,7 +90,7 @@ fn markdown2html(text: &str) -> Result<String, String> {
     )
 }
 
-fn logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
+fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
         rocket::info!("cookie value received from user: {email}");
@@ -107,12 +107,12 @@ async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Result<Templ
 
     let events = get_events_from_database(db).await.map_err(|err| {
         rocket::error!("Error: {err}");
-        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},)
+        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},)
     })?;
 
     let groups = get_groups_from_database(db).await.map_err(|err| {
         rocket::error!("Error: {err}");
-        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},)
+        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},)
     })?;
 
     Ok(Template::render(
@@ -122,7 +122,7 @@ async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Result<Templ
             events: events,
             groups: groups,
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     ))
 }
@@ -134,7 +134,7 @@ fn about(cookies: &CookieJar<'_>) -> Template {
         context! {
             title: "About Meet-OS",
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -146,7 +146,7 @@ fn admin(cookies: &CookieJar<'_>) -> Template {
         context! {
             title: "Admin",
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -158,7 +158,7 @@ fn privacy(cookies: &CookieJar<'_>) -> Template {
         context! {
             title: "Privacy Policy",
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -170,7 +170,7 @@ fn soc(cookies: &CookieJar<'_>) -> Template {
         context! {
             title: "Standard of Conduct",
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -192,7 +192,7 @@ fn login_get(cookies: &CookieJar<'_>) -> Template {
         context! {
             title: "Login",
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -209,7 +209,7 @@ async fn login_post(
     if !validator::validate_email(&email) {
         return Ok(Template::render(
             "message",
-            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
         ));
     }
 
@@ -219,7 +219,7 @@ async fn login_post(
             rocket::error!("Error: {err}");
             return Ok(Template::render(
                 "message",
-                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
+                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: get_logged_in(cookies),},
             ));
         }
     };
@@ -227,7 +227,7 @@ async fn login_post(
     let Some(user) = user else {
         return Ok(Template::render(
             "message",
-            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: logged_in(cookies),},
+            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: get_logged_in(cookies),},
         ));
     };
 
@@ -239,7 +239,7 @@ async fn login_post(
         rocket::error!("Error: {err}");
         Template::render(
             "message",
-            context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
         )
     })?;
 
@@ -252,7 +252,7 @@ async fn login_post(
     } else {
         Ok(Template::render(
             "message",
-            context! {title: "Invalid password", message: "Invalid password", config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Invalid password", message: "Invalid password", config: get_public_config(), logged_in: get_logged_in(cookies),},
         ))
     }
 }
@@ -354,7 +354,7 @@ fn register_get(cookies: &CookieJar<'_>) -> Template {
         context! {
             title: "Register",
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -373,7 +373,7 @@ async fn register_post(
     if !validator::validate_email(&email) {
         return Template::render(
             "message",
-            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
         );
     }
     let password = input.password.trim().as_bytes();
@@ -381,7 +381,7 @@ async fn register_post(
     if password.len() < pw_min_length {
         return Template::render(
             "message",
-            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: get_logged_in(cookies),},
         );
     }
     let process = "register";
@@ -393,7 +393,7 @@ async fn register_post(
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config: get_public_config(), logged_in: get_logged_in(cookies),},
             );
         }
     };
@@ -414,7 +414,7 @@ async fn register_post(
             // TODO special reporting when the email is already in the system
             return Template::render(
                 "message",
-                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
             );
         }
     };
@@ -456,7 +456,7 @@ async fn register_post(
 
     Template::render(
         "message",
-        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
     )
 
     // Template::render(
@@ -491,7 +491,7 @@ async fn verify(
     }
     Template::render(
         "message",
-        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config: get_public_config(), logged_in: get_logged_in(cookies),},
     )
 }
 
@@ -504,14 +504,14 @@ async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templ
             rocket::info!("email: {}", user.email);
             return Template::render(
                 "profile",
-                context! {title: "Profile", user: user, config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Profile", user: user, config: get_public_config(), logged_in: get_logged_in(cookies),},
             );
         }
     }
 
     Template::render(
         "message",
-        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: get_logged_in(cookies),},
     )
 }
 
@@ -530,7 +530,7 @@ fn event_get(cookies: &CookieJar<'_>, id: usize) -> Template {
             body: body,
             group: group,
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -544,7 +544,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             None => {
                 return Template::render(
                     "message",
-                    context! {title: "No such group", message: "No such group", config: get_public_config(), logged_in: logged_in(cookies),},
+                    context! {title: "No such group", message: "No such group", config: get_public_config(), logged_in: get_logged_in(cookies),},
                 )
             } // TODO 404
         },
@@ -552,7 +552,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
             );
         }
     };
@@ -569,7 +569,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             description: description,
             events: events,
             config: get_public_config(),
-            logged_in: logged_in(cookies),
+            logged_in: get_logged_in(cookies),
         },
     )
 }
@@ -586,13 +586,13 @@ async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templat
     match get_groups_from_database(db).await {
         Ok(groups) => Template::render(
             "groups",
-            context! {title: "Groups", groups: groups, config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Groups", groups: groups, config: get_public_config(), logged_in: get_logged_in(cookies),},
         ),
         Err(err) => {
             rocket::error!("Error {err}");
             Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
             )
         }
     }
@@ -626,11 +626,11 @@ async fn create_group_get(
     db: &State<Surreal<Db>>,
     cookies: &CookieJar<'_>,
 ) -> Result<Template, Template> {
-    let login = logged_in(cookies).ok_or("").map_err(|err| {
+    let login = get_logged_in(cookies).ok_or("").map_err(|err| {
         rocket::error!("Error: {err}");
         Template::render(
             "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: get_logged_in(cookies),},
         )
     })?;
 
@@ -638,13 +638,13 @@ async fn create_group_get(
     let user = is_admin(db, &login.email).await.ok_or("").map_err(|_err| {
         Template::render(
             "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: get_logged_in(cookies),},
         )
     })?;
 
     Ok(Template::render(
         "create_group",
-        context! {title: "Create Group", user: user, config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "Create Group", user: user, config: get_public_config(), logged_in: get_logged_in(cookies),},
     ))
 }
 
@@ -656,7 +656,7 @@ async fn create_group_post(
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
 
-    if let Some(login) = logged_in(cookies) {
+    if let Some(login) = get_logged_in(cookies) {
         rocket::info!("cookie value received from user: {}", login.email);
         if let Some(_user) = is_admin(db, &login.email).await {
             let gid = match get_groups_from_database(db).await {
@@ -681,25 +681,25 @@ async fn create_group_post(
                     rocket::info!("Error while trying to add group {err}");
                     return Template::render(
                         "message",
-                        context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config: get_public_config(), logged_in: logged_in(cookies),},
+                        context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config: get_public_config(), logged_in: get_logged_in(cookies),},
                     );
                 }
             };
 
             return Template::render(
                 "message",
-                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config: get_public_config(), logged_in: logged_in(cookies),},
+                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config: get_public_config(), logged_in: get_logged_in(cookies),},
             );
         }
         return Template::render(
             "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: logged_in(cookies),},
+            context! {title: "Unauthorized", message: "Unauthorized", config: get_public_config(), logged_in: get_logged_in(cookies),},
         );
     }
 
     Template::render(
         "message",
-        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: logged_in(cookies),},
+        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: get_logged_in(cookies),},
     )
 }
 
