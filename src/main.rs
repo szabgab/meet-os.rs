@@ -220,12 +220,13 @@ async fn login_post(
     rocket::info!("rocket login: {:?}", input.email);
 
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
         return Template::render(
             "message",
-            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config, logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config, logged_in},
         );
     }
 
@@ -235,7 +236,7 @@ async fn login_post(
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in: get_logged_in(cookies),},
+                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in},
             );
         }
     };
@@ -243,7 +244,7 @@ async fn login_post(
     let Some(user) = user else {
         return Template::render(
             "message",
-            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in: get_logged_in(cookies),},
+            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in},
         );
     };
 
@@ -257,7 +258,7 @@ async fn login_post(
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in},
             );
         }
     };
@@ -271,7 +272,7 @@ async fn login_post(
     } else {
         Template::render(
             "message",
-            context! {title: "Invalid password", message: "Invalid password", config, logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid password", message: "Invalid password", config, logged_in},
         )
     }
 }
