@@ -6,6 +6,23 @@ use utilities::{
 };
 
 #[test]
+fn profile_without_cookie() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}");
+
+        // Access the profile without a cookie
+        let res = client.get(format!("{url}/profile")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Missing cookie");
+        assert!(html.contains("It seems you are not logged in"));
+        check_guest_menu(&html);
+    });
+}
+
+#[test]
 fn register_user() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
@@ -42,15 +59,6 @@ fn register_user() {
 
         //assert_eq!(code, res.code);
         println!("code: {code}");
-
-        // Access the profile without a cookie
-        let res = client.get(format!("{url}/profile")).send().unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Missing cookie");
-        assert!(html.contains("It seems you are not logged in"));
-        check_guest_menu(&html);
 
         // TODO. shall we access the database directly and check the data there too?
         //     // Without dropping the client here we get an error on the next line
