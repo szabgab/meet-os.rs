@@ -205,11 +205,13 @@ async fn login_post(
 ) -> Result<Template, Template> {
     rocket::info!("rocket login: {:?}", input.email);
 
+    let config = get_public_config();
+
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
         return Ok(Template::render(
             "message",
-            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config(), logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config, logged_in: get_logged_in(cookies),},
         ));
     }
 
@@ -219,7 +221,7 @@ async fn login_post(
             rocket::error!("Error: {err}");
             return Ok(Template::render(
                 "message",
-                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: get_logged_in(cookies),},
+                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in: get_logged_in(cookies),},
             ));
         }
     };
@@ -227,7 +229,7 @@ async fn login_post(
     let Some(user) = user else {
         return Ok(Template::render(
             "message",
-            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),logged_in: get_logged_in(cookies),},
+            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in: get_logged_in(cookies),},
         ));
     };
 
@@ -241,7 +243,7 @@ async fn login_post(
             rocket::error!("Error: {err}");
             return Ok(Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
             ));
         }
     };
@@ -250,12 +252,12 @@ async fn login_post(
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
         Ok(Template::render(
             "message",
-            context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config: get_public_config(), logged_in: CookieUser {email}},
+            context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, logged_in: CookieUser {email}},
         ))
     } else {
         Ok(Template::render(
             "message",
-            context! {title: "Invalid password", message: "Invalid password", config: get_public_config(), logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid password", message: "Invalid password", config, logged_in: get_logged_in(cookies),},
         ))
     }
 }
