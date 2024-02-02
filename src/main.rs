@@ -215,35 +215,35 @@ async fn login_post(
     cookies: &CookieJar<'_>,
     db: &State<Surreal<Db>>,
     input: Form<LoginForm<'_>>,
-) -> Result<Template, Template> {
+) -> Template {
     rocket::info!("rocket login: {:?}", input.email);
 
     let config = get_public_config();
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
-        return Ok(Template::render(
+        return Template::render(
             "message",
             context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config, logged_in: get_logged_in(cookies),},
-        ));
+        );
     }
 
     let user = match get_user_by_email(db, &email).await {
         Ok(user) => user,
         Err(err) => {
             rocket::error!("Error: {err}");
-            return Ok(Template::render(
+            return Template::render(
                 "message",
                 context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in: get_logged_in(cookies),},
-            ));
+            );
         }
     };
 
     let Some(user) = user else {
-        return Ok(Template::render(
+        return Template::render(
             "message",
             context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,logged_in: get_logged_in(cookies),},
-        ));
+        );
     };
 
     rocket::info!("email: {}", user.email);
@@ -254,24 +254,24 @@ async fn login_post(
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
-            return Ok(Template::render(
+            return Template::render(
                 "message",
                 context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
-            ));
+            );
         }
     };
 
     if Pbkdf2.verify_password(password, &parsed_hash).is_ok() {
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
-        Ok(Template::render(
+        Template::render(
             "message",
             context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, logged_in: CookieUser {email}},
-        ))
+        )
     } else {
-        Ok(Template::render(
+        Template::render(
             "message",
             context! {title: "Invalid password", message: "Invalid password", config, logged_in: get_logged_in(cookies),},
-        ))
+        )
     }
 }
 
