@@ -235,13 +235,16 @@ async fn login_post(
 
     let password = input.password.trim().as_bytes();
 
-    let parsed_hash = PasswordHash::new(&user.password).map_err(|err| {
-        rocket::error!("Error: {err}");
-        Template::render(
-            "message",
-            context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
-        )
-    })?;
+    let parsed_hash = match PasswordHash::new(&user.password) {
+        Ok(val) => val,
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Ok(Template::render(
+                "message",
+                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
+            ));
+        }
+    };
 
     if Pbkdf2.verify_password(password, &parsed_hash).is_ok() {
         cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
