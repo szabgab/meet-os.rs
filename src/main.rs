@@ -569,6 +569,7 @@ fn event_get(cookies: &CookieJar<'_>, id: usize) -> Template {
 async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize) -> Template {
     rocket::info!("group_get: {gid}");
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     let group = match get_group_by_gid(db, gid).await {
         Ok(group) => match group {
@@ -576,7 +577,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             None => {
                 return Template::render(
                     "message",
-                    context! {title: "No such group", message: "No such group", config, logged_in: get_logged_in(cookies),},
+                    context! {title: "No such group", message: "No such group", config, logged_in},
                 )
             } // TODO 404
         },
@@ -584,7 +585,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in},
             );
         }
     };
@@ -601,7 +602,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             description: description,
             events: events,
             config,
-            logged_in: get_logged_in(cookies),
+            logged_in,
         },
     )
 }
@@ -616,17 +617,18 @@ async fn js_files(file: PathBuf) -> Option<NamedFile> {
 #[get("/groups")]
 async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     match get_groups_from_database(db).await {
         Ok(groups) => Template::render(
             "groups",
-            context! {title: "Groups", groups: groups, config, logged_in: get_logged_in(cookies),},
+            context! {title: "Groups", groups: groups, config, logged_in},
         ),
         Err(err) => {
             rocket::error!("Error {err}");
             Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in},
             )
         }
     }
