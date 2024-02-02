@@ -102,29 +102,42 @@ fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
 }
 
 #[get("/")]
-async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Result<Template, Template> {
+async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Template {
     rocket::info!("home");
+    let config = get_public_config();
 
-    let events = get_events_from_database(db).await.map_err(|err| {
-        rocket::error!("Error: {err}");
-        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},)
-    })?;
+    let events = match get_events_from_database(db).await {
+        Ok(val) => val,
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+            );
+        }
+    };
 
-    let groups = get_groups_from_database(db).await.map_err(|err| {
-        rocket::error!("Error: {err}");
-        Template::render("message", context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},)
-    })?;
+    let groups = match get_groups_from_database(db).await {
+        Ok(val) => val,
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+            );
+        }
+    };
 
-    Ok(Template::render(
+    Template::render(
         "index",
         context! {
             title: "Meet-OS",
             events: events,
             groups: groups,
-            config: get_public_config(),
+            config,
             logged_in: get_logged_in(cookies),
         },
-    ))
+    )
 }
 
 #[get("/about")]
