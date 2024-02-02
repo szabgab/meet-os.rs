@@ -388,6 +388,7 @@ async fn register_post(
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     // email: lowerase, remove spaces from sides
     // validate format @
@@ -395,7 +396,7 @@ async fn register_post(
     if !validator::validate_email(&email) {
         return Template::render(
             "message",
-            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config, logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b> Please try again", input.email), config, logged_in},
         );
     }
 
@@ -404,7 +405,7 @@ async fn register_post(
     if password.len() < pw_min_length {
         return Template::render(
             "message",
-            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, logged_in: get_logged_in(cookies),},
+            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, logged_in},
         );
     }
     let process = "register";
@@ -416,7 +417,7 @@ async fn register_post(
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, logged_in: get_logged_in(cookies),},
+                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, logged_in},
             );
         }
     };
@@ -437,7 +438,7 @@ async fn register_post(
             // TODO special reporting when the email is already in the system
             return Template::render(
                 "message",
-                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config, logged_in: get_logged_in(cookies),},
+                context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config, logged_in},
             );
         }
     };
@@ -479,7 +480,7 @@ async fn register_post(
 
     Template::render(
         "message",
-        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config, logged_in: get_logged_in(cookies),},
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config, logged_in},
     )
 
     // Template::render(
@@ -499,6 +500,7 @@ async fn verify(
     rocket::info!("process: {process}, code: {code}");
 
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     // TODO take the process into account at the verification
     if let Ok(Some(user)) = verify_code(db, process, code).await {
@@ -516,13 +518,14 @@ async fn verify(
     }
     Template::render(
         "message",
-        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, logged_in: get_logged_in(cookies),},
+        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, logged_in},
     )
 }
 
 #[get("/profile")]
 async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
@@ -531,14 +534,14 @@ async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templ
             rocket::info!("email: {}", user.email);
             return Template::render(
                 "profile",
-                context! {title: "Profile", user: user, config, logged_in: get_logged_in(cookies),},
+                context! {title: "Profile", user: user, config, logged_in},
             );
         }
     }
 
     Template::render(
         "message",
-        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config, logged_in: get_logged_in(cookies),},
+        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config, logged_in},
     )
 }
 
