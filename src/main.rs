@@ -661,27 +661,19 @@ async fn is_admin(db: &State<Surreal<Db>>, email: &str) -> Option<User> {
 async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
     let config = get_public_config();
 
-    let login = match get_logged_in(cookies).ok_or("") {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, logged_in: get_logged_in(cookies),},
-            );
-        }
+    let Some(login) = get_logged_in(cookies) else {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, logged_in: get_logged_in(cookies),},
+        );
     };
 
     rocket::info!("cookie value received from user: {}", login.email);
-    let user = match is_admin(db, &login.email).await.ok_or("") {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Unauthorized", message: "Unauthorized", config, logged_in: get_logged_in(cookies),},
-            );
-        }
+    let Some(user) = is_admin(db, &login.email).await else {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, logged_in: get_logged_in(cookies),},
+        );
     };
 
     Template::render(
