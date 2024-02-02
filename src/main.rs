@@ -496,6 +496,8 @@ async fn verify(
 ) -> Template {
     rocket::info!("process: {process}, code: {code}");
 
+    let config = get_public_config();
+
     // TODO take the process into account at the verification
     if let Ok(Some(user)) = verify_code(db, process, code).await {
         rocket::info!("verified: {}", user.email);
@@ -507,17 +509,19 @@ async fn verify(
         };
         return Template::render(
             "message",
-            context! {title: title, message: message, config: get_public_config(), logged_in: CookieUser {email: user.email},},
+            context! {title: title, message: message, config, logged_in: CookieUser {email: user.email},},
         );
     }
     Template::render(
         "message",
-        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config: get_public_config(), logged_in: get_logged_in(cookies),},
+        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, logged_in: get_logged_in(cookies),},
     )
 }
 
 #[get("/profile")]
 async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
+    let config = get_public_config();
+
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
         rocket::info!("cookie value received from user: {email}");
@@ -525,14 +529,14 @@ async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templ
             rocket::info!("email: {}", user.email);
             return Template::render(
                 "profile",
-                context! {title: "Profile", user: user, config: get_public_config(), logged_in: get_logged_in(cookies),},
+                context! {title: "Profile", user: user, config, logged_in: get_logged_in(cookies),},
             );
         }
     }
 
     Template::render(
         "message",
-        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config: get_public_config(), logged_in: get_logged_in(cookies),},
+        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config, logged_in: get_logged_in(cookies),},
     )
 }
 
@@ -559,13 +563,15 @@ fn event_get(cookies: &CookieJar<'_>, id: usize) -> Template {
 #[get("/group/<gid>")]
 async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize) -> Template {
     rocket::info!("group_get: {gid}");
+    let config = get_public_config();
+
     let group = match get_group_by_gid(db, gid).await {
         Ok(group) => match group {
             Some(group) => group,
             None => {
                 return Template::render(
                     "message",
-                    context! {title: "No such group", message: "No such group", config: get_public_config(), logged_in: get_logged_in(cookies),},
+                    context! {title: "No such group", message: "No such group", config, logged_in: get_logged_in(cookies),},
                 )
             } // TODO 404
         },
@@ -573,7 +579,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config: get_public_config(), logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
             );
         }
     };
@@ -589,7 +595,7 @@ async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize)
             group: &group,
             description: description,
             events: events,
-            config: get_public_config(),
+            config,
             logged_in: get_logged_in(cookies),
         },
     )
