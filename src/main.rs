@@ -680,7 +680,7 @@ async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> T
 
     Template::render(
         "create_group",
-        context! {title: "Create Group", user: user, config, logged_in: get_logged_in(cookies),},
+        context! {title: "Create Group", user: user, config, logged_in},
     )
 }
 
@@ -693,51 +693,54 @@ async fn create_group_post(
     rocket::info!("create_group_post: {:?}", input.name);
     let config = get_public_config();
 
-    if let Some(login) = get_logged_in(cookies) {
-        rocket::info!("cookie value received from user: {}", login.email);
-        if let Some(_user) = is_admin(db, &login.email).await {
-            let gid = match get_groups_from_database(db).await {
-                Ok(groups) => groups.len().saturating_add(1),
-                Err(err) => {
-                    rocket::info!("Error while trying to add group {err}");
-                    1
-                }
-            };
+    let logged_in = get_logged_in(cookies);
 
-            rocket::info!("group_id: {gid}");
-            let group = Group {
-                name: input.name.to_owned(),
-                location: input.location.to_owned(),
-                description: input.description.to_owned(),
-                gid,
-            };
-
-            match add_group(db, &group).await {
-                Ok(result) => result,
-                Err(err) => {
-                    rocket::info!("Error while trying to add group {err}");
-                    return Template::render(
-                        "message",
-                        context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config, logged_in: get_logged_in(cookies),},
-                    );
-                }
-            };
-
-            return Template::render(
-                "message",
-                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, logged_in: get_logged_in(cookies),},
-            );
-        }
+    if logged_in.is_none() {
         return Template::render(
             "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, logged_in: get_logged_in(cookies),},
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, logged_in},
+        );
+    };
+    let logged_in = logged_in.unwrap();
+
+    rocket::info!("cookie value received from user: {}", logged_in.email);
+
+    if is_admin(db, &logged_in.email).await.is_none() {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, logged_in},
         );
     }
 
-    Template::render(
-        "message",
-        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, logged_in: get_logged_in(cookies),},
-    )
+    let gid = match get_groups_from_database(db).await {
+        Ok(groups) => groups.len().saturating_add(1),
+        Err(err) => {
+            rocket::info!("Error while trying to add group {err}");
+            1 // TODO return internal error message
+        }
+    };
+
+    rocket::info!("group_id: {gid}");
+    let group = Group {
+        name: input.name.to_owned(),
+        location: input.location.to_owned(),
+        description: input.description.to_owned(),
+        gid,
+    };
+
+    match add_group(db, &group).await {
+        Ok(_result) => Template::render(
+            "message",
+            context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, logged_in},
+        ),
+        Err(err) => {
+            rocket::info!("Error while trying to add group {err}");
+            Template::render(
+                "message",
+                context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config, logged_in},
+            )
+        }
+    }
 }
 
 #[launch]
