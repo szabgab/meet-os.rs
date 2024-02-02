@@ -105,6 +105,7 @@ fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
 async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Template {
     rocket::info!("home");
     let config = get_public_config();
+    let logged_in = get_logged_in(cookies);
 
     let events = match get_events_from_database(db).await {
         Ok(val) => val,
@@ -112,7 +113,7 @@ async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Template {
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in},
             );
         }
     };
@@ -123,7 +124,7 @@ async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Template {
             rocket::error!("Error: {err}");
             return Template::render(
                 "message",
-                context! {title: "Internal error", message: "Internal error", config, logged_in: get_logged_in(cookies),},
+                context! {title: "Internal error", message: "Internal error", config, logged_in},
             );
         }
     };
@@ -132,10 +133,10 @@ async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Template {
         "index",
         context! {
             title: "Meet-OS",
-            events: events,
-            groups: groups,
+            events,
+            groups,
             config,
-            logged_in: get_logged_in(cookies),
+            logged_in,
         },
     )
 }
