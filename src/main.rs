@@ -30,13 +30,19 @@ use surrealdb::Surreal;
 
 #[derive(Deserialize, Debug)]
 struct PrivateConfig {
-    sendgrid_api_key: String,
     admins: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 struct MyConfig {
     base_url: String,
+
+    #[serde(default = "get_empty_string")]
+    sendgrid_api_key: String,
+}
+
+fn get_empty_string() -> String {
+    String::new()
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -362,8 +368,7 @@ async fn login_post(
 //         let mut file = File::create(email_file).unwrap();
 //         writeln!(&mut file, "{}", &text).unwrap();
 //     } else {
-//         let private = get_private_config();
-//         sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
+//         sendgrid(&myconfig.sendgrid_api_key, &from, to_address, subject, &text).await;
 //     }
 
 //     Template::render(
@@ -477,8 +482,16 @@ async fn register_post(
         let mut file = File::create(email_file).unwrap();
         writeln!(&mut file, "{}", &text).unwrap();
     } else {
-        let private = get_private_config();
-        sendgrid(&private.sendgrid_api_key, &from, to_address, subject, &text).await;
+        // TODO display some error if the sendgrid key is empty
+        // TODO display some error if the email sending failed
+        sendgrid(
+            &myconfig.sendgrid_api_key,
+            &from,
+            to_address,
+            subject,
+            &text,
+        )
+        .await;
     }
 
     Template::render(
