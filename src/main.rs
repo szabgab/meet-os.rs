@@ -10,8 +10,9 @@ use rocket::form::Form;
 use rocket::fs::NamedFile;
 use rocket::http::CookieJar;
 use rocket::serde::uuid::Uuid;
-use rocket::State;
+use rocket::{fairing::AdHoc, State};
 use rocket_dyn_templates::{context, Template};
+
 use serde::{Deserialize, Serialize};
 
 use pbkdf2::{
@@ -31,6 +32,11 @@ use surrealdb::Surreal;
 struct PrivateConfig {
     sendgrid_api_key: String,
     admins: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct MyConfig {
+    base_url: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -282,6 +288,7 @@ async fn login_post(
 //     cookies: &CookieJar<'_>,
 //     db: &State<Surreal<Db>>,
 //     input: Form<LoginForm<'_>>,
+//     myconfig: &State<MyConfig>,
 // ) -> Template {
 //     rocket::info!("rocket login: {:?}", input.email);
 
@@ -326,9 +333,7 @@ async fn login_post(
 //         }
 //     };
 
-//     let base_url = rocket::Config::figment()
-//         .extract_inner::<String>("base_url")
-//         .unwrap_or_default();
+//     let base_url = &myconfig.base_url;
 
 //     let subject = "Verify your Meet-OS login!";
 //     let text = format!(
@@ -384,6 +389,7 @@ async fn register_post(
     cookies: &CookieJar<'_>,
     db: &State<Surreal<Db>>,
     input: Form<RegistrationForm<'_>>,
+    myconfig: &State<MyConfig>,
 ) -> Template {
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
@@ -443,10 +449,7 @@ async fn register_post(
         }
     };
 
-    let base_url = rocket::Config::figment()
-        .extract_inner::<String>("base_url")
-        .unwrap_or_default();
-
+    let base_url = &myconfig.base_url;
     let subject = "Verify your Meet-OS registration!";
     let text = format!(
         r#"Hi,
@@ -771,4 +774,5 @@ fn rocket() -> _ {
         )
         .attach(Template::fairing())
         .attach(db::fairing())
+        .attach(AdHoc::config::<MyConfig>())
 }
