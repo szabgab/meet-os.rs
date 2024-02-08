@@ -56,7 +56,7 @@ cd meeting.rs
 pre-commit install
 ```
 
-Configure the environment variable `ROCKET_CONFIG` to be `Debug.toml`.
+Copy `Rocket.skeleton.toml` to `Rocket.toml`
 
 ## Requirements
 
