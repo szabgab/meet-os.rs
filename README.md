@@ -58,6 +58,12 @@ pre-commit install
 
 Copy `Rocket.skeleton.toml` to `Rocket.toml`
 
+Create an account on Sendgrid and add your API key to the `[debug]` section of `Rocket.toml`:
+
+```
+sendgrid_api_key = "SG.blabla"
+```
+
 ## Requirements
 
 ### For the Rust-Maven online meetings
