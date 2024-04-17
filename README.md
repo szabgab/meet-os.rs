@@ -138,8 +138,9 @@ git clone git@github.com:szabgab/meetings.rs.git
 ```
 
 ```
-sudo ln -s /home/gabor/work/meetings.rs/meetings.service /usr/lib/systemd/system/meetings.service
+sudo cp /home/gabor/work/meetings.rs/meetings.service /etc/systemd/system/meetings.service
 sudo systemctl daemon-reload
+sudo systemctl enable meetings.service
 sudo systemctl start meetings.service
 ```
 
