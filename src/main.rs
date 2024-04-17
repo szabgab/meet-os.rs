@@ -28,17 +28,14 @@ use meetings::{
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
 
-#[derive(Deserialize, Debug)]
-struct PrivateConfig {
-    admins: Vec<String>,
-}
-
 #[derive(Deserialize, Serialize, Debug)]
 struct MyConfig {
     base_url: String,
 
     #[serde(default = "get_empty_string")]
     sendgrid_api_key: String,
+
+    admins: Vec<String>,
 }
 
 fn get_empty_string() -> String {
@@ -73,13 +70,6 @@ struct LoginForm<'r> {
 #[derive(Serialize, Deserialize, Debug)]
 struct CookieUser {
     email: String,
-}
-
-fn get_private_config() -> PrivateConfig {
-    let filename = "private.yaml";
-    let raw_string = read_to_string(filename).unwrap();
-    let data: PrivateConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data
 }
 
 fn get_public_config() -> PublicConfig {
@@ -661,11 +651,14 @@ async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templat
     // )
 }
 
-async fn is_admin(db: &State<Surreal<Db>>, email: &str) -> Option<User> {
+async fn is_admin(
+    db: &State<Surreal<Db>>,
+    myconfig: &State<MyConfig>,
+    email: &str,
+) -> Option<User> {
     if let Ok(Some(user)) = get_user_by_email(db, email).await {
         rocket::info!("email: {}", user.email);
-        let private = get_private_config();
-        if private.admins.contains(&email.to_owned()) {
+        if myconfig.admins.contains(&email.to_owned()) {
             return Some(user);
         }
     }
@@ -674,7 +667,11 @@ async fn is_admin(db: &State<Surreal<Db>>, email: &str) -> Option<User> {
 }
 
 #[get("/create-group")]
-async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
+async fn create_group_get(
+    db: &State<Surreal<Db>>,
+    cookies: &CookieJar<'_>,
+    myconfig: &State<MyConfig>,
+) -> Template {
     let config = get_public_config();
     let logged_in = get_logged_in(cookies);
 
@@ -687,7 +684,7 @@ async fn create_group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> T
     let logged_in = logged_in.unwrap();
 
     rocket::info!("cookie value received from user: {}", logged_in.email);
-    let Some(user) = is_admin(db, &logged_in.email).await else {
+    let Some(user) = is_admin(db, &myconfig, &logged_in.email).await else {
         return Template::render(
             "message",
             context! {title: "Unauthorized", message: "Unauthorized", config, logged_in},
@@ -705,6 +702,7 @@ async fn create_group_post(
     cookies: &CookieJar<'_>,
     db: &State<Surreal<Db>>,
     input: Form<GroupForm<'_>>,
+    myconfig: &State<MyConfig>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
     let config = get_public_config();
@@ -721,7 +719,7 @@ async fn create_group_post(
 
     rocket::info!("cookie value received from user: {}", logged_in.email);
 
-    if is_admin(db, &logged_in.email).await.is_none() {
+    if is_admin(db, &myconfig, &logged_in.email).await.is_none() {
         return Template::render(
             "message",
             context! {title: "Unauthorized", message: "Unauthorized", config, logged_in},
