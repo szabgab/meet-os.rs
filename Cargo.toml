@@ -80,3 +80,6 @@ missing_errors_doc = "allow"
 
 cargo  = { priority = -1, level = "deny" }
 multiple_crate_versions = "allow"  # see https://rust-lang.github.io/rust-clippy/master/index.html#/multiple_crate_versions
+
+
+blocks_in_conditions = "allow" # We get some strange reports at struct definitions and not in if blocks. Let's disable ths for now.

@@ -684,7 +684,7 @@ async fn create_group_get(
     let logged_in = logged_in.unwrap();
 
     rocket::info!("cookie value received from user: {}", logged_in.email);
-    let Some(user) = is_admin(db, &myconfig, &logged_in.email).await else {
+    let Some(user) = is_admin(db, myconfig, &logged_in.email).await else {
         return Template::render(
             "message",
             context! {title: "Unauthorized", message: "Unauthorized", config, logged_in},
@@ -719,7 +719,7 @@ async fn create_group_post(
 
     rocket::info!("cookie value received from user: {}", logged_in.email);
 
-    if is_admin(db, &myconfig, &logged_in.email).await.is_none() {
+    if is_admin(db, myconfig, &logged_in.email).await.is_none() {
         return Template::render(
             "message",
             context! {title: "Unauthorized", message: "Unauthorized", config, logged_in},
