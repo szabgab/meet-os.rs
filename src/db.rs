@@ -3,7 +3,6 @@
 use std::env;
 use std::fs::read_to_string;
 
-
 use rocket::fairing::AdHoc;
 use surrealdb::engine::local::{Db, RocksDb};
 use surrealdb::opt::Resource;

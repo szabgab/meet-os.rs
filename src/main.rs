@@ -15,6 +15,8 @@ use rocket::serde::uuid::Uuid;
 use rocket::{fairing::AdHoc, State};
 use rocket_dyn_templates::{context, Template};
 
+use markdown::message;
+
 use serde::{Deserialize, Serialize};
 
 use pbkdf2::{
@@ -81,7 +83,7 @@ fn get_public_config() -> PublicConfig {
     data
 }
 
-fn markdown2html(text: &str) -> Result<String, String> {
+fn markdown2html(text: &str) -> Result<String, message::Message> {
     markdown::to_html_with_options(
         text,
         &markdown::Options {
