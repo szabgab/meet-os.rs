@@ -1,3 +1,5 @@
+#![allow(clippy::std_instead_of_core)]
+
 #[macro_use]
 extern crate rocket;
 

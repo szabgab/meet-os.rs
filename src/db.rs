@@ -1,5 +1,8 @@
+#![allow(clippy::std_instead_of_core)]
+
 use std::env;
 use std::fs::read_to_string;
+
 
 use rocket::fairing::AdHoc;
 use surrealdb::engine::local::{Db, RocksDb};
