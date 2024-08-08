@@ -30,7 +30,10 @@ pub fn fairing() -> AdHoc {
 /// Panics when it fails to create the database folder or set up the database.
 pub async fn get_database(database_folder: &str) -> Surreal<Db> {
     let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
-    db.use_ns("meet-os-ns").use_db("meet-os-db").await.unwrap();
+    let db_namespace =
+        env::var("DATABASE_NAMESPACE").unwrap_or_else(|_| String::from("meet-os-ns"));
+    let db_name = env::var("DATABASE_NAME").unwrap_or_else(|_| String::from("meet-os-ns"));
+    db.use_ns(&db_namespace).use_db(&db_name).await.unwrap();
     // TODO: do this only when we create the database
     db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
         .await

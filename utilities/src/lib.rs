@@ -61,6 +61,8 @@ pub fn run_external(func: fn(&str)) {
     println!("tmp_dir: {:?}", tmp_dir);
     std::env::set_var("ROCKET_CONFIG", "Rocket.skeleton.toml");
     std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
+    std::env::set_var("DATABASE_NAMESPACE", format!("test-namespace-{}", rand::random::<f64>()));
+    std::env::set_var("DATABASE_NAME", format!("test-name-{}", rand::random::<f64>()));
     std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
     std::env::set_var("ROCKET_PORT", &port);
     compile();
