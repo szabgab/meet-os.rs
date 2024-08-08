@@ -17,9 +17,14 @@ fn create_group_by_admin() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let foo_cookie_str =
-            register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123foo");
-        println!("foo_cookie_str: {foo_cookie_str}");
+        let admin_cookie_str = register_user_helper(
+            &client,
+            &url,
+            "Site Manager",
+            "admin@meet-os.com",
+            "123Secret",
+        );
+        println!("admin_cookie_str: {admin_cookie_str}");
         let peti_cookie_str =
             register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com", "123peti");
         println!("peti_cookie_str: {peti_cookie_str}");
@@ -27,7 +32,7 @@ fn create_group_by_admin() {
         // Access the Group creation page with authorized user
         let res = client
             .get(format!("{url}/create-group"))
-            .header("Cookie", format!("meet-os={foo_cookie_str}"))
+            .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -48,7 +53,7 @@ fn create_group_by_admin() {
                     "Text with [link](https://rust.code-maven.com/)",
                 ),
             ])
-            .header("Cookie", format!("meet-os={foo_cookie_str}"))
+            .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -69,7 +74,7 @@ fn create_group_by_admin() {
                 ("location", "Other"),
                 ("description", "Text with [link](https://code-maven.com/)"),
             ])
-            .header("Cookie", format!("meet-os={foo_cookie_str}"))
+            .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);

@@ -2,7 +2,7 @@
 secret_key = "qqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
 base_url = "http://localhost:8000"
 sendgrid_api_key = "replace me"
-admins  = ["foo@meet-os.com"]
+admins  = ["admin@meet-os.com"]
 
 
 # We have this section to be able to try the --release flag during development
@@ -10,3 +10,4 @@ admins  = ["foo@meet-os.com"]
 secret_key = "zqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
 base_url = "http://localhost:8000"
 log_level = "normal"
+
