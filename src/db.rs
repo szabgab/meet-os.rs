@@ -27,7 +27,11 @@ pub fn fairing() -> AdHoc {
 ///
 /// Panics when it fails to create the database folder or set up the database.
 pub async fn get_database() -> Surreal<Client> {
-    let db = Surreal::new::<Ws>("127.0.0.1:8001").await.unwrap();
+    let address = match env::var("GITHUB_ACTION") {
+        Ok(_) => "surrealdb:8000",
+        Err(_) => "127.0.0.1:8001",
+    };
+    let db = Surreal::new::<Ws>(address).await.unwrap();
     let db_namespace =
         env::var("DATABASE_NAMESPACE").unwrap_or_else(|_| String::from("meet-os-ns"));
     let db_name = env::var("DATABASE_NAME").unwrap_or_else(|_| String::from("meet-os-ns"));

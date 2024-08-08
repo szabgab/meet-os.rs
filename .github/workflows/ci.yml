@@ -9,7 +9,9 @@ env:
 
 jobs:
   build:
-
+    services:
+      surrealdb:
+        image: surrealdb/surrealdb:latest
     runs-on: ubuntu-latest
 
     steps:
