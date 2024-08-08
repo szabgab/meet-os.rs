@@ -64,6 +64,21 @@ Create an account on Sendgrid and add your API key to the `[debug]` section of `
 sendgrid_api_key = "SG.blabla"
 ```
 
+Create `config.yaml` adding the Google Analytics code:
+
+```
+google_analytics: G-SOME-CODE
+```
+
+Install [cargo-watch](https://github.com/watchexec/cargo-watch)
+
+Run
+
+```
+cargo watch -x "run --bin meetings"
+```
+
+
 ## Requirements
 
 ### For the Rust-Maven online meetings
