@@ -25,12 +25,22 @@ pub fn check_guest_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
 }
 
-pub fn check_logged_in_menu(html: &str) {
+fn check_logged_in_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
     assert!(!html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
 
     assert!(html.contains(r#"<a href="/profile" class="navbar-item">Profile</a>"#));
     assert!(html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+}
+
+pub fn check_admin_menu(html: &str) {
+    check_logged_in_menu(html);
+    assert!(html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+}
+
+pub fn check_user_menu(html: &str) {
+    check_logged_in_menu(html);
+    //assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 }
 
 pub fn check_html(html: &str, tag: &str, text: &str) {
