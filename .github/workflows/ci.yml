@@ -9,13 +9,22 @@ env:
 
 jobs:
   build:
-    services:
-      surrealdb:
-        image: surrealdb/surrealdb:latest
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Start SurrealDB
+      uses: surrealdb/setup-surreal@v1
+      with:
+        surrealdb_version: latest
+        surrealdb_port: 8001
+        surrealdb_username: root
+        surrealdb_password: root
+        surrealdb_auth: true
+        surrealdb_strict: true
+        surrealdb_log: info
+        surrealdb_additional_args: --allow-all
 
     - name: Show Rust version
       run: rustc -Vv
