@@ -47,6 +47,8 @@ jobs:
 
 
     - name: Run tests
+      env:
+        RUST_BACKTRACE: 1
       run: |
         cp Rocket.skeleton.toml Rocket.toml
         cargo test --verbose
