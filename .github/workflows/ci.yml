@@ -15,13 +15,13 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Start SurrealDB
-      uses: surrealdb/setup-surreal@v1.0.2
+      uses: surrealdb/setup-surreal@latest
       with:
         surrealdb_version: latest
         surrealdb_port: 8001
         surrealdb_username: root
         surrealdb_password: root
-        surrealdb_auth: true
+        surrealdb_auth: false
         surrealdb_strict: true
         surrealdb_log: info
         surrealdb_additional_args: --allow-all
