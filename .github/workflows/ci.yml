@@ -60,5 +60,5 @@ jobs:
       run: cargo fmt --check
 
     - name: Clippy stop at any warning
-      run: cargo clippy -- --deny warnings
+      run: cargo clippy -- --deny warnings --no-deps
 
