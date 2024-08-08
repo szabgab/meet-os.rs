@@ -18,10 +18,6 @@ use crate::{Event, Group, User};
 pub fn fairing() -> AdHoc {
     // TODO handle errors here properly by using AdHoc::try_on_ignite instead of AdHoc::on_ignite.
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
-        //let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
-        //rocket::info!("db::fairing from folder '{:?}'", database_folder);
-
-        //let db = get_database(&database_folder).await;
         let db = get_database().await;
         rocket.manage(db)
     })
@@ -31,8 +27,6 @@ pub fn fairing() -> AdHoc {
 ///
 /// Panics when it fails to create the database folder or set up the database.
 pub async fn get_database() -> Surreal<Client> {
-    //let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
-    //let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
     let db = Surreal::new::<Ws>("127.0.0.1:8001").await.unwrap();
     let db_namespace =
         env::var("DATABASE_NAMESPACE").unwrap_or_else(|_| String::from("meet-os-ns"));
