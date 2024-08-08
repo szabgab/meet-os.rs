@@ -39,6 +39,18 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-cargo-
 
+    - name: System info
+      run: |
+          df -h
+          du -hs ~/.cargo
+          du -hs *
+
+    - name: Check cargo fmt
+      run: cargo fmt --check
+
+    - name: Clippy stop at any warning
+      run: cargo clippy -- --deny warnings --no-deps
+
     - name: Build debug version
       run: cargo build --verbose
 
@@ -55,10 +67,4 @@ jobs:
 
         #- name: Build release version
         #  run: cargo build --release --verbose
-
-    - name: Check cargo fmt
-      run: cargo fmt --check
-
-    - name: Clippy stop at any warning
-      run: cargo clippy -- --deny warnings --no-deps
 
