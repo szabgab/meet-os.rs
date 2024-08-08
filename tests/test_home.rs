@@ -10,7 +10,7 @@ fn home() {
                 match res.text() {
                     Ok(html) => {
                         check_html(&html, "title", "Meet-OS");
-                        check_html(&html, "h1", "Welcome to the Rust meeting server");
+                        check_html(&html, "h1", "Welcome to the Meet-OS meeting server");
                         // check_html_list(
                         //     &html,
                         //     "li",
