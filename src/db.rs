@@ -4,7 +4,8 @@ use std::env;
 use std::fs::read_to_string;
 
 use rocket::fairing::AdHoc;
-use surrealdb::engine::local::{Db, RocksDb};
+use surrealdb::engine::remote::ws::Client;
+use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
@@ -17,10 +18,11 @@ use crate::{Event, Group, User};
 pub fn fairing() -> AdHoc {
     // TODO handle errors here properly by using AdHoc::try_on_ignite instead of AdHoc::on_ignite.
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
-        let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
-        rocket::info!("db::fairing from folder '{:?}'", database_folder);
+        //let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
+        //rocket::info!("db::fairing from folder '{:?}'", database_folder);
 
-        let db = get_database(&database_folder).await;
+        //let db = get_database(&database_folder).await;
+        let db = get_database().await;
         rocket.manage(db)
     })
 }
@@ -28,8 +30,10 @@ pub fn fairing() -> AdHoc {
 /// # Panics
 ///
 /// Panics when it fails to create the database folder or set up the database.
-pub async fn get_database(database_folder: &str) -> Surreal<Db> {
-    let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
+pub async fn get_database() -> Surreal<Client> {
+    //let db = Surreal::new::<RocksDb>(database_folder).await.unwrap();
+    //let database_folder = env::var("DATABASE_PATH").unwrap_or_else(|_| "./db".to_owned());
+    let db = Surreal::new::<Ws>("127.0.0.1:8001").await.unwrap();
     let db_namespace =
         env::var("DATABASE_NAMESPACE").unwrap_or_else(|_| String::from("meet-os-ns"));
     let db_name = env::var("DATABASE_NAME").unwrap_or_else(|_| String::from("meet-os-ns"));
@@ -43,7 +47,7 @@ pub async fn get_database(database_folder: &str) -> Surreal<Db> {
     db
 }
 
-pub async fn add_user(db: &Surreal<Db>, user: &User) -> surrealdb::Result<()> {
+pub async fn add_user(db: &Surreal<Client>, user: &User) -> surrealdb::Result<()> {
     rocket::info!("add user email: '{}' code: '{}'", user.email, user.code);
 
     db.create(Resource::from("user")).content(user).await?;
@@ -51,7 +55,7 @@ pub async fn add_user(db: &Surreal<Db>, user: &User) -> surrealdb::Result<()> {
     Ok(())
 }
 
-pub async fn add_group(db: &Surreal<Db>, group: &Group) -> surrealdb::Result<()> {
+pub async fn add_group(db: &Surreal<Client>, group: &Group) -> surrealdb::Result<()> {
     rocket::info!("add group: '{}'", group.name);
 
     db.create(Resource::from("group")).content(group).await?;
@@ -60,7 +64,7 @@ pub async fn add_group(db: &Surreal<Db>, group: &Group) -> surrealdb::Result<()>
 }
 
 pub async fn verify_code(
-    db: &Surreal<Db>,
+    db: &Surreal<Client>,
     process: &str,
     code: &str,
 ) -> surrealdb::Result<Option<User>> {
@@ -88,7 +92,10 @@ pub async fn verify_code(
     Ok(entry)
 }
 
-pub async fn get_user_by_email(db: &Surreal<Db>, email: &str) -> surrealdb::Result<Option<User>> {
+pub async fn get_user_by_email(
+    db: &Surreal<Client>,
+    email: &str,
+) -> surrealdb::Result<Option<User>> {
     rocket::info!("get_user_by_email: '{email}'");
     rocket::info!("has db");
     let mut response = db
@@ -106,7 +113,7 @@ pub async fn get_user_by_email(db: &Surreal<Db>, email: &str) -> surrealdb::Resu
 }
 
 pub async fn add_login_code_to_user(
-    db: &Surreal<Db>,
+    db: &Surreal<Client>,
     email: &str,
     process: &str,
     code: &str,
@@ -150,7 +157,7 @@ pub fn load_events() -> Vec<Event> {
 }
 
 #[must_use]
-pub async fn get_events_by_group_id(db: &Surreal<Db>, gid: usize) -> Vec<Event> {
+pub async fn get_events_by_group_id(db: &Surreal<Client>, gid: usize) -> Vec<Event> {
     match get_events_from_database(db).await {
         Ok(events) => events
             .into_iter()
@@ -179,7 +186,7 @@ pub fn load_groups() -> Vec<Group> {
     vec![data]
 }
 
-pub async fn get_groups_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Group>> {
+pub async fn get_groups_from_database(db: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
     rocket::info!("get_groups_from_database");
     let mut response = db.query("SELECT * FROM group;").await?;
     let entries: Vec<Group> = response.take(0)?;
@@ -189,7 +196,10 @@ pub async fn get_groups_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec
     Ok(entries)
 }
 
-pub async fn get_group_by_gid(db: &Surreal<Db>, gid: usize) -> surrealdb::Result<Option<Group>> {
+pub async fn get_group_by_gid(
+    db: &Surreal<Client>,
+    gid: usize,
+) -> surrealdb::Result<Option<Group>> {
     rocket::info!("get_group_by_gid: '{gid}'");
     let mut response = db
         .query("SELECT * FROM group WHERE gid=$gid;")
@@ -205,7 +215,7 @@ pub async fn get_group_by_gid(db: &Surreal<Db>, gid: usize) -> surrealdb::Result
     Ok(entry)
 }
 
-pub async fn get_events_from_database(db: &Surreal<Db>) -> surrealdb::Result<Vec<Event>> {
+pub async fn get_events_from_database(db: &Surreal<Client>) -> surrealdb::Result<Vec<Event>> {
     rocket::info!("get_groups_from_database");
     let mut response = db.query("SELECT * FROM group;").await?;
     let entries: Vec<Event> = response.take(0)?;

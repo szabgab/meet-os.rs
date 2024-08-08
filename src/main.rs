@@ -29,7 +29,7 @@ use meetings::{
     get_groups_from_database, get_user_by_email, load_event, load_group, sendgrid, verify_code,
     EmailAddress, Group, User,
 };
-use surrealdb::engine::local::Db;
+use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -108,7 +108,7 @@ fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
 }
 
 #[get("/")]
-async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Db>>) -> Template {
+async fn index(cookies: &CookieJar<'_>, db: &State<Surreal<Client>>) -> Template {
     rocket::info!("home");
     let config = get_public_config();
     let logged_in = get_logged_in(cookies);
@@ -220,7 +220,7 @@ fn login_get(cookies: &CookieJar<'_>) -> Template {
 #[post("/login", data = "<input>")]
 async fn login_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Db>>,
+    db: &State<Surreal<Client>>,
     input: Form<LoginForm<'_>>,
 ) -> Template {
     rocket::info!("rocket login: {:?}", input.email);
@@ -386,7 +386,7 @@ fn register_get(cookies: &CookieJar<'_>) -> Template {
 #[post("/register", data = "<input>")]
 async fn register_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Db>>,
+    db: &State<Surreal<Client>>,
     input: Form<RegistrationForm<'_>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
@@ -502,7 +502,7 @@ async fn register_post(
 // TODO limit the possible values for the process to register and login
 #[get("/verify/<process>/<code>")]
 async fn verify(
-    db: &State<Surreal<Db>>,
+    db: &State<Surreal<Client>>,
     process: &str,
     code: &str,
     cookies: &CookieJar<'_>,
@@ -533,7 +533,7 @@ async fn verify(
 }
 
 #[get("/profile")]
-async fn show_profile(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
+async fn show_profile(db: &State<Surreal<Client>>, cookies: &CookieJar<'_>) -> Template {
     let config = get_public_config();
     let logged_in = get_logged_in(cookies);
 
@@ -576,7 +576,7 @@ fn event_get(cookies: &CookieJar<'_>, id: usize) -> Template {
 }
 
 #[get("/group/<gid>")]
-async fn group_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>, gid: usize) -> Template {
+async fn group_get(db: &State<Surreal<Client>>, cookies: &CookieJar<'_>, gid: usize) -> Template {
     rocket::info!("group_get: {gid}");
     let config = get_public_config();
     let logged_in = get_logged_in(cookies);
@@ -625,7 +625,7 @@ async fn js_files(file: PathBuf) -> Option<NamedFile> {
 }
 
 #[get("/groups")]
-async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Template {
+async fn groups_get(db: &State<Surreal<Client>>, cookies: &CookieJar<'_>) -> Template {
     let config = get_public_config();
     let logged_in = get_logged_in(cookies);
 
@@ -656,7 +656,7 @@ async fn groups_get(db: &State<Surreal<Db>>, cookies: &CookieJar<'_>) -> Templat
 }
 
 async fn is_admin(
-    db: &State<Surreal<Db>>,
+    db: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     email: &str,
 ) -> Option<User> {
@@ -672,7 +672,7 @@ async fn is_admin(
 
 #[get("/create-group")]
 async fn create_group_get(
-    db: &State<Surreal<Db>>,
+    db: &State<Surreal<Client>>,
     cookies: &CookieJar<'_>,
     myconfig: &State<MyConfig>,
 ) -> Template {
@@ -704,7 +704,7 @@ async fn create_group_get(
 #[post("/create-group", data = "<input>")]
 async fn create_group_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Db>>,
+    db: &State<Surreal<Client>>,
     input: Form<GroupForm<'_>>,
     myconfig: &State<MyConfig>,
 ) -> Template {

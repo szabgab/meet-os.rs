@@ -23,7 +23,7 @@ sendgrid = "0.20"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
-surrealdb = { version = "1.1", features = ["kv-rocksdb"] }
+surrealdb = "1.1"
 tokio = { version = "1.35", features = ["macros", "rt-multi-thread"] }
 markdown = { git = "https://github.com/wooorm/markdown-rs.git" }
 uuid = { version = "1.6", features = ["v4"] }
@@ -82,4 +82,4 @@ cargo  = { priority = -1, level = "deny" }
 multiple_crate_versions = "allow"  # see https://rust-lang.github.io/rust-clippy/master/index.html#/multiple_crate_versions
 
 
-blocks_in_conditions = "allow" # We get some strange reports at struct definitions and not in if blocks. Let's disable ths for now.
+blocks_in_conditions = "allow" # We get some strange reports at struct definitions and not in if blocks. Let's disable this for now.
