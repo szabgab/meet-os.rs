@@ -22,8 +22,8 @@ jobs:
         surrealdb_username: root
         surrealdb_password: root
         surrealdb_auth: false
-        surrealdb_strict: true
-        surrealdb_log: info
+        surrealdb_strict: false
+        surrealdb_log: trace
         surrealdb_additional_args: --allow-all
 
     - name: Show Rust version
