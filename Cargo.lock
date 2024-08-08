@@ -2107,7 +2107,8 @@ checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
 [[package]]
 name = "markdown"
 version = "1.0.0-alpha.18"
-source = "git+https://github.com/wooorm/markdown-rs.git#d0788c9caa4b9622999bd24e3c8a34a7c23c02c2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e61c5c85b392273c4d4ea546e6399ace3e3db172ab01b6de8f3d398d1dbd2ec"
 dependencies = [
  "unicode-id",
 ]

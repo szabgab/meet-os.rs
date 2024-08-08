@@ -25,7 +25,7 @@ serde_json = "1.0"
 serde_yaml = "0.9"
 surrealdb = "1.1"
 tokio = { version = "1.35", features = ["macros", "rt-multi-thread"] }
-markdown = { git = "https://github.com/wooorm/markdown-rs.git" }
+markdown = "1.0.0-alpha.18"
 uuid = { version = "1.6", features = ["v4"] }
 validator = "0.16"
 regex = "1.10"
