@@ -6,7 +6,7 @@ use utilities::{
 };
 
 #[test]
-fn profile_without_cookie() {
+fn try_page_without_cookie() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}");
