@@ -82,6 +82,24 @@ Run
 cargo watch -x "run --bin meetings"
 ```
 
+## Testing
+
+The tests assume a running SurrealDB server. We setup a web server for each test run in a forked process and then
+send http requests using the reqwest crate. We use environment variables to pass test-related configuration
+options to the application.
+
+The test run in a single thread configured in the `.cargo/config.toml` by setting `RUST_TEST_THREADS`to `1`.
+
+The reason we text with a web server is probably historical. The in-process tests collided and I thought the solution
+will be setting up external processes. Only after converting the tests and realizing those also fail I understood that
+the problem is that the tests run in parallel threads and environment variables are per-process. So the use of the
+environment variables is what force us to run the tests in a single thread.
+
+
+```
+cargo test
+```
+
 
 ## Requirements
 
