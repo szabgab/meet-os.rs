@@ -708,13 +708,6 @@ async fn group_get(
     )
 }
 
-#[get("/js/<file..>")]
-async fn js_files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/js/").join(file))
-        .await
-        .ok()
-}
-
 #[get("/groups")]
 async fn groups_get(
     cookies: &CookieJar<'_>,
@@ -842,6 +835,13 @@ async fn create_group_post(
             )
         }
     }
+}
+
+#[get("/js/<file..>")]
+async fn js_files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/js/").join(file))
+        .await
+        .ok()
 }
 
 #[launch]
