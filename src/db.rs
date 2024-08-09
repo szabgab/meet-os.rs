@@ -174,6 +174,16 @@ pub fn load_group(id: usize) -> Group {
     data
 }
 
+pub async fn get_users_from_database(db: &Surreal<Client>) -> surrealdb::Result<Vec<User>> {
+    rocket::info!("get_groups_from_database");
+    let mut response = db.query("SELECT * FROM user;").await?;
+    let entries: Vec<User> = response.take(0)?;
+    for ent in &entries {
+        rocket::info!("user name {}", ent.name);
+    }
+    Ok(entries)
+}
+
 // TODO load n groups to display on the front page
 #[must_use]
 pub fn load_groups() -> Vec<Group> {

@@ -149,3 +149,22 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
     return cookie_str;
 }
 
+pub fn login_helper(client: &reqwest::blocking::Client, url: &str, email: &str, password: &str) -> String {
+    let res = client
+    .post(format!("{url}/login"))
+    .form(&[("email", email), ("password", password)])
+    .send()
+    .unwrap();
+    assert_eq!(res.status(), 200);
+
+let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
+println!("cookie: {cookie}");
+assert!(cookie.contains("meet-os="));
+let re = Regex::new("meet-os=([^;]+);").unwrap();
+let cookie_str = match re.captures(cookie) {
+    Some(value) => value[1].to_owned(),
+    None => panic!("Code not found cookie"),
+};
+println!("cookie_str: {cookie_str}");
+    cookie_str
+}

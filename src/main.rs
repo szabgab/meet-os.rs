@@ -26,8 +26,8 @@ use pbkdf2::{
 
 use meetings::{
     add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
-    get_groups_from_database, get_user_by_email, load_event, load_group, sendgrid, verify_code,
-    EmailAddress, Group, User,
+    get_groups_from_database, get_user_by_email, get_users_from_database, load_event, load_group,
+    sendgrid, verify_code, EmailAddress, Group, User,
 };
 
 use surrealdb::engine::remote::ws::Client;
@@ -796,6 +796,48 @@ async fn admin(
     )
 }
 
+#[get("/users")]
+async fn list_users(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    rocket::info!(
+        "cookie value received from user: {}",
+        visitor.user.clone().unwrap().email
+    );
+
+    if !visitor.admin {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
+        );
+    }
+
+    let users = get_users_from_database(db).await.unwrap();
+
+    Template::render(
+        "users",
+        context! {
+            title: "List Users",
+            config ,
+            visitor,
+            users,
+        },
+    )
+}
+
 #[get("/create-group")]
 async fn create_group_get(
     cookies: &CookieJar<'_>,
@@ -905,6 +947,7 @@ fn rocket() -> _ {
                 group_get,
                 index,
                 js_files,
+                list_users,
                 logout_get,
                 login_get,
                 login_post,
