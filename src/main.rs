@@ -142,6 +142,13 @@ fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
     None
 }
 
+#[get("/js/<file..>")]
+async fn js_files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/js/").join(file))
+        .await
+        .ok()
+}
+
 #[get("/")]
 async fn index(
     cookies: &CookieJar<'_>,
@@ -202,22 +209,6 @@ async fn about(
     )
 }
 
-#[get("/admin")]
-async fn admin(
-    cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    Template::render(
-        "admin",
-        context! {
-            title: "Admin",
-            config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
-        },
-    )
-}
-
 #[get("/privacy")]
 async fn privacy(
     cookies: &CookieJar<'_>,
@@ -250,18 +241,19 @@ async fn soc(
     )
 }
 
-#[get("/logout")]
-async fn logout_get(
+#[get("/admin")]
+async fn admin(
     cookies: &CookieJar<'_>,
     db: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
-    // TODO shall we check if the cookie was even there?
-    cookies.remove_private("meet-os");
-    let visitor = Visitor::new(cookies, db, myconfig).await;
     Template::render(
-        "message",
-        context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config(), visitor},
+        "admin",
+        context! {
+            title: "Admin",
+            config: get_public_config(),
+            visitor: Visitor::new(cookies, db, myconfig).await,
+        },
     )
 }
 
@@ -350,6 +342,21 @@ async fn login_post(
             context! {title: "Invalid password", message: "Invalid password", config, visitor},
         )
     }
+}
+
+#[get("/logout")]
+async fn logout_get(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    // TODO shall we check if the cookie was even there?
+    cookies.remove_private("meet-os");
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+    Template::render(
+        "message",
+        context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config(), visitor},
+    )
 }
 
 // #[post("/reset-password", data = "<input>")]
@@ -835,13 +842,6 @@ async fn create_group_post(
             )
         }
     }
-}
-
-#[get("/js/<file..>")]
-async fn js_files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/js/").join(file))
-        .await
-        .ok()
 }
 
 #[launch]
