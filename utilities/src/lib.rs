@@ -40,7 +40,7 @@ pub fn check_admin_menu(html: &str) {
 
 pub fn check_user_menu(html: &str) {
     check_logged_in_menu(html);
-    //assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+    assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 }
 
 pub fn check_html(html: &str, tag: &str, text: &str) {
