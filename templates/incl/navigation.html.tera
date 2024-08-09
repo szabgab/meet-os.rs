@@ -12,14 +12,14 @@
         <div class="navbar-start">
           <a href="/" class="navbar-item">Home</a>
           <a href="/groups" class="navbar-item">Groups</a>
-          {% if logged_in %}
+          {% if visitor.admin %}
             <a href="/admin" class="navbar-item">Admin</a>
           {% endif %}
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
           <div class="navbar-item has-dropdown is-hoverable">
-            {% if logged_in %}
+            {% if visitor.logged_in %}
               <a href="/logout" class="navbar-item">Logout</a>
               <a href="/profile" class="navbar-item">Profile</a>
             {% else %}
