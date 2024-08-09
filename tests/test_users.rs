@@ -11,7 +11,7 @@ fn profile_without_cookie() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}");
 
-        for path in ["/profile", "/create-group"] {
+        for path in ["/profile", "/create-group", "/admin"] {
             // Access the profile without a cookie
             let res = client.get(format!("{url}{path}")).send().unwrap();
             assert_eq!(res.status(), 200);
