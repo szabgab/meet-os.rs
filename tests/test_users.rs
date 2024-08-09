@@ -1,8 +1,8 @@
 use regex::Regex;
 
 use utilities::{
-    check_guest_menu, check_html, check_profile_page, check_user_menu, register_user_helper,
-    run_external,
+    check_admin_menu, check_guest_menu, check_html, check_profile_page, check_user_menu,
+    register_user_helper, run_external,
 };
 
 #[test]
@@ -186,6 +186,56 @@ fn login_regular_user() {
         check_html(&html, "title", "Logged out");
         check_html(&html, "h1", "Logged out");
         //check_guest_menu(&html);
+
+        // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
+        // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
+        // If we want to make sure that the user cannot access the system any more we'll have to manage the login information
+        // on the server side.
+        //check_profile_page(&client, &url, &cookie_str, "");
+    });
+}
+
+#[test]
+fn login_admin_user() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
+        let name = "Site Manager";
+        let email = "admin@meet-os.com";
+        let password = "123456";
+
+        let _cookie_str = register_user_helper(&client, &url, name, email, password);
+
+        let res = client
+            .post(format!("{url}/login"))
+            .form(&[("email", email), ("password", password)])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+
+        let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
+        println!("cookie: {cookie}");
+        assert!(cookie.contains("meet-os="));
+        let re = Regex::new("meet-os=([^;]+);").unwrap();
+        let cookie_str = match re.captures(cookie) {
+            Some(value) => value[1].to_owned(),
+            None => panic!("Code not found cookie"),
+        };
+        println!("cookie_str: {cookie_str}");
+
+        let html = res.text().unwrap();
+        //assert_eq!(html, "x");
+        check_html(&html, "title", "Welcome back");
+        check_admin_menu(&html);
+
+        // // Access the profile with the cookie
+        check_profile_page(&client, &url, &cookie_str, name);
+
+        let res = client.get(format!("{url}/logout")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Logged out");
+        check_html(&html, "h1", "Logged out");
 
         // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.

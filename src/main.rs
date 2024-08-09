@@ -65,6 +65,28 @@ impl Visitor {
 
         me
     }
+
+    async fn new_after_login(
+        email: &str,
+        db: &State<Surreal<Client>>,
+        myconfig: &State<MyConfig>,
+    ) -> Self {
+        let mut me = Self {
+            logged_in: true,
+            admin: false,
+            user: None,
+        };
+
+        if let Ok(user) = get_user_by_email(db, email).await {
+            me.user = user;
+            //rocket::info!("email: {}", user.email);
+            if myconfig.admins.contains(&email.to_owned()) {
+                me.admin = true;
+            }
+        }
+
+        me
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -267,7 +289,7 @@ async fn login_post(
     rocket::info!("rocket login: {:?}", input.email);
 
     let config = get_public_config();
-    let mut visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, db, myconfig).await;
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
@@ -311,11 +333,12 @@ async fn login_post(
     };
 
     if Pbkdf2.verify_password(password, &parsed_hash).is_ok() {
-        cookies.add_private(("meet-os", user.email)); // TODO this should be the user ID, right?
+        cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
 
         // It seems despite calling add_private, the cookies will still return the old value so
-        // for now we manually set the logged_in field
-        visitor.logged_in = true;
+        // for now we have a separate constructor for the Visitor
+        #[allow(clippy::shadow_unrelated)]
+        let visitor = Visitor::new_after_login(&email, db, myconfig).await;
         Template::render(
             "message",
             context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, visitor},
