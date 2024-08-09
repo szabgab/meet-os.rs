@@ -623,7 +623,7 @@ async fn show_profile(
 
     Template::render(
         "message",
-        context! {title: "Missing cookie", message: format!("It seems you are not logged in"), config, visitor},
+        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
     )
 }
 

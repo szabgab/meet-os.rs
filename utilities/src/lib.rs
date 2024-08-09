@@ -109,7 +109,7 @@ pub fn check_profile_page(client: &reqwest::blocking::Client, url: &str, cookie_
     let html = res.text().unwrap();
 
     if h1.is_empty() {
-        check_html(&html, "title", "Missing cookie");
+        check_html(&html, "title", "Not logged in");
         assert!(html.contains("It seems you are not logged in"));
     } else {
         check_html(&html, "title", "Profile");

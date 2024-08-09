@@ -11,13 +11,13 @@ fn profile_without_cookie() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}");
 
-        for path in ["/profile"] {
+        for path in ["/profile", "/create-group"] {
             // Access the profile without a cookie
             let res = client.get(format!("{url}{path}")).send().unwrap();
             assert_eq!(res.status(), 200);
             let html = res.text().unwrap();
             //assert_eq!(html, "");
-            check_html(&html, "title", "Missing cookie");
+            check_html(&html, "title", "Not logged in");
             assert!(html.contains("It seems you are not logged in"));
             check_guest_menu(&html);
         }
