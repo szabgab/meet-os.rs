@@ -59,22 +59,9 @@ fn register_user() {
             None => panic!("Code not found in email: {email_content}"),
         };
 
-        //assert_eq!(code, res.code);
         println!("code: {code}");
 
-        // TODO. shall we access the database directly and check the data there too?
-        //     // Without dropping the client here we get an error on the next line
-        //     // value: Db(Tx("IO error: lock hold by current process, acquire time 1705858854 acquiring thread 58266: /tmp/.tmpVlNPFx/db/LOCK: No locks available"))
-        //     let res = tokio_test::block_on(get_user_by_email(&db, "foo@meet-os.com"))
-        //         .unwrap()
-        //         .unwrap();
-        //     assert_eq!(res.email, "foo@meet-os.com");
-        //     assert_eq!(res.name, "Foo Bar");
-        //     assert!(!res.verified);
-        //     assert_eq!(res.process, "register");
-        //     // date? code?
-
-        //     // Verify the email
+        // Verify the email
         let res = client
             .get(format!("{url}/verify/register/{code}"))
             .send()
@@ -158,7 +145,7 @@ fn duplicate_email() {
 }
 
 #[test]
-fn login_user() {
+fn login_regular_user() {
     run_external(|port| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
