@@ -241,22 +241,6 @@ async fn soc(
     )
 }
 
-#[get("/admin")]
-async fn admin(
-    cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    Template::render(
-        "admin",
-        context! {
-            title: "Admin",
-            config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
-        },
-    )
-}
-
 #[get("/login")]
 async fn login_get(
     cookies: &CookieJar<'_>,
@@ -748,6 +732,22 @@ async fn groups_get(
     //     "message",
     //     context! {title: "Internal error", message: "Internal error", config: get_public_config(), visitor},
     // )
+}
+
+#[get("/admin")]
+async fn admin(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    Template::render(
+        "admin",
+        context! {
+            title: "Admin",
+            config: get_public_config(),
+            visitor: Visitor::new(cookies, db, myconfig).await,
+        },
+    )
 }
 
 #[get("/create-group")]
