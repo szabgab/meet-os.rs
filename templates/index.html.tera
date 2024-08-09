@@ -8,30 +8,25 @@
 
        Meet-OS (pronounced as mythos. It is the pattern of basic values and attitudes of a people, characteristically transmitted through myths and the arts.)
 
-       <h2>Events</h2>
+      {% if events %}
+        <h2>Events</h2>
 
-       <ul>
-       {% for event in events %}
-           <li><a href="/event/{{ event.id }}">{{ event.title}}</a></li>
-       {% endfor %}
-       </ul>
+        <ul>
+        {% for event in events %}
+            <li><a href="/event/{{ event.id }}">{{ event.title}}</a></li>
+        {% endfor %}
+        </ul>
+      {% endif %}
 
+      {% if groups %}
+        <h2>Groups</h2>
 
-       <h2>Groups</h2>
-
-       <ul>
-       {% for group in groups %}
+        <ul>
+        {% for group in groups %}
            <li><a href="/group/{{ group.gid }}">{{ group.name }}</a></li>
-       {% endfor %}
-       </ul>
-
-       <h2>About</h2>
-
-       The goal of this web application is to provide a platform where we can organize meeting for people.
-       <p>
-       The source code is available in a <a href="https://github.com/szabgab/meetings.rs">git repository</a>.
-       <p>
-       The development started as 2024 started rolling.
+        {% endfor %}
+        </ul>
+      {% endif %}
 
     </div>
   </div>

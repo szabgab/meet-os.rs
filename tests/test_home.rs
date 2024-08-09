@@ -1,7 +1,7 @@
 use utilities::{check_guest_menu, check_html, check_html_list, run_external};
 
 #[test]
-fn home() {
+fn check_empty_home() {
     run_external(|port| {
         let url = format!("http://localhost:{port}");
         let res = reqwest::blocking::get(format!("{url}/")).unwrap();
@@ -18,7 +18,8 @@ fn home() {
         //         r#"<a href="/group/1">Rust Maven</a>"#,
         //     ],
         // );
-        check_html_list(&html, "h2", vec!["Events", "Groups"]);
+        assert!(!html.contains("<h2>Events</h2>"));
+        assert!(!html.contains("<h2>Groups</h2>"));
         check_guest_menu(&html);
     });
 }
