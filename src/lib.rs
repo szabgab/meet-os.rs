@@ -8,6 +8,7 @@ pub use notifications::*;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct User {
+    pub uid: usize,
     pub email: String,
     pub password: String,
     pub name: String,

@@ -514,7 +514,10 @@ async fn register_post(
         }
     };
 
+    let uid = increment(db, "user").await.unwrap();
+
     let user = User {
+        uid,
         name: input.name.to_owned(),
         email,
         password: hashed_password,
