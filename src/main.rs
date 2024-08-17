@@ -26,8 +26,8 @@ use pbkdf2::{
 
 use meetings::{
     add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
-    get_groups_from_database, get_user_by_email, get_users_from_database, load_event, load_group,
-    sendgrid, verify_code, EmailAddress, Group, User,
+    get_groups_from_database, get_user_by_email, get_users_from_database, increment, load_event,
+    load_group, sendgrid, verify_code, EmailAddress, Group, User,
 };
 
 use surrealdb::engine::remote::ws::Client;
@@ -901,13 +901,7 @@ async fn create_group_post(
         );
     }
 
-    let gid = match get_groups_from_database(db).await {
-        Ok(groups) => groups.len().saturating_add(1),
-        Err(err) => {
-            rocket::info!("Error while trying to add group {err}");
-            1 // TODO return internal error message
-        }
-    };
+    let gid = increment(db, "group").await.unwrap();
 
     rocket::info!("group_id: {gid}");
     let group = Group {

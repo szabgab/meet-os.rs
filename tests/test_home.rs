@@ -1,4 +1,4 @@
-use utilities::{check_guest_menu, check_html, check_html_list, run_external};
+use utilities::{check_guest_menu, check_html, run_external};
 
 #[test]
 fn check_empty_home() {

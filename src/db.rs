@@ -9,7 +9,7 @@ use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::{Event, Group, User};
+use crate::{Counter, Event, Group, User};
 
 /// # Panics
 ///
@@ -228,4 +228,34 @@ pub async fn get_events_from_database(db: &Surreal<Client>) -> surrealdb::Result
         rocket::info!("event name {}", ent.title);
     }
     Ok(entries)
+}
+
+/// # Panics
+///
+/// Panics when there is an error
+pub async fn increment(db: &Surreal<Client>, name: &str) -> surrealdb::Result<usize> {
+    // TODO: do this only when creatig the database
+    let _response = db
+        .query("DEFINE INDEX counter_name ON TABLE counter COLUMNS name UNIQUE")
+        .await?;
+
+    #[allow(clippy::separated_literal_suffix)]
+    let response = db
+        .query(
+            "
+            INSERT INTO counter (name, count)
+                VALUES ($name, $count) ON DUPLICATE KEY UPDATE count += 1;
+        ",
+        )
+        .bind(("name", name))
+        .bind(("count", 1_i32))
+        .await?;
+
+    let mut entries = response.check()?;
+    let entries: Vec<Counter> = entries.take(0)?;
+    // fetching the first (and hopefully only) entry
+    let entry = entries.into_iter().next().unwrap();
+    let id: usize = entry.count.try_into().unwrap();
+
+    Ok(id)
 }

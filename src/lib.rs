@@ -44,6 +44,12 @@ pub struct EmailAddress {
     pub email: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Counter {
+    name: String,
+    count: u32,
+}
+
 fn get_empty_string() -> String {
     String::new()
 }
