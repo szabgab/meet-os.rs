@@ -31,7 +31,6 @@ pub struct Event {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Group {
-    #[serde(default = "get_usize_zero")]
     pub gid: usize,
     pub name: String,
     pub location: String,
@@ -48,8 +47,4 @@ pub struct EmailAddress {
 pub struct Counter {
     name: String,
     count: u32,
-}
-
-fn get_usize_zero() -> usize {
-    0
 }
