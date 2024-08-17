@@ -21,8 +21,7 @@ pub struct User {
 // TODO is there a better way to set the id of the event to the filename?
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Event {
-    #[serde(default = "get_empty_string")]
-    pub id: String,
+    pub eid: usize,
     pub title: String,
     pub date: String,
     pub location: String,
@@ -49,10 +48,6 @@ pub struct EmailAddress {
 pub struct Counter {
     name: String,
     count: u32,
-}
-
-fn get_empty_string() -> String {
-    String::new()
 }
 
 fn get_usize_zero() -> usize {

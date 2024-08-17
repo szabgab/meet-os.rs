@@ -140,7 +140,7 @@ pub fn load_event(id: usize) -> Event {
     let filename = format!("data/events/{id}.yaml");
     let raw_string = read_to_string(filename).unwrap();
     let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.id = String::from("1");
+    data.eid = id;
     data
 }
 
