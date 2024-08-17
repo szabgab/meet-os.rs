@@ -8,6 +8,10 @@
       
         {{description | safe}}
 
+        <div>
+        Owner: <a href="/user/{{owner.uid}}">{{owner.name}}</a>
+        </div>
+
         <h2>Events</h2>
         <ul>
           {% for event in events %}

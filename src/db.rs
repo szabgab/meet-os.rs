@@ -87,6 +87,23 @@ pub async fn verify_code(
     Ok(entry)
 }
 
+pub async fn get_user_by_id(db: &Surreal<Client>, uid: usize) -> surrealdb::Result<Option<User>> {
+    rocket::info!("get_user_by_id: '{uid}'");
+
+    let mut response = db
+        .query("SELECT * FROM user WHERE uid=$uid;")
+        .bind(("uid", uid))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
+
+    if let Some(entry) = entry.as_ref() {
+        rocket::info!("Foud user {}, {}", entry.name, entry.email);
+    }
+
+    Ok(entry)
+}
+
 pub async fn get_user_by_email(
     db: &Surreal<Client>,
     email: &str,

@@ -35,6 +35,7 @@ pub struct Group {
     pub name: String,
     pub location: String,
     pub description: String,
+    pub owner: usize,
 }
 
 #[derive(Debug)]

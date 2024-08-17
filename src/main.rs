@@ -26,8 +26,8 @@ use pbkdf2::{
 
 use meetings::{
     add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
-    get_groups_from_database, get_user_by_email, get_users_from_database, increment, load_event,
-    load_group, sendgrid, verify_code, EmailAddress, Group, User,
+    get_groups_from_database, get_user_by_email, get_user_by_id, get_users_from_database,
+    increment, load_event, load_group, sendgrid, verify_code, EmailAddress, Group, User,
 };
 
 use surrealdb::engine::remote::ws::Client;
@@ -113,6 +113,7 @@ struct GroupForm<'r> {
     name: &'r str,
     location: &'r str,
     description: &'r str,
+    owner: usize,
 }
 
 #[derive(FromForm)]
@@ -711,6 +712,7 @@ async fn group_get(
     let events = get_events_by_group_id(db, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
+    let owner = get_user_by_id(db, group.owner).await.unwrap().unwrap();
 
     Template::render(
         "group",
@@ -721,6 +723,7 @@ async fn group_get(
             events: events,
             config,
             visitor,
+            owner
         },
     )
 }
@@ -867,9 +870,11 @@ async fn create_group_get(
         );
     };
 
+    let users = get_users_from_database(db).await.unwrap();
+
     Template::render(
         "create_group",
-        context! {title: "Create Group", user: user, config, visitor},
+        context! {title: "Create Group", users, user: user, config, visitor},
     )
 }
 
@@ -905,12 +910,22 @@ async fn create_group_post(
     }
 
     let gid = increment(db, "group").await.unwrap();
+    // TODO verify that the given owner is a valid user-id (FOREIGN KEY should handle this)
+    // //let owner = get_user_by_email(db, input.owner).await.unwrap();
+    // if owner.is_none() {
+    //     return Template::render(
+    //         "message",
+    //         context! {title: "Invalid email", message: "Invalid email", config, visitor},
+    //     );
+    // }
+    //let owner_id = owner.unwrap().uid;
 
     rocket::info!("group_id: {gid}");
     let group = Group {
         name: input.name.to_owned(),
         location: input.location.to_owned(),
         description: input.description.to_owned(),
+        owner: input.owner,
         gid,
     };
 

@@ -52,6 +52,7 @@ fn create_group_by_admin() {
                     "description",
                     "Text with [link](https://rust.code-maven.com/)",
                 ),
+                ("owner", "2"),
             ])
             .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
@@ -73,6 +74,7 @@ fn create_group_by_admin() {
                 ("name", "Python Maven"),
                 ("location", "Other"),
                 ("description", "Text with [link](https://code-maven.com/)"),
+                ("owner", "1"),
             ])
             .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
@@ -121,6 +123,7 @@ fn create_group_unauthorized() {
                 ("name", "Rust Maven"),
                 ("location", "Virtual"),
                 ("description", "nope"),
+                ("owner", "1"),
             ])
             .header("Cookie", format!("meet-os={peti_cookie_str}"))
             .send()
@@ -171,6 +174,7 @@ fn create_group_guest() {
                 ("name", "Rust Maven"),
                 ("location", ""),
                 ("description", ""),
+                ("owner", "1"),
             ])
             .send()
             .unwrap();
