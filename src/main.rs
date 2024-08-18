@@ -333,23 +333,23 @@ async fn login_post(
         }
     };
 
-    if Pbkdf2.verify_password(password, &parsed_hash).is_ok() {
-        cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
-
-        // It seems despite calling add_private, the cookies will still return the old value so
-        // for now we have a separate constructor for the Visitor
-        #[allow(clippy::shadow_unrelated)]
-        let visitor = Visitor::new_after_login(&email, db, myconfig).await;
-        Template::render(
-            "message",
-            context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, visitor},
-        )
-    } else {
-        Template::render(
+    if Pbkdf2.verify_password(password, &parsed_hash).is_err() {
+        return Template::render(
             "message",
             context! {title: "Invalid password", message: "Invalid password", config, visitor},
-        )
+        );
     }
+
+    cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
+
+    // It seems despite calling add_private, the cookies will still return the old value so
+    // for now we have a separate constructor for the Visitor
+    #[allow(clippy::shadow_unrelated)]
+    let visitor = Visitor::new_after_login(&email, db, myconfig).await;
+    Template::render(
+        "message",
+        context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, visitor},
+    )
 }
 
 #[get("/logout")]
