@@ -6,10 +6,9 @@ extern crate rocket;
 use std::env;
 use std::fs::{read_to_string, File};
 use std::io::Write;
-use std::path::{Path, PathBuf};
 
 use rocket::form::Form;
-use rocket::fs::NamedFile;
+use rocket::fs::{relative, FileServer};
 use rocket::http::CookieJar;
 use rocket::serde::uuid::Uuid;
 use rocket::{fairing::AdHoc, State};
@@ -163,13 +162,6 @@ fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
         });
     }
     None
-}
-
-#[get("/js/<file..>")]
-async fn js_files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/js/").join(file))
-        .await
-        .ok()
 }
 
 #[get("/")]
@@ -958,7 +950,6 @@ fn rocket() -> _ {
                 groups_get,
                 group_get,
                 index,
-                js_files,
                 list_users,
                 logout_get,
                 login_get,
@@ -971,6 +962,7 @@ fn rocket() -> _ {
                 verify
             ],
         )
+        .mount("/", FileServer::from(relative!("static")))
         .attach(Template::fairing())
         .attach(db::fairing())
         .attach(AdHoc::config::<MyConfig>())
