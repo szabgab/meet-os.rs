@@ -179,6 +179,21 @@ pub async fn get_groups(db: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
     Ok(entries)
 }
 
+pub async fn get_groups_by_owner_id(
+    db: &Surreal<Client>,
+    uid: usize,
+) -> surrealdb::Result<Vec<Group>> {
+    rocket::info!("get_groups_by_owner_id: '{uid}'");
+    let mut response = db
+        .query("SELECT * FROM group WHERE owner=$uid;")
+        .bind(("uid", uid))
+        .await?;
+
+    let entries: Vec<Group> = response.take(0)?;
+
+    Ok(entries)
+}
+
 pub async fn get_group_by_gid(
     db: &Surreal<Client>,
     gid: usize,

@@ -28,8 +28,8 @@ use pbkdf2::{
 
 use meetings::{
     add_user, db, get_event_by_eid, get_events, get_events_by_group_id, get_group_by_gid,
-    get_groups, get_public_config, get_user_by_email, get_user_by_id, get_users, increment,
-    sendgrid, verify_code, EmailAddress, MyConfig, User,
+    get_groups, get_groups_by_owner_id, get_public_config, get_user_by_email, get_user_by_id,
+    get_users, increment, sendgrid, verify_code, EmailAddress, MyConfig, User,
 };
 
 use web::Visitor;
@@ -542,9 +542,12 @@ async fn show_profile(
         );
     };
 
+    let uid = visitor.user.clone().unwrap().uid;
+    let groups = get_groups_by_owner_id(db, uid).await.unwrap();
+
     Template::render(
         "profile",
-        context! {title: "Profile", user: visitor.user.clone(), config, visitor},
+        context! {title: "Profile", user: visitor.user.clone(), groups, config, visitor},
     )
 }
 
