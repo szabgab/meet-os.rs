@@ -150,7 +150,7 @@ pub async fn add_login_code_to_user(
 
 #[must_use]
 pub async fn get_events_by_group_id(db: &Surreal<Client>, gid: usize) -> Vec<Event> {
-    match get_events_from_database(db).await {
+    match get_events(db).await {
         Ok(events) => events
             .into_iter()
             .filter(|event| event.group_id == gid)
@@ -198,8 +198,8 @@ pub async fn get_group_by_gid(
     Ok(entry)
 }
 
-pub async fn get_events_from_database(db: &Surreal<Client>) -> surrealdb::Result<Vec<Event>> {
-    rocket::info!("get_groups_from_database");
+pub async fn get_events(db: &Surreal<Client>) -> surrealdb::Result<Vec<Event>> {
+    rocket::info!("get_events");
     let mut response = db.query("SELECT * FROM group;").await?;
     let entries: Vec<Event> = response.take(0)?;
     for ent in &entries {
