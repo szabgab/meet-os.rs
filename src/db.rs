@@ -169,8 +169,8 @@ pub async fn get_users(db: &Surreal<Client>) -> surrealdb::Result<Vec<User>> {
     Ok(entries)
 }
 
-pub async fn get_groups_from_database(db: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
-    rocket::info!("get_groups_from_database");
+pub async fn get_groups(db: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
+    rocket::info!("get_groups");
     let mut response = db.query("SELECT * FROM group;").await?;
     let entries: Vec<Group> = response.take(0)?;
     for ent in &entries {

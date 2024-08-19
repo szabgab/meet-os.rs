@@ -28,8 +28,8 @@ use pbkdf2::{
 
 use meetings::{
     add_user, db, get_event_by_eid, get_events_by_group_id, get_events_from_database,
-    get_group_by_gid, get_groups_from_database, get_public_config, get_user_by_email,
-    get_user_by_id, get_users, increment, sendgrid, verify_code, EmailAddress, MyConfig, User,
+    get_group_by_gid, get_groups, get_public_config, get_user_by_email, get_user_by_id, get_users,
+    increment, sendgrid, verify_code, EmailAddress, MyConfig, User,
 };
 
 use web::Visitor;
@@ -84,7 +84,7 @@ async fn index(
         }
     };
 
-    let groups = match get_groups_from_database(db).await {
+    let groups = match get_groups(db).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -631,7 +631,7 @@ async fn groups_get(
     let config = get_public_config();
     let visitor = Visitor::new(cookies, db, myconfig).await;
 
-    match get_groups_from_database(db).await {
+    match get_groups(db).await {
         Ok(groups) => Template::render(
             "groups",
             context! {title: "Groups", groups: groups, config, visitor},
