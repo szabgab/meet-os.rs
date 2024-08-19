@@ -86,6 +86,14 @@ impl Visitor {
 
         me
     }
+
+    fn new_after_logout() -> Self {
+        Self {
+            logged_in: false,
+            admin: false,
+            user: None,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -351,8 +359,16 @@ async fn logout_get(
     myconfig: &State<MyConfig>,
 ) -> Template {
     // TODO shall we check if the cookie was even there?
-    cookies.remove_private("meet-os");
     let visitor = Visitor::new(cookies, db, myconfig).await;
+    if !visitor.logged_in {
+        rocket::warn!("Trying to log out while not logged in");
+    }
+
+    cookies.remove_private("meet-os");
+
+    #[allow(clippy::shadow_unrelated)]
+    let visitor = Visitor::new_after_logout();
+
     Template::render(
         "message",
         context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config(), visitor},
