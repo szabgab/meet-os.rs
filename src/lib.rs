@@ -49,3 +49,8 @@ pub struct Counter {
     name: String,
     count: u32,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PublicConfig {
+    google_analytics: String,
+}
