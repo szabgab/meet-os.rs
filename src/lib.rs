@@ -54,3 +54,17 @@ pub struct Counter {
 pub struct PublicConfig {
     google_analytics: String,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct MyConfig {
+    pub base_url: String,
+
+    #[serde(default = "get_empty_string")]
+    pub sendgrid_api_key: String,
+
+    pub admins: Vec<String>,
+}
+
+fn get_empty_string() -> String {
+    String::new()
+}

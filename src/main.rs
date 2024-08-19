@@ -26,8 +26,8 @@ use pbkdf2::{
 use meetings::{
     add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
     get_groups_from_database, get_user_by_email, get_user_by_id, get_users_from_database,
-    increment, load_event, load_group, sendgrid, verify_code, EmailAddress, Group, PublicConfig,
-    User,
+    increment, load_event, load_group, sendgrid, verify_code, EmailAddress, Group, MyConfig,
+    PublicConfig, User,
 };
 
 use surrealdb::engine::remote::ws::Client;
@@ -95,20 +95,6 @@ impl Visitor {
             user: None,
         }
     }
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-struct MyConfig {
-    base_url: String,
-
-    #[serde(default = "get_empty_string")]
-    sendgrid_api_key: String,
-
-    admins: Vec<String>,
-}
-
-fn get_empty_string() -> String {
-    String::new()
 }
 
 #[derive(FromForm)]
