@@ -7,7 +7,7 @@
         <h1 class="title is-3">{{title}}</h1>
 
         <div><a href="/create-group">Create group</a></div>
-        <div><a href="/users">List users</a></div>
+        <div><a href="/admin/users">List users</a></div>
     </div>
   </div>
 </section>

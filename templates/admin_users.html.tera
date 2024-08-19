@@ -4,11 +4,12 @@
   <div class="container">
     <div class="content">
        <h1 class="title is-3">{{title}}</h1>
-        <ul>
+        <table>
+          <tr><td>User</td><td>Verified</td><td>Registration Date</td></tr>
         {% for user in users %}
-            <li><a href="/user/{{ user.uid }}">{{ user.name }}</a></li>
+            <tr><td><a href="/user/{{ user.uid }}">{{ user.name }}</a></td><td>{{ user.verified }}</td><td>{{ user.date }}</td></tr>
         {% endfor %}
-        </ul>
+        </table>
     </div>
   </div>
 </section>

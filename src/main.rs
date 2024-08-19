@@ -832,14 +832,12 @@ async fn list_users(
         visitor.user.clone().unwrap().email
     );
 
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
-
-    let users = get_users_from_database(db).await.unwrap();
+    // TODO filtering  could be moved to the database call
+    let all_users = get_users_from_database(db).await.unwrap();
+    let users = all_users
+        .into_iter()
+        .filter(|user| user.verified)
+        .collect::<Vec<_>>();
 
     Template::render(
         "users",
@@ -952,6 +950,48 @@ async fn create_group_post(
     }
 }
 
+#[get("/admin/users")]
+async fn admin_users(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    rocket::info!(
+        "cookie value received from user: {}",
+        visitor.user.clone().unwrap().email
+    );
+
+    if !visitor.admin {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
+        );
+    }
+
+    let users = get_users_from_database(db).await.unwrap();
+
+    Template::render(
+        "admin_users",
+        context! {
+            title: "List Users",
+            config ,
+            visitor,
+            users,
+        },
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -960,6 +1000,7 @@ fn rocket() -> _ {
             routes![
                 about,
                 admin,
+                admin_users,
                 create_group_get,
                 create_group_post,
                 event_get,
