@@ -543,11 +543,11 @@ async fn show_profile(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let groups = get_groups_by_owner_id(db, uid).await.unwrap();
+    let owned_groups = get_groups_by_owner_id(db, uid).await.unwrap();
 
     Template::render(
         "profile",
-        context! {title: "Profile", user: visitor.user.clone(), groups, config, visitor},
+        context! {title: "Profile", user: visitor.user.clone(), owned_groups, config, visitor},
     )
 }
 

@@ -7,13 +7,15 @@
         <div><b>email</b>: {{user.email}}</div>
     </div>
 
-    <h2 class="title is-4">Owned Groups</h2>
-    <table>
-      <tr><th>Name</th></tr>
-      {% for group in groups %}
-        <tr><td><a href="/group/{{group.gid}}">{{group.name}}</a></td></tr>
-      {% endfor %}
-    </table>
+    {% if owned_groups %}
+      <h2 class="title is-4">Owned Groups</h2>
+      <table>
+        <tr><th>Name</th></tr>
+        {% for group in owned_groups %}
+          <tr><td><a href="/group/{{group.gid}}">{{group.name}}</a></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
   </div>
 </section>
 

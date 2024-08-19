@@ -12,12 +12,14 @@
         Owner: <a href="/user/{{owner.uid}}">{{owner.name}}</a>
         </div>
 
-        <h2>Events</h2>
-        <ul>
-          {% for event in events %}
-            <li><a href="/event/{{event.id}}">{{event.date}} - {{event.title}}</a></li>
-          {% endfor %}
-        </ul>
+        {% if events %}
+          <h2>Events</h2>
+          <ul>
+            {% for event in events %}
+              <li><a href="/event/{{event.id}}">{{event.date}} - {{event.title}}</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
     </div>
   </div>
 </section>
