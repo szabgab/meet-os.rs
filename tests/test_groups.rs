@@ -31,7 +31,7 @@ fn create_group_by_admin() {
 
         // Access the Group creation page with authorized user
         let res = client
-            .get(format!("{url}/create-group"))
+            .get(format!("{url}/admin/create-group"))
             .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
             .unwrap();
@@ -44,7 +44,7 @@ fn create_group_by_admin() {
 
         // Create a Group
         let res = client
-            .post(format!("{url}/create-group"))
+            .post(format!("{url}/admin/create-group"))
             .form(&[
                 ("name", "Rust Maven"),
                 ("location", "Virtual"),
@@ -69,7 +69,7 @@ fn create_group_by_admin() {
         check_html(&html, "h1", "Groups");
 
         let res = client
-            .post(format!("{url}/create-group"))
+            .post(format!("{url}/admin/create-group"))
             .form(&[
                 ("name", "Python Maven"),
                 ("location", "Other"),
@@ -105,7 +105,7 @@ fn create_group_unauthorized() {
 
         // Access the Group creation page with unauthorized user
         let res = client
-            .get(format!("{url}/create-group"))
+            .get(format!("{url}/admin/create-group"))
             .header("Cookie", format!("meet-os={peti_cookie_str}"))
             .send()
             .unwrap();
@@ -118,7 +118,7 @@ fn create_group_unauthorized() {
 
         // Create group should fail
         let res = client
-            .post(format!("{url}/create-group"))
+            .post(format!("{url}/admin/create-group"))
             .form(&[
                 ("name", "Rust Maven"),
                 ("location", "Virtual"),
@@ -150,7 +150,10 @@ fn create_group_guest() {
         let url = format!("http://localhost:{port}");
 
         // Access the Group creation page without user
-        let res = client.get(format!("{url}/create-group")).send().unwrap();
+        let res = client
+            .get(format!("{url}/admin/create-group"))
+            .send()
+            .unwrap();
         assert_eq!(res.status(), 200);
 
         let html = res.text().unwrap();
@@ -169,7 +172,7 @@ fn create_group_guest() {
 
         // Create group should fail
         let res = client
-            .post(format!("{url}/create-group"))
+            .post(format!("{url}/admin/create-group"))
             .form(&[
                 ("name", "Rust Maven"),
                 ("location", ""),

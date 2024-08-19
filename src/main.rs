@@ -27,24 +27,16 @@ use pbkdf2::{
 };
 
 use meetings::{
-    add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
+    add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
     get_groups_from_database, get_public_config, get_user_by_email, get_user_by_id,
     get_users_from_database, increment, load_event, load_group, sendgrid, verify_code,
-    EmailAddress, Group, MyConfig, User,
+    EmailAddress, MyConfig, User,
 };
 
 use web::Visitor;
 
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-
-#[derive(FromForm)]
-struct GroupForm<'r> {
-    name: &'r str,
-    location: &'r str,
-    description: &'r str,
-    owner: usize,
-}
 
 #[derive(FromForm)]
 struct RegistrationForm<'r> {
@@ -757,106 +749,6 @@ async fn user(
     )
 }
 
-#[get("/create-group")]
-async fn create_group_get(
-    cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
-
-    let user = visitor.user.clone().unwrap();
-
-    rocket::info!("cookie value received from user: {}", user.email);
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    };
-
-    let users = get_users_from_database(db).await.unwrap();
-
-    Template::render(
-        "create_group",
-        context! {title: "Create Group", users, user: user, config, visitor},
-    )
-}
-
-#[post("/create-group", data = "<input>")]
-async fn create_group_post(
-    cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-    input: Form<GroupForm<'_>>,
-) -> Template {
-    rocket::info!("create_group_post: {:?}", input.name);
-    let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, db, myconfig).await;
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
-
-    rocket::info!(
-        "cookie value received from user: {}",
-        visitor.user.clone().unwrap().email
-    );
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
-
-    let gid = increment(db, "group").await.unwrap();
-    // TODO verify that the given owner is a valid user-id (FOREIGN KEY should handle this)
-    // //let owner = get_user_by_email(db, input.owner).await.unwrap();
-    // if owner.is_none() {
-    //     return Template::render(
-    //         "message",
-    //         context! {title: "Invalid email", message: "Invalid email", config, visitor},
-    //     );
-    // }
-    //let owner_id = owner.unwrap().uid;
-
-    rocket::info!("group_id: {gid}");
-    let group = Group {
-        name: input.name.to_owned(),
-        location: input.location.to_owned(),
-        description: input.description.to_owned(),
-        owner: input.owner,
-        gid,
-    };
-
-    match add_group(db, &group).await {
-        Ok(_result) => Template::render(
-            "message",
-            context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, visitor},
-        ),
-        Err(err) => {
-            rocket::info!("Error while trying to add group {err}");
-            Template::render(
-                "message",
-                context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config, visitor},
-            )
-        }
-    }
-}
-
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -865,8 +757,6 @@ fn rocket() -> _ {
             "/",
             routes![
                 about,
-                create_group_get,
-                create_group_post,
                 event_get,
                 groups_get,
                 group_get,
