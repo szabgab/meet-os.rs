@@ -179,18 +179,6 @@ pub async fn get_events_by_group_id(db: &Surreal<Client>, gid: usize) -> Vec<Eve
     }
 }
 
-/// # Panics
-///
-/// Panics when cant read file
-#[must_use]
-pub fn load_group(id: usize) -> Group {
-    let filename = format!("data/groups/{id}.yaml");
-    let raw_string = read_to_string(filename).unwrap();
-    let mut data: Group = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.gid = 1;
-    data
-}
-
 pub async fn get_users(db: &Surreal<Client>) -> surrealdb::Result<Vec<User>> {
     rocket::info!("get_users");
     let mut response = db.query("SELECT * FROM user;").await?;
@@ -199,13 +187,6 @@ pub async fn get_users(db: &Surreal<Client>) -> surrealdb::Result<Vec<User>> {
         rocket::info!("user name {}", ent.name);
     }
     Ok(entries)
-}
-
-// TODO load n groups to display on the front page
-#[must_use]
-pub fn load_groups() -> Vec<Group> {
-    let data = load_group(1);
-    vec![data]
 }
 
 pub async fn get_groups_from_database(db: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
@@ -275,4 +256,23 @@ pub async fn increment(db: &Surreal<Client>, name: &str) -> surrealdb::Result<us
     let id: usize = entry.count.try_into().unwrap();
 
     Ok(id)
+}
+
+pub async fn get_event_by_eid(
+    db: &Surreal<Client>,
+    eid: usize,
+) -> surrealdb::Result<Option<Event>> {
+    rocket::info!("get_event_by_eid: '{eid}'");
+    let mut response = db
+        .query("SELECT * FROM event WHERE eid=$eid;")
+        .bind(("eid", eid))
+        .await?;
+
+    let entry: Option<Event> = response.take(0)?;
+
+    if let Some(entry) = entry.as_ref() {
+        rocket::info!("Event title: {}", entry.title);
+    }
+
+    Ok(entry)
 }

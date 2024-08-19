@@ -27,9 +27,9 @@ use pbkdf2::{
 };
 
 use meetings::{
-    add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
-    get_groups_from_database, get_public_config, get_user_by_email, get_user_by_id, get_users,
-    increment, load_event, load_group, sendgrid, verify_code, EmailAddress, MyConfig, User,
+    add_user, db, get_event_by_eid, get_events_by_group_id, get_events_from_database,
+    get_group_by_gid, get_groups_from_database, get_public_config, get_user_by_email,
+    get_user_by_id, get_users, increment, sendgrid, verify_code, EmailAddress, MyConfig, User,
 };
 
 use web::Visitor;
@@ -555,8 +555,8 @@ async fn event_get(
     myconfig: &State<MyConfig>,
     id: usize,
 ) -> Template {
-    let event = load_event(id);
-    let group = load_group(event.group_id);
+    let event = get_event_by_eid(db, id).await.unwrap().unwrap();
+    let group = get_group_by_gid(db, event.group_id).await.unwrap().unwrap();
 
     let body = markdown2html(&event.body).unwrap();
 
