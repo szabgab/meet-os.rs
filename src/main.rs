@@ -536,21 +536,16 @@ async fn show_profile(
     let config = get_public_config();
     let visitor = Visitor::new(cookies, db, myconfig).await;
 
-    if let Some(cookie) = cookies.get_private("meet-os") {
-        let email = cookie.value();
-        rocket::info!("cookie value received from user: {email}");
-        if let Ok(Some(user)) = get_user_by_email(db, email).await {
-            rocket::info!("email: {}", user.email);
-            return Template::render(
-                "profile",
-                context! {title: "Profile", user: user, config, visitor},
-            );
-        }
-    }
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
 
     Template::render(
-        "message",
-        context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        "profile",
+        context! {title: "Profile", user: visitor.user.clone(), config, visitor},
     )
 }
 
