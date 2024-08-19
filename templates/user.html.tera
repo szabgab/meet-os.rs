@@ -1,0 +1,14 @@
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">{{title}}</h1>
+        <table>
+            <tr><td>Name:</td><td>{{user.name}}</td></tr>
+        </table>
+    </div>
+  </div>
+</section>
+
+{% include "incl/footer" %}

@@ -850,6 +850,52 @@ async fn list_users(
     )
 }
 
+#[get("/user/<uid>")]
+async fn user(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    uid: usize,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let user = match get_user_by_id(db, uid).await.unwrap() {
+        None => {
+            return Template::render(
+                "message",
+                context! {title: "User not found", message: format!("This user does not exist"), config, visitor},
+            )
+        }
+        Some(user) => user,
+    };
+
+    if !user.verified {
+        return Template::render(
+            "message",
+            context! {title: "Unverified user", message: format!("This user has not verified his email address yet"), config, visitor},
+        );
+    }
+
+    Template::render(
+        "user",
+        context! {
+            title: user.name.clone(),
+            config ,
+            visitor,
+            user,
+        },
+    )
+}
+
 #[get("/create-group")]
 async fn create_group_get(
     cookies: &CookieJar<'_>,
@@ -1016,6 +1062,7 @@ fn rocket() -> _ {
                 register_post,
                 show_profile,
                 soc,
+                user,
                 verify
             ],
         )
