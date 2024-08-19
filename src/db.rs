@@ -1,7 +1,6 @@
 #![allow(clippy::std_instead_of_core)]
 
 use std::env;
-use std::fs::read_to_string;
 
 use rocket::fairing::AdHoc;
 use surrealdb::engine::remote::ws::Client;
@@ -147,25 +146,6 @@ pub async fn add_login_code_to_user(
     }
 
     Ok(entry)
-}
-
-/// # Panics
-///
-/// Panics when cant read file
-#[must_use]
-pub fn load_event(id: usize) -> Event {
-    let filename = format!("data/events/{id}.yaml");
-    let raw_string = read_to_string(filename).unwrap();
-    let mut data: Event = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data.eid = id;
-    data
-}
-
-// TODO load n events to display on the front page, which n events?
-#[must_use]
-pub fn load_events() -> Vec<Event> {
-    let data = load_event(1);
-    vec![data]
 }
 
 #[must_use]
