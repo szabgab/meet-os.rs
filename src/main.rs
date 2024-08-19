@@ -3,6 +3,9 @@
 #[macro_use]
 extern crate rocket;
 
+#[allow(clippy::pub_with_shorthand)]
+pub(crate) mod web;
+
 use std::env;
 use std::fs::File;
 use std::io::Write;
@@ -16,8 +19,6 @@ use rocket_dyn_templates::{context, Template};
 
 use markdown::message;
 
-use serde::{Deserialize, Serialize};
-
 use pbkdf2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Pbkdf2,
@@ -30,72 +31,10 @@ use meetings::{
     EmailAddress, Group, MyConfig, User,
 };
 
+use web::Visitor;
+
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Visitor {
-    logged_in: bool,
-    admin: bool,
-    user: Option<User>,
-}
-
-impl Visitor {
-    async fn new(
-        cookies: &CookieJar<'_>,
-        db: &State<Surreal<Client>>,
-        myconfig: &State<MyConfig>,
-    ) -> Self {
-        let mut me = Self {
-            logged_in: false,
-            admin: false,
-            user: None,
-        };
-
-        if let Some(cookie_user) = get_logged_in(cookies) {
-            me.logged_in = true;
-            if let Ok(user) = get_user_by_email(db, &cookie_user.email).await {
-                me.user = user;
-                //rocket::info!("email: {}", user.email);
-                if myconfig.admins.contains(&cookie_user.email.clone()) {
-                    me.admin = true;
-                }
-            }
-        }
-
-        me
-    }
-
-    async fn new_after_login(
-        email: &str,
-        db: &State<Surreal<Client>>,
-        myconfig: &State<MyConfig>,
-    ) -> Self {
-        let mut me = Self {
-            logged_in: true,
-            admin: false,
-            user: None,
-        };
-
-        if let Ok(user) = get_user_by_email(db, email).await {
-            me.user = user;
-            //rocket::info!("email: {}", user.email);
-            if myconfig.admins.contains(&email.to_owned()) {
-                me.admin = true;
-            }
-        }
-
-        me
-    }
-
-    fn new_after_logout() -> Self {
-        Self {
-            logged_in: false,
-            admin: false,
-            user: None,
-        }
-    }
-}
 
 #[derive(FromForm)]
 struct GroupForm<'r> {
@@ -118,11 +57,6 @@ struct LoginForm<'r> {
     password: &'r str,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct CookieUser {
-    email: String,
-}
-
 fn markdown2html(text: &str) -> Result<String, message::Message> {
     markdown::to_html_with_options(
         text,
@@ -134,17 +68,6 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
             ..markdown::Options::gfm()
         },
     )
-}
-
-fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
-    if let Some(cookie) = cookies.get_private("meet-os") {
-        let email = cookie.value();
-        rocket::info!("cookie value received from user: {email}");
-        return Some(CookieUser {
-            email: email.to_owned(),
-        });
-    }
-    None
 }
 
 #[get("/")]
