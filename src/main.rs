@@ -28,9 +28,8 @@ use pbkdf2::{
 
 use meetings::{
     add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
-    get_groups_from_database, get_public_config, get_user_by_email, get_user_by_id,
-    get_users_from_database, increment, load_event, load_group, sendgrid, verify_code,
-    EmailAddress, MyConfig, User,
+    get_groups_from_database, get_public_config, get_user_by_email, get_user_by_id, get_users,
+    increment, load_event, load_group, sendgrid, verify_code, EmailAddress, MyConfig, User,
 };
 
 use web::Visitor;
@@ -681,7 +680,7 @@ async fn list_users(
     );
 
     // TODO filtering  could be moved to the database call
-    let all_users = get_users_from_database(db).await.unwrap();
+    let all_users = get_users(db).await.unwrap();
     let users = all_users
         .into_iter()
         .filter(|user| user.verified)

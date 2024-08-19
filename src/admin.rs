@@ -10,7 +10,7 @@ use surrealdb::Surreal;
 
 use crate::db::add_group;
 use crate::web::Visitor;
-use crate::{get_public_config, get_users_from_database, MyConfig};
+use crate::{get_public_config, get_users, MyConfig};
 use meetings::{increment, Group};
 
 #[derive(FromForm)]
@@ -93,7 +93,7 @@ async fn admin_users(
         );
     }
 
-    let users = get_users_from_database(db).await.unwrap();
+    let users = get_users(db).await.unwrap();
 
     Template::render(
         "admin_users",
@@ -132,7 +132,7 @@ async fn create_group_get(
         );
     };
 
-    let users = get_users_from_database(db).await.unwrap();
+    let users = get_users(db).await.unwrap();
 
     Template::render(
         "create_group",
