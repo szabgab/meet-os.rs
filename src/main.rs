@@ -4,6 +4,8 @@
 extern crate rocket;
 
 #[allow(clippy::pub_with_shorthand)]
+pub(crate) mod admin;
+#[allow(clippy::pub_with_shorthand)]
 pub(crate) mod web;
 
 use std::env;
@@ -669,45 +671,6 @@ async fn groups_get(
     // )
 }
 
-#[get("/admin")]
-async fn admin(
-    cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, db, myconfig).await;
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
-
-    rocket::info!(
-        "cookie value received from user: {}",
-        visitor.user.clone().unwrap().email
-    );
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
-
-    Template::render(
-        "admin",
-        context! {
-            title: "Admin",
-            config ,
-            visitor,
-        },
-    )
-}
-
 #[get("/users")]
 async fn list_users(
     cookies: &CookieJar<'_>,
@@ -939,11 +902,11 @@ async fn admin_users(
 #[launch]
 fn rocket() -> _ {
     rocket::build()
+        .mount("/admin", admin::routes())
         .mount(
             "/",
             routes![
                 about,
-                admin,
                 admin_users,
                 create_group_get,
                 create_group_post,
