@@ -4,7 +4,7 @@
 extern crate rocket;
 
 use std::env;
-use std::fs::{read_to_string, File};
+use std::fs::File;
 use std::io::Write;
 
 use rocket::form::Form;
@@ -25,9 +25,9 @@ use pbkdf2::{
 
 use meetings::{
     add_group, add_user, db, get_events_by_group_id, get_events_from_database, get_group_by_gid,
-    get_groups_from_database, get_user_by_email, get_user_by_id, get_users_from_database,
-    increment, load_event, load_group, sendgrid, verify_code, EmailAddress, Group, MyConfig,
-    PublicConfig, User,
+    get_groups_from_database, get_public_config, get_user_by_email, get_user_by_id,
+    get_users_from_database, increment, load_event, load_group, sendgrid, verify_code,
+    EmailAddress, Group, MyConfig, User,
 };
 
 use surrealdb::engine::remote::ws::Client;
@@ -121,13 +121,6 @@ struct LoginForm<'r> {
 #[derive(Serialize, Deserialize, Debug)]
 struct CookieUser {
     email: String,
-}
-
-fn get_public_config() -> PublicConfig {
-    let filename = "config.yaml";
-    let raw_string = read_to_string(filename).unwrap();
-    let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
-    data
 }
 
 fn markdown2html(text: &str) -> Result<String, message::Message> {

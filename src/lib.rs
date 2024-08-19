@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use std::fs::read_to_string;
+
 pub mod db;
 pub use db::*;
 
@@ -67,4 +69,15 @@ pub struct MyConfig {
 
 fn get_empty_string() -> String {
     String::new()
+}
+
+/// # Panics
+///
+/// Panics when it fails to read the config file.
+#[must_use]
+pub fn get_public_config() -> PublicConfig {
+    let filename = "config.yaml";
+    let raw_string = read_to_string(filename).unwrap();
+    let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    data
 }
