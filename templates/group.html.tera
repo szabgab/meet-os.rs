@@ -11,6 +11,11 @@
         <div>
         Owner: <a href="/user/{{owner.uid}}">{{owner.name}}</a>
         </div>
+        {% if visitor.logged_in %}
+          {% if visitor.user.uid == owner.uid %}
+            <a href="/add-event?gid={{group.gid}}">Add event</a>
+          {% endif %}
+        {% endif %}
 
         {% if events %}
           <h2>Events</h2>

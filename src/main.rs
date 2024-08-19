@@ -27,15 +27,25 @@ use pbkdf2::{
 };
 
 use meetings::{
-    add_user, db, get_event_by_eid, get_events, get_events_by_group_id, get_group_by_gid,
-    get_groups, get_groups_by_owner_id, get_public_config, get_user_by_email, get_user_by_id,
-    get_users, increment, sendgrid, verify_code, EmailAddress, MyConfig, User,
+    add_event, add_user, db, get_event_by_eid, get_events, get_events_by_group_id,
+    get_group_by_gid, get_groups, get_groups_by_owner_id, get_public_config, get_user_by_email,
+    get_user_by_id, get_users, increment, sendgrid, verify_code, EmailAddress, Event, MyConfig,
+    User,
 };
 
 use web::Visitor;
 
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
+
+#[derive(FromForm)]
+struct EventForm<'r> {
+    title: &'r str,
+    date: &'r str,
+    location: &'r str,
+    description: &'r str,
+    gid: usize,
+}
 
 #[derive(FromForm)]
 struct RegistrationForm<'r> {
@@ -558,20 +568,21 @@ async fn event_get(
     myconfig: &State<MyConfig>,
     id: usize,
 ) -> Template {
+    let visitor = Visitor::new(cookies, db, myconfig).await;
     let event = get_event_by_eid(db, id).await.unwrap().unwrap();
     let group = get_group_by_gid(db, event.group_id).await.unwrap().unwrap();
 
-    let body = markdown2html(&event.body).unwrap();
+    let description = markdown2html(&event.description).unwrap();
 
     Template::render(
         "event",
         context! {
             title: &event.title,
             event: &event,
-            body: body,
-            group: group,
+            description,
+            group,
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor,
         },
     )
 }
@@ -746,6 +757,122 @@ async fn user(
     )
 }
 
+#[get("/add-event?<gid>")]
+async fn add_event_get(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    gid: usize,
+) -> Template {
+    rocket::info!("add-event");
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let group = get_group_by_gid(db, gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    Template::render(
+        "edit_event",
+        context! {
+            title: "Add event",
+            config: get_public_config(),
+            visitor: Visitor::new(cookies, db, myconfig).await,
+            gid: gid
+        },
+    )
+}
+
+#[post("/edit-event", data = "<input>")]
+async fn add_event_post(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    input: Form<EventForm<'_>>,
+) -> Template {
+    rocket::info!("input: gid: {:?} title: '{:?}'", input.gid, input.title);
+
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let group = get_group_by_gid(db, input.gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    let min_title_length = 10;
+    let title = input.title.to_owned();
+    if title.len() < min_title_length {
+        return Template::render(
+            "message",
+            context! {title: "Too short a title", message: format!("Minimal title length {} Current title len: {}", min_title_length, title.len()), config, visitor},
+        );
+    }
+    // TODO: no < in title
+
+    let description = input.description.to_owned();
+    // TODO validate the description - disable < character
+
+    let location = input.location.to_owned();
+
+    let date = input.date.to_owned();
+    // TODO validate date format and that it is in the futurn (at least 1 hour ahead)?
+
+    let eid = increment(db, "event").await.unwrap();
+
+    let event = Event {
+        eid,
+        title,
+        description,
+        date,
+        location,
+        group_id: input.gid,
+    };
+    match add_event(db, &event).await {
+        Ok(result) => result,
+        Err(err) => {
+            rocket::info!("Error while trying to add event {err}");
+            // TODO special reporting when the email is already in the system
+            return Template::render(
+                "message",
+                context! {title: "Adding event failed", message: "Could not add event.", config, visitor},
+            );
+        }
+    };
+
+    Template::render(
+        "message",
+        context! {title: "Event added", message: "Event added", config, visitor},
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -754,6 +881,8 @@ fn rocket() -> _ {
             "/",
             routes![
                 about,
+                add_event_get,
+                add_event_post,
                 event_get,
                 groups_get,
                 group_get,

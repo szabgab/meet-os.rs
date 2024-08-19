@@ -28,7 +28,7 @@ pub struct Event {
     pub date: String,
     pub location: String,
     pub group_id: usize,
-    pub body: String,
+    pub description: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

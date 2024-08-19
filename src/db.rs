@@ -49,6 +49,14 @@ pub async fn add_user(db: &Surreal<Client>, user: &User) -> surrealdb::Result<()
     Ok(())
 }
 
+pub async fn add_event(db: &Surreal<Client>, event: &Event) -> surrealdb::Result<()> {
+    rocket::info!("add event: '{}' code: '{}'", event.eid, event.title);
+
+    db.create(Resource::from("event")).content(event).await?;
+
+    Ok(())
+}
+
 pub async fn add_group(db: &Surreal<Client>, group: &Group) -> surrealdb::Result<()> {
     rocket::info!("add group: '{}'", group.name);
 
@@ -215,7 +223,7 @@ pub async fn get_group_by_gid(
 
 pub async fn get_events(db: &Surreal<Client>) -> surrealdb::Result<Vec<Event>> {
     rocket::info!("get_events");
-    let mut response = db.query("SELECT * FROM group;").await?;
+    let mut response = db.query("SELECT * FROM event;").await?;
     let entries: Vec<Event> = response.take(0)?;
     for ent in &entries {
         rocket::info!("event name {}", ent.title);
