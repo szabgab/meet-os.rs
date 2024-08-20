@@ -12,6 +12,14 @@
        {{description | safe}}
 
        Organized by <a href="/group/{{ group.gid }}">{{ group.name }}</a>.
+
+       {% if visitor.logged_in %}
+         {% if visitor.user.uid == group.owner %}
+            if in future
+              <a href="/edit-event?eid={{event.eid}}">edit</a>
+         {% endif %}
+       {% endif %}
+
     </div>
   </div>
 </section>
