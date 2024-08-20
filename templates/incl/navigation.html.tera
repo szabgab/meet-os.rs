@@ -25,7 +25,7 @@
           <div class="navbar-item has-dropdown is-hoverable">
             {% if visitor.logged_in %}
               <a href="/logout" class="navbar-item">Logout</a>
-              <a href="/profile" class="navbar-item">Profile</a>
+              <a href="/profile" class="navbar-item">Profile ({{visitor.user.name}})</a>
             {% else %}
               <a href="/register" class="navbar-item">Register</a>
               <a href="/login" class="navbar-item">Login</a>
