@@ -31,10 +31,9 @@ use pbkdf2::{
 use meetings::db;
 
 use meetings::{
-    add_event, add_user, get_event_by_eid, get_events_by_group_id, get_group_by_gid, get_groups,
-    get_groups_by_membership_id, get_groups_by_owner_id, get_membership, get_public_config,
-    get_user_by_email, get_user_by_id, get_users, increment, join_group, leave_group, sendgrid,
-    verify_code, EmailAddress, Event, MyConfig, User,
+    get_groups, get_groups_by_membership_id, get_groups_by_owner_id, get_membership,
+    get_public_config, get_user_by_email, get_user_by_id, get_users, increment, join_group,
+    leave_group, sendgrid, verify_code, EmailAddress, Event, MyConfig, User,
 };
 
 use web::Visitor;
@@ -472,7 +471,7 @@ async fn register_post(
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
     };
-    match add_user(dbh, &user).await {
+    match db::add_user(dbh, &user).await {
         Ok(result) => result,
         Err(err) => {
             rocket::info!("Error while trying to add user {err}");
@@ -593,7 +592,7 @@ async fn join_group_get(
         );
     };
 
-    let group = get_group_by_gid(dbh, gid).await.unwrap();
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap();
     if group.is_none() {
         return Template::render(
             "message",
@@ -637,7 +636,7 @@ async fn leave_group_get(
         );
     };
 
-    let group = get_group_by_gid(dbh, gid).await.unwrap();
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap();
     if group.is_none() {
         return Template::render(
             "message",
@@ -700,8 +699,8 @@ async fn event_get(
     id: usize,
 ) -> Template {
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
-    let event = get_event_by_eid(dbh, id).await.unwrap().unwrap();
-    let group = get_group_by_gid(dbh, event.group_id)
+    let event = db::get_event_by_eid(dbh, id).await.unwrap().unwrap();
+    let group = db::get_group_by_gid(dbh, event.group_id)
         .await
         .unwrap()
         .unwrap();
@@ -732,7 +731,7 @@ async fn group_get(
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    let group = match get_group_by_gid(dbh, gid).await {
+    let group = match db::get_group_by_gid(dbh, gid).await {
         Ok(group) => match group {
             Some(group) => group,
             None => {
@@ -759,7 +758,7 @@ async fn group_get(
         None
     };
 
-    let events = get_events_by_group_id(dbh, gid).await;
+    let events = db::get_events_by_group_id(dbh, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
     let owner = get_user_by_id(dbh, group.owner).await.unwrap().unwrap();
@@ -920,7 +919,7 @@ async fn add_event_get(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let group = get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
 
     if group.owner != uid {
         return Template::render(
@@ -961,7 +960,7 @@ async fn add_event_post(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let group = get_group_by_gid(dbh, input.gid).await.unwrap().unwrap();
+    let group = db::get_group_by_gid(dbh, input.gid).await.unwrap().unwrap();
 
     if group.owner != uid {
         return Template::render(
@@ -998,7 +997,7 @@ async fn add_event_post(
         location,
         group_id: input.gid,
     };
-    match add_event(dbh, &event).await {
+    match db::add_event(dbh, &event).await {
         Ok(result) => result,
         Err(err) => {
             rocket::info!("Error while trying to add event {err}");
