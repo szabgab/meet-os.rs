@@ -498,7 +498,7 @@ async fn verify(
     rocket::info!("process: {process}, code: {code}");
 
     let config = get_public_config();
-    let mut visitor = Visitor::new(cookies, dbh, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     // TODO take the process into account at the verification
     if let Ok(Some(user)) = db::verify_code(dbh, process, code).await {
@@ -513,7 +513,9 @@ async fn verify(
         notify::admin_new_user_verified(myconfig, &user).await;
 
         // take into account the newly set cookie value
-        visitor.logged_in = true;
+        #[allow(clippy::shadow_unrelated)]
+        let visitor = Visitor::new_after_login(&user.email, dbh, myconfig).await;
+
         return Template::render(
             "message",
             context! {title: title, message: message, config, visitor},
