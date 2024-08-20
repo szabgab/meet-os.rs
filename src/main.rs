@@ -28,11 +28,13 @@ use pbkdf2::{
     Pbkdf2,
 };
 
+use meetings::db;
+
 use meetings::{
-    add_event, add_user, db, get_event_by_eid, get_events, get_events_by_group_id,
-    get_group_by_gid, get_groups, get_groups_by_membership_id, get_groups_by_owner_id,
-    get_membership, get_public_config, get_user_by_email, get_user_by_id, get_users, increment,
-    join_group, leave_group, sendgrid, verify_code, EmailAddress, Event, MyConfig, User,
+    add_event, add_user, get_event_by_eid, get_events_by_group_id, get_group_by_gid, get_groups,
+    get_groups_by_membership_id, get_groups_by_owner_id, get_membership, get_public_config,
+    get_user_by_email, get_user_by_id, get_users, increment, join_group, leave_group, sendgrid,
+    verify_code, EmailAddress, Event, MyConfig, User,
 };
 
 use web::Visitor;
@@ -85,7 +87,7 @@ async fn index(
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    let events = match get_events(dbh).await {
+    let events = match db::get_events(dbh).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -129,7 +131,7 @@ async fn events(
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    let events = match get_events(dbh).await {
+    let events = match db::get_events(dbh).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
