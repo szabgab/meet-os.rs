@@ -6,6 +6,8 @@ extern crate rocket;
 #[allow(clippy::pub_with_shorthand)]
 pub(crate) mod admin;
 #[allow(clippy::pub_with_shorthand)]
+pub(crate) mod public;
+#[allow(clippy::pub_with_shorthand)]
 pub(crate) mod web;
 
 mod notify;
@@ -144,54 +146,6 @@ async fn events(
             events,
             config,
             visitor,
-        },
-    )
-}
-
-#[get("/about")]
-async fn about(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    Template::render(
-        "about",
-        context! {
-            title: "About Meet-OS",
-            config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
-        },
-    )
-}
-
-#[get("/privacy")]
-async fn privacy(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    Template::render(
-        "privacy",
-        context! {
-            title: "Privacy Policy",
-            config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
-        },
-    )
-}
-
-#[get("/soc")]
-async fn soc(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-) -> Template {
-    Template::render(
-        "soc",
-        context! {
-            title: "Standard of Conduct",
-            config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
         },
     )
 }
@@ -1015,10 +969,10 @@ async fn add_event_post(
 fn rocket() -> _ {
     rocket::build()
         .mount("/admin", admin::routes())
+        .mount("/", public::routes())
         .mount(
             "/",
             routes![
-                about,
                 add_event_get,
                 add_event_post,
                 event_get,
@@ -1032,11 +986,9 @@ fn rocket() -> _ {
                 logout_get,
                 login_get,
                 login_post,
-                privacy,
                 register_get,
                 register_post,
                 show_profile,
-                soc,
                 user,
                 verify
             ],
