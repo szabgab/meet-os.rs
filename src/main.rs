@@ -527,6 +527,8 @@ async fn verify(
             _ => ("Oups", "Big opus and TODO"),
         };
 
+        notify::admin_new_user_verified(myconfig, &user).await;
+
         // take into account the newly set cookie value
         visitor.logged_in = true;
         return Template::render(
