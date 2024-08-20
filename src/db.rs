@@ -8,7 +8,7 @@ use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::{Counter, Event, Group, User};
+use crate::{Counter, Event, Group, Membership, User};
 
 /// # Panics
 ///
@@ -34,6 +34,12 @@ pub async fn get_database() -> Surreal<Client> {
     db.use_ns(&db_namespace).use_db(&db_name).await.unwrap();
     // TODO: do this only when we create the database
     db.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
+        .await
+        .unwrap()
+        .check()
+        .unwrap();
+
+    db.query("DEFINE INDEX member_ship ON TABLE membership COLUMNS uid, gid UNIQUE")
         .await
         .unwrap()
         .check()
@@ -276,6 +282,54 @@ pub async fn get_event_by_eid(
     if let Some(entry) = entry.as_ref() {
         rocket::info!("Event title: {}", entry.title);
     }
+
+    Ok(entry)
+}
+
+pub async fn join_group(db: &Surreal<Client>, gid: usize, uid: usize) -> surrealdb::Result<()> {
+    rocket::info!("user {} joins group: {}", uid, gid);
+
+    let membership = Membership {
+        uid,
+        gid,
+        admin: false,
+    };
+
+    db.create(Resource::from("membership"))
+        .content(membership)
+        .await?;
+
+    Ok(())
+}
+
+/// # Panics
+///
+/// Panics when it fails
+pub async fn leave_group(db: &Surreal<Client>, gid: usize, uid: usize) -> surrealdb::Result<()> {
+    rocket::info!("user {} leaves group: {}", uid, gid);
+
+    db.query("DELETE membership WHERE uid=$uid AND gid=$gid")
+        .bind(("uid", uid))
+        .bind(("gid", gid))
+        .await?
+        .check()
+        .unwrap();
+
+    Ok(())
+}
+
+pub async fn get_membership(
+    db: &Surreal<Client>,
+    gid: usize,
+    uid: usize,
+) -> surrealdb::Result<Option<Membership>> {
+    let mut response = db
+        .query("SELECT * FROM membership WHERE gid=$gid AND uid=$uid;")
+        .bind(("gid", gid))
+        .bind(("uid", uid))
+        .await?;
+
+    let entry: Option<Membership> = response.take(0)?;
 
     Ok(entry)
 }

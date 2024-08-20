@@ -30,9 +30,9 @@ use pbkdf2::{
 
 use meetings::{
     add_event, add_user, db, get_event_by_eid, get_events, get_events_by_group_id,
-    get_group_by_gid, get_groups, get_groups_by_owner_id, get_public_config, get_user_by_email,
-    get_user_by_id, get_users, increment, sendgrid, verify_code, EmailAddress, Event, MyConfig,
-    User,
+    get_group_by_gid, get_groups, get_groups_by_owner_id, get_membership, get_public_config,
+    get_user_by_email, get_user_by_id, get_users, increment, join_group, leave_group, sendgrid,
+    verify_code, EmailAddress, Event, MyConfig, User,
 };
 
 use web::Visitor;
@@ -542,6 +542,94 @@ async fn verify(
     )
 }
 
+#[get("/join-group?<gid>")]
+async fn join_group_get(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    gid: usize,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let group = get_group_by_gid(db, gid).await.unwrap();
+    if group.is_none() {
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: "No such group", config, visitor},
+        );
+    }
+    let group = group.unwrap();
+
+    let uid = visitor.user.clone().unwrap().uid;
+    if uid == group.owner {
+        return Template::render(
+            "message",
+            context! {title: "You are the owner of this group", message: "You are the owner of this group", config, visitor},
+        );
+    }
+
+    // TODO if uid is already a member - reject
+
+    join_group(db, gid, uid).await.unwrap();
+
+    Template::render(
+        "message",
+        context! {title: "Membership", message: format!(r#"User added to <a href="/group/{gid}">group</a>"#), config, visitor},
+    )
+}
+
+#[get("/leave-group?<gid>")]
+async fn leave_group_get(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    gid: usize,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let group = get_group_by_gid(db, gid).await.unwrap();
+    if group.is_none() {
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: "No such group", config, visitor},
+        );
+    }
+    let group = group.unwrap();
+
+    let uid = visitor.user.clone().unwrap().uid;
+    if uid == group.owner {
+        return Template::render(
+            "message",
+            context! {title: "You are the owner of this group", message: "You are the owner of this group", config, visitor},
+        );
+    }
+
+    // TODO if uid is not a member - reject
+
+    leave_group(db, gid, uid).await.unwrap();
+
+    Template::render(
+        "message",
+        context! {title: "Membership", message: format!(r#"User removed from <a href="/group/{gid}">group</a>"#), config, visitor},
+    )
+}
+
 #[get("/profile")]
 async fn show_profile(
     cookies: &CookieJar<'_>,
@@ -623,6 +711,14 @@ async fn group_get(
         }
     };
 
+    let membership = if visitor.logged_in {
+        get_membership(db, gid, visitor.clone().user.unwrap().uid)
+            .await
+            .unwrap()
+    } else {
+        None
+    };
+
     let events = get_events_by_group_id(db, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
@@ -637,7 +733,8 @@ async fn group_get(
             events: events,
             config,
             visitor,
-            owner
+            owner,
+            membership,
         },
     )
 }
@@ -893,6 +990,8 @@ fn rocket() -> _ {
                 groups_get,
                 group_get,
                 index,
+                join_group_get,
+                leave_group_get,
                 list_users,
                 logout_get,
                 login_get,

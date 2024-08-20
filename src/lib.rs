@@ -40,6 +40,13 @@ pub struct Group {
     pub owner: usize,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Membership {
+    pub gid: usize,
+    pub uid: usize,
+    pub admin: bool,
+}
+
 #[derive(Debug)]
 pub struct EmailAddress {
     pub name: String,

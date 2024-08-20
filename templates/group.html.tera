@@ -13,8 +13,18 @@
         </div>
         {% if visitor.logged_in %}
           {% if visitor.user.uid == owner.uid %}
-            <a href="/add-event?gid={{group.gid}}">Add event</a>
+             you are the owner of this group
+             <a href="/add-event?gid={{group.gid}}">Add event</a>
+             <a href="/edit-group?gid={{group.gid}}">Edit group<a>
+          {% else %}
+            {% if membership %}
+               You are a member. <a href="/leave-group?gid={{group.gid}}">leave group</a>
+            {% else %}
+               <a href="/join-group?gid={{group.gid}}">join this group</a>
+            {% endif %}
           {% endif %}
+        {% else %}
+          <a href="/login">Login</a>
         {% endif %}
 
         {% if events %}
