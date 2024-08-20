@@ -8,6 +8,8 @@ pub(crate) mod admin;
 #[allow(clippy::pub_with_shorthand)]
 pub(crate) mod web;
 
+mod notify;
+
 use std::env;
 use std::fs::File;
 use std::io::Write;
@@ -487,6 +489,8 @@ async fn register_post(
         )
         .await;
     }
+
+    notify::admin_new_user_registered(myconfig, &user).await;
 
     Template::render(
         "message",
