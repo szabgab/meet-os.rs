@@ -78,14 +78,14 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
 #[get("/")]
 async fn index(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     rocket::info!("home");
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    let events = match get_events(db).await {
+    let events = match get_events(dbh).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -96,7 +96,7 @@ async fn index(
         }
     };
 
-    let groups = match get_groups(db).await {
+    let groups = match get_groups(dbh).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -122,14 +122,14 @@ async fn index(
 #[get("/events")]
 async fn events(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     rocket::info!("home");
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    let events = match get_events(db).await {
+    let events = match get_events(dbh).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -154,7 +154,7 @@ async fn events(
 #[get("/about")]
 async fn about(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     Template::render(
@@ -162,7 +162,7 @@ async fn about(
         context! {
             title: "About Meet-OS",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
         },
     )
 }
@@ -170,7 +170,7 @@ async fn about(
 #[get("/privacy")]
 async fn privacy(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     Template::render(
@@ -178,7 +178,7 @@ async fn privacy(
         context! {
             title: "Privacy Policy",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
         },
     )
 }
@@ -186,7 +186,7 @@ async fn privacy(
 #[get("/soc")]
 async fn soc(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     Template::render(
@@ -194,7 +194,7 @@ async fn soc(
         context! {
             title: "Standard of Conduct",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
         },
     )
 }
@@ -202,7 +202,7 @@ async fn soc(
 #[get("/login")]
 async fn login_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     Template::render(
@@ -210,7 +210,7 @@ async fn login_get(
         context! {
             title: "Login",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
         },
     )
 }
@@ -218,14 +218,14 @@ async fn login_get(
 #[post("/login", data = "<input>")]
 async fn login_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     input: Form<LoginForm<'_>>,
 ) -> Template {
     rocket::info!("rocket login: {:?}", input.email);
 
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
@@ -235,7 +235,7 @@ async fn login_post(
         );
     }
 
-    let user = match get_user_by_email(db, &email).await {
+    let user = match get_user_by_email(dbh, &email).await {
         Ok(user) => user,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -280,7 +280,7 @@ async fn login_post(
     // It seems despite calling add_private, the cookies will still return the old value so
     // for now we have a separate constructor for the Visitor
     #[allow(clippy::shadow_unrelated)]
-    let visitor = Visitor::new_after_login(&email, db, myconfig).await;
+    let visitor = Visitor::new_after_login(&email, dbh, myconfig).await;
     Template::render(
         "message",
         context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, visitor},
@@ -290,11 +290,11 @@ async fn login_post(
 #[get("/logout")]
 async fn logout_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     // TODO shall we check if the cookie was even there?
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
     if !visitor.logged_in {
         rocket::warn!("Trying to log out while not logged in");
     }
@@ -313,7 +313,7 @@ async fn logout_get(
 // #[post("/reset-password", data = "<input>")]
 // async fn reset_password_post(
 //     cookies: &CookieJar<'_>,
-//     db: &State<Surreal<Db>>,
+//     dbh: &State<Surreal<Db>>,
 //     input: Form<LoginForm<'_>>,
 //     myconfig: &State<MyConfig>,
 // ) -> Template {
@@ -327,7 +327,7 @@ async fn logout_get(
 //         );
 //     }
 
-//     let user: User = match get_user_by_email(db, &email).await {
+//     let user: User = match get_user_by_email(dbh, &email).await {
 //         Ok(user) => match user {
 //             Some(user) => user,
 //             None => {
@@ -349,7 +349,7 @@ async fn logout_get(
 //     let process = "login";
 //     let code = Uuid::new_v4();
 
-//     match add_login_code_to_user(db, &email, process, code.to_string().as_str()).await {
+//     match add_login_code_to_user(dbh, &email, process, code.to_string().as_str()).await {
 //         Ok(_result) => (),
 //         Err(err) => {
 //             rocket::info!("Error while trying to add user {err}");
@@ -401,7 +401,7 @@ async fn logout_get(
 #[get("/register")]
 async fn register_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     Template::render(
@@ -409,7 +409,7 @@ async fn register_get(
         context! {
             title: "Register",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
         },
     )
 }
@@ -417,14 +417,14 @@ async fn register_get(
 #[post("/register", data = "<input>")]
 async fn register_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     input: Form<RegistrationForm<'_>>,
 ) -> Template {
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     // email: lowerase, remove spaces from sides
     // validate format @
@@ -458,7 +458,7 @@ async fn register_post(
         }
     };
 
-    let uid = increment(db, "user").await.unwrap();
+    let uid = increment(dbh, "user").await.unwrap();
 
     let user = User {
         uid,
@@ -470,7 +470,7 @@ async fn register_post(
         date: "date".to_owned(), // TODO get current timestamp
         verified: false,
     };
-    match add_user(db, &user).await {
+    match add_user(dbh, &user).await {
         Ok(result) => result,
         Err(err) => {
             rocket::info!("Error while trying to add user {err}");
@@ -539,7 +539,7 @@ async fn register_post(
 #[get("/verify/<process>/<code>")]
 async fn verify(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     process: &str,
     code: &str,
@@ -547,10 +547,10 @@ async fn verify(
     rocket::info!("process: {process}, code: {code}");
 
     let config = get_public_config();
-    let mut visitor = Visitor::new(cookies, db, myconfig).await;
+    let mut visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     // TODO take the process into account at the verification
-    if let Ok(Some(user)) = verify_code(db, process, code).await {
+    if let Ok(Some(user)) = verify_code(dbh, process, code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
         let (title, message) = match process {
@@ -577,12 +577,12 @@ async fn verify(
 #[get("/join-group?<gid>")]
 async fn join_group_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -591,7 +591,7 @@ async fn join_group_get(
         );
     };
 
-    let group = get_group_by_gid(db, gid).await.unwrap();
+    let group = get_group_by_gid(dbh, gid).await.unwrap();
     if group.is_none() {
         return Template::render(
             "message",
@@ -610,7 +610,7 @@ async fn join_group_get(
 
     // TODO if uid is already a member - reject
 
-    join_group(db, gid, uid).await.unwrap();
+    join_group(dbh, gid, uid).await.unwrap();
 
     Template::render(
         "message",
@@ -621,12 +621,12 @@ async fn join_group_get(
 #[get("/leave-group?<gid>")]
 async fn leave_group_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -635,7 +635,7 @@ async fn leave_group_get(
         );
     };
 
-    let group = get_group_by_gid(db, gid).await.unwrap();
+    let group = get_group_by_gid(dbh, gid).await.unwrap();
     if group.is_none() {
         return Template::render(
             "message",
@@ -654,7 +654,7 @@ async fn leave_group_get(
 
     // TODO if uid is not a member - reject
 
-    leave_group(db, gid, uid).await.unwrap();
+    leave_group(dbh, gid, uid).await.unwrap();
 
     Template::render(
         "message",
@@ -665,11 +665,11 @@ async fn leave_group_get(
 #[get("/profile")]
 async fn show_profile(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -679,9 +679,9 @@ async fn show_profile(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let owned_groups = get_groups_by_owner_id(db, uid).await.unwrap();
+    let owned_groups = get_groups_by_owner_id(dbh, uid).await.unwrap();
 
-    let groups = get_groups_by_membership_id(db, uid).await.unwrap();
+    let groups = get_groups_by_membership_id(dbh, uid).await.unwrap();
     rocket::info!("{groups:?}");
 
     Template::render(
@@ -693,13 +693,16 @@ async fn show_profile(
 #[get("/event/<id>")]
 async fn event_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     id: usize,
 ) -> Template {
-    let visitor = Visitor::new(cookies, db, myconfig).await;
-    let event = get_event_by_eid(db, id).await.unwrap().unwrap();
-    let group = get_group_by_gid(db, event.group_id).await.unwrap().unwrap();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+    let event = get_event_by_eid(dbh, id).await.unwrap().unwrap();
+    let group = get_group_by_gid(dbh, event.group_id)
+        .await
+        .unwrap()
+        .unwrap();
 
     let description = markdown2html(&event.description).unwrap();
 
@@ -719,15 +722,15 @@ async fn event_get(
 #[get("/group/<gid>")]
 async fn group_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     gid: usize,
 ) -> Template {
     rocket::info!("group_get: {gid}");
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    let group = match get_group_by_gid(db, gid).await {
+    let group = match get_group_by_gid(dbh, gid).await {
         Ok(group) => match group {
             Some(group) => group,
             None => {
@@ -747,17 +750,17 @@ async fn group_get(
     };
 
     let membership = if visitor.logged_in {
-        get_membership(db, gid, visitor.clone().user.unwrap().uid)
+        get_membership(dbh, gid, visitor.clone().user.unwrap().uid)
             .await
             .unwrap()
     } else {
         None
     };
 
-    let events = get_events_by_group_id(db, gid).await;
+    let events = get_events_by_group_id(dbh, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
-    let owner = get_user_by_id(db, group.owner).await.unwrap().unwrap();
+    let owner = get_user_by_id(dbh, group.owner).await.unwrap().unwrap();
 
     Template::render(
         "group",
@@ -777,13 +780,13 @@ async fn group_get(
 #[get("/groups")]
 async fn groups_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    match get_groups(db).await {
+    match get_groups(dbh).await {
         Ok(groups) => Template::render(
             "groups",
             context! {title: "Groups", groups: groups, config, visitor},
@@ -797,7 +800,7 @@ async fn groups_get(
         }
     }
 
-    // if let Ok(groups) = get_groups_from_database(db).await {
+    // if let Ok(groups) = get_groups_from_database(dbh).await {
     //     return Template::render(
     //         "groups",
     //         context! {title: "Groups", groups: groups, config: get_public_config(), visitor},
@@ -812,12 +815,12 @@ async fn groups_get(
 #[get("/users")]
 async fn list_users(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -832,7 +835,7 @@ async fn list_users(
     );
 
     // TODO filtering  could be moved to the database call
-    let all_users = get_users(db).await.unwrap();
+    let all_users = get_users(dbh).await.unwrap();
     let users = all_users
         .into_iter()
         .filter(|user| user.verified)
@@ -852,13 +855,13 @@ async fn list_users(
 #[get("/user/<uid>")]
 async fn user(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -867,7 +870,7 @@ async fn user(
         );
     };
 
-    let user = match get_user_by_id(db, uid).await.unwrap() {
+    let user = match get_user_by_id(dbh, uid).await.unwrap() {
         None => {
             return Template::render(
                 "message",
@@ -898,14 +901,14 @@ async fn user(
 #[get("/add-event?<gid>")]
 async fn add_event_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     gid: usize,
 ) -> Template {
     rocket::info!("add-event");
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -915,7 +918,7 @@ async fn add_event_get(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let group = get_group_by_gid(db, gid).await.unwrap().unwrap();
+    let group = get_group_by_gid(dbh, gid).await.unwrap().unwrap();
 
     if group.owner != uid {
         return Template::render(
@@ -929,7 +932,7 @@ async fn add_event_get(
         context! {
             title: "Add event",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, db, myconfig).await,
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
             gid: gid
         },
     )
@@ -938,7 +941,7 @@ async fn add_event_get(
 #[post("/edit-event", data = "<input>")]
 async fn add_event_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     input: Form<EventForm<'_>>,
 ) -> Template {
@@ -946,7 +949,7 @@ async fn add_event_post(
 
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -956,7 +959,7 @@ async fn add_event_post(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let group = get_group_by_gid(db, input.gid).await.unwrap().unwrap();
+    let group = get_group_by_gid(dbh, input.gid).await.unwrap().unwrap();
 
     if group.owner != uid {
         return Template::render(
@@ -983,7 +986,7 @@ async fn add_event_post(
     let date = input.date.to_owned();
     // TODO validate date format and that it is in the futurn (at least 1 hour ahead)?
 
-    let eid = increment(db, "event").await.unwrap();
+    let eid = increment(dbh, "event").await.unwrap();
 
     let event = Event {
         eid,
@@ -993,7 +996,7 @@ async fn add_event_post(
         location,
         group_id: input.gid,
     };
-    match add_event(db, &event).await {
+    match add_event(dbh, &event).await {
         Ok(result) => result,
         Err(err) => {
             rocket::info!("Error while trying to add event {err}");
