@@ -28,12 +28,12 @@ pub fn routes() -> Vec<Route> {
 #[get("/")]
 async fn admin(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -67,12 +67,12 @@ async fn admin(
 #[get("/users")]
 async fn admin_users(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -93,7 +93,7 @@ async fn admin_users(
         );
     }
 
-    let users = get_users(db).await.unwrap();
+    let users = get_users(dbh).await.unwrap();
 
     Template::render(
         "admin_users",
@@ -109,11 +109,11 @@ async fn admin_users(
 #[get("/create-group")]
 async fn create_group_get(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -132,7 +132,7 @@ async fn create_group_get(
         );
     };
 
-    let users = get_users(db).await.unwrap();
+    let users = get_users(dbh).await.unwrap();
 
     Template::render(
         "create_group",
@@ -143,14 +143,14 @@ async fn create_group_get(
 #[post("/create-group", data = "<input>")]
 async fn create_group_post(
     cookies: &CookieJar<'_>,
-    db: &State<Surreal<Client>>,
+    dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
     let config = get_public_config();
 
-    let visitor = Visitor::new(cookies, db, myconfig).await;
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -171,7 +171,7 @@ async fn create_group_post(
         );
     }
 
-    let gid = increment(db, "group").await.unwrap();
+    let gid = increment(dbh, "group").await.unwrap();
     // TODO verify that the given owner is a valid user-id (FOREIGN KEY should handle this)
     // //let owner = get_user_by_email(db, input.owner).await.unwrap();
     // if owner.is_none() {
@@ -191,7 +191,7 @@ async fn create_group_post(
         gid,
     };
 
-    match add_group(db, &group).await {
+    match add_group(dbh, &group).await {
         Ok(_result) => Template::render(
             "message",
             context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, visitor},

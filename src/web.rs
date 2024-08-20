@@ -23,7 +23,7 @@ pub struct Visitor {
 impl Visitor {
     pub async fn new(
         cookies: &CookieJar<'_>,
-        db: &State<Surreal<Client>>,
+        dbh: &State<Surreal<Client>>,
         myconfig: &State<MyConfig>,
     ) -> Self {
         let mut me = Self {
@@ -34,7 +34,7 @@ impl Visitor {
 
         if let Some(cookie_user) = get_logged_in(cookies) {
             me.logged_in = true;
-            if let Ok(user) = get_user_by_email(db, &cookie_user.email).await {
+            if let Ok(user) = get_user_by_email(dbh, &cookie_user.email).await {
                 me.user = user;
                 //rocket::info!("email: {}", user.email);
                 if myconfig.admins.contains(&cookie_user.email.clone()) {
@@ -48,7 +48,7 @@ impl Visitor {
 
     pub async fn new_after_login(
         email: &str,
-        db: &State<Surreal<Client>>,
+        dbh: &State<Surreal<Client>>,
         myconfig: &State<MyConfig>,
     ) -> Self {
         let mut me = Self {
@@ -57,7 +57,7 @@ impl Visitor {
             user: None,
         };
 
-        if let Ok(user) = get_user_by_email(db, email).await {
+        if let Ok(user) = get_user_by_email(dbh, email).await {
             me.user = user;
             //rocket::info!("email: {}", user.email);
             if myconfig.admins.contains(&email.to_owned()) {
