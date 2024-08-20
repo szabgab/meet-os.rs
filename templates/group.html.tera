@@ -21,7 +21,7 @@
           <h2>Events</h2>
           <ul>
             {% for event in events %}
-              <li><a href="/event/{{event.id}}">{{event.date}} - {{event.title}}</a></li>
+              <li><a href="/event/{{event.eid}}">{{event.date}} - {{event.title}}</a></li>
             {% endfor %}
           </ul>
         {% endif %}
