@@ -30,11 +30,7 @@ use pbkdf2::{
 
 use meetings::db;
 
-use meetings::{
-    get_groups, get_groups_by_membership_id, get_groups_by_owner_id, get_membership,
-    get_public_config, get_user_by_email, get_user_by_id, get_users, increment, join_group,
-    leave_group, sendgrid, verify_code, EmailAddress, Event, MyConfig, User,
-};
+use meetings::{get_public_config, sendgrid, EmailAddress, Event, MyConfig, User};
 
 use web::Visitor;
 
@@ -97,7 +93,7 @@ async fn index(
         }
     };
 
-    let groups = match get_groups(dbh).await {
+    let groups = match db::get_groups(dbh).await {
         Ok(val) => val,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -236,7 +232,7 @@ async fn login_post(
         );
     }
 
-    let user = match get_user_by_email(dbh, &email).await {
+    let user = match db::get_user_by_email(dbh, &email).await {
         Ok(user) => user,
         Err(err) => {
             rocket::error!("Error: {err}");
@@ -328,7 +324,7 @@ async fn logout_get(
 //         );
 //     }
 
-//     let user: User = match get_user_by_email(dbh, &email).await {
+//     let user: User = match db::get_user_by_email(dbh, &email).await {
 //         Ok(user) => match user {
 //             Some(user) => user,
 //             None => {
@@ -459,7 +455,7 @@ async fn register_post(
         }
     };
 
-    let uid = increment(dbh, "user").await.unwrap();
+    let uid = db::increment(dbh, "user").await.unwrap();
 
     let user = User {
         uid,
@@ -551,7 +547,7 @@ async fn verify(
     let mut visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     // TODO take the process into account at the verification
-    if let Ok(Some(user)) = verify_code(dbh, process, code).await {
+    if let Ok(Some(user)) = db::verify_code(dbh, process, code).await {
         rocket::info!("verified: {}", user.email);
         cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
         let (title, message) = match process {
@@ -611,7 +607,7 @@ async fn join_group_get(
 
     // TODO if uid is already a member - reject
 
-    join_group(dbh, gid, uid).await.unwrap();
+    db::join_group(dbh, gid, uid).await.unwrap();
 
     Template::render(
         "message",
@@ -655,7 +651,7 @@ async fn leave_group_get(
 
     // TODO if uid is not a member - reject
 
-    leave_group(dbh, gid, uid).await.unwrap();
+    db::leave_group(dbh, gid, uid).await.unwrap();
 
     Template::render(
         "message",
@@ -680,9 +676,9 @@ async fn show_profile(
     };
 
     let uid = visitor.user.clone().unwrap().uid;
-    let owned_groups = get_groups_by_owner_id(dbh, uid).await.unwrap();
+    let owned_groups = db::get_groups_by_owner_id(dbh, uid).await.unwrap();
 
-    let groups = get_groups_by_membership_id(dbh, uid).await.unwrap();
+    let groups = db::get_groups_by_membership_id(dbh, uid).await.unwrap();
     rocket::info!("{groups:?}");
 
     Template::render(
@@ -751,7 +747,7 @@ async fn group_get(
     };
 
     let membership = if visitor.logged_in {
-        get_membership(dbh, gid, visitor.clone().user.unwrap().uid)
+        db::get_membership(dbh, gid, visitor.clone().user.unwrap().uid)
             .await
             .unwrap()
     } else {
@@ -761,7 +757,7 @@ async fn group_get(
     let events = db::get_events_by_group_id(dbh, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
-    let owner = get_user_by_id(dbh, group.owner).await.unwrap().unwrap();
+    let owner = db::get_user_by_id(dbh, group.owner).await.unwrap().unwrap();
 
     Template::render(
         "group",
@@ -787,7 +783,7 @@ async fn groups_get(
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
-    match get_groups(dbh).await {
+    match db::get_groups(dbh).await {
         Ok(groups) => Template::render(
             "groups",
             context! {title: "Groups", groups: groups, config, visitor},
@@ -801,7 +797,7 @@ async fn groups_get(
         }
     }
 
-    // if let Ok(groups) = get_groups_from_database(dbh).await {
+    // if let Ok(groups) = db::get_groups_from_database(dbh).await {
     //     return Template::render(
     //         "groups",
     //         context! {title: "Groups", groups: groups, config: get_public_config(), visitor},
@@ -836,7 +832,7 @@ async fn list_users(
     );
 
     // TODO filtering  could be moved to the database call
-    let all_users = get_users(dbh).await.unwrap();
+    let all_users = db::get_users(dbh).await.unwrap();
     let users = all_users
         .into_iter()
         .filter(|user| user.verified)
@@ -871,7 +867,7 @@ async fn user(
         );
     };
 
-    let user = match get_user_by_id(dbh, uid).await.unwrap() {
+    let user = match db::get_user_by_id(dbh, uid).await.unwrap() {
         None => {
             return Template::render(
                 "message",
@@ -987,7 +983,7 @@ async fn add_event_post(
     let date = input.date.to_owned();
     // TODO validate date format and that it is in the futurn (at least 1 hour ahead)?
 
-    let eid = increment(dbh, "event").await.unwrap();
+    let eid = db::increment(dbh, "event").await.unwrap();
 
     let event = Event {
         eid,

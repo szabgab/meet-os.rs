@@ -8,10 +8,10 @@ use rocket_dyn_templates::{context, Template};
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
-use crate::db::add_group;
+use crate::db;
 use crate::web::Visitor;
-use crate::{get_public_config, get_users, MyConfig};
-use meetings::{increment, Group};
+use crate::{get_public_config, MyConfig};
+use meetings::Group;
 
 #[derive(FromForm)]
 struct GroupForm<'r> {
@@ -93,7 +93,7 @@ async fn admin_users(
         );
     }
 
-    let users = get_users(dbh).await.unwrap();
+    let users = db::get_users(dbh).await.unwrap();
 
     Template::render(
         "admin_users",
@@ -132,7 +132,7 @@ async fn create_group_get(
         );
     };
 
-    let users = get_users(dbh).await.unwrap();
+    let users = db::get_users(dbh).await.unwrap();
 
     Template::render(
         "create_group",
@@ -171,7 +171,7 @@ async fn create_group_post(
         );
     }
 
-    let gid = increment(dbh, "group").await.unwrap();
+    let gid = db::increment(dbh, "group").await.unwrap();
     // TODO verify that the given owner is a valid user-id (FOREIGN KEY should handle this)
     // //let owner = get_user_by_email(db, input.owner).await.unwrap();
     // if owner.is_none() {
@@ -191,7 +191,7 @@ async fn create_group_post(
         gid,
     };
 
-    match add_group(dbh, &group).await {
+    match db::add_group(dbh, &group).await {
         Ok(_result) => Template::render(
             "message",
             context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, visitor},
