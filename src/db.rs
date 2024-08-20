@@ -193,6 +193,63 @@ pub async fn get_groups(db: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
     Ok(entries)
 }
 
+pub async fn get_groups_by_membership_id(
+    db: &Surreal<Client>,
+    uid: usize,
+) -> surrealdb::Result<Vec<Group>> {
+    rocket::info!("get_groups_by_membership_id: '{uid}'");
+
+    // let mut response = db
+    // .query("SELECT * FROM membership WHERE uid=$uid;")
+    // .bind(("uid", uid))
+    // .await?;
+
+    // let entries: Vec<Membership> = response.take(0)?;
+    // rocket::info!("gids: {entries:?}");
+
+    // let mut response = db
+    // .query("SELECT gid FROM membership WHERE uid=$uid;")
+    // .bind(("uid", uid))
+    // .await?;
+
+    // let entries: Vec<String> = response.take(0)?;
+    // rocket::info!("gids: {entries:?}");
+
+    // let mut response = db
+    //     .query("SELECT * FROM group WHERE gid IN (SELECT gid FROM membership WHERE uid=$uid);")
+    //     .bind(("uid", uid))
+    //     .await?;
+
+    // let mut response = db
+    //     .query("SELECT * FROM group, membership WHERE group.gid=membership.gid AND membership.uid=$uid;")
+    //     .bind(("uid", uid))
+    //     .await?;
+
+    // TODO: make the code above with subexpression work
+    let mut response = db
+        .query("SELECT * FROM membership WHERE uid=$uid;")
+        .bind(("uid", uid))
+        .await?;
+
+    let memberships: Vec<Membership> = response.take(0)?;
+    rocket::info!("members: {memberships:?}");
+
+    let mut groups = vec![];
+    for member in memberships {
+        rocket::info!("gid: {}", member.gid);
+        let mut response2 = db
+            .query("SELECT * FROM group WHERE gid=$gid;")
+            .bind(("gid", member.gid))
+            .await?;
+
+        let entries: Vec<Group> = response2.take(0)?;
+        rocket::info!("entries: {entries:?}");
+        groups.extend(entries);
+    }
+
+    Ok(groups)
+}
+
 pub async fn get_groups_by_owner_id(
     db: &Surreal<Client>,
     uid: usize,

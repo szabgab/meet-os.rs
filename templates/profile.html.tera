@@ -16,6 +16,18 @@
         {% endfor %}
       </table>
     {% endif %}
+
+
+    {% if groups %}
+      <h2 class="title is-4">Group Membership</h2>
+      <table>
+        <tr><th>Name</th></tr>
+        {% for group in groups %}
+          <tr><td><a href="/group/{{group.gid}}">{{group.name}}</a></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
   </div>
 </section>
 

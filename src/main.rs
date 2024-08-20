@@ -30,9 +30,9 @@ use pbkdf2::{
 
 use meetings::{
     add_event, add_user, db, get_event_by_eid, get_events, get_events_by_group_id,
-    get_group_by_gid, get_groups, get_groups_by_owner_id, get_membership, get_public_config,
-    get_user_by_email, get_user_by_id, get_users, increment, join_group, leave_group, sendgrid,
-    verify_code, EmailAddress, Event, MyConfig, User,
+    get_group_by_gid, get_groups, get_groups_by_membership_id, get_groups_by_owner_id,
+    get_membership, get_public_config, get_user_by_email, get_user_by_id, get_users, increment,
+    join_group, leave_group, sendgrid, verify_code, EmailAddress, Event, MyConfig, User,
 };
 
 use web::Visitor;
@@ -649,9 +649,12 @@ async fn show_profile(
     let uid = visitor.user.clone().unwrap().uid;
     let owned_groups = get_groups_by_owner_id(db, uid).await.unwrap();
 
+    let groups = get_groups_by_membership_id(db, uid).await.unwrap();
+    rocket::info!("{groups:?}");
+
     Template::render(
         "profile",
-        context! {title: "Profile", user: visitor.user.clone(), owned_groups, config, visitor},
+        context! {title: "Profile", user: visitor.user.clone(), owned_groups, groups, config, visitor},
     )
 }
 
