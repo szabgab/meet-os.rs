@@ -9,7 +9,7 @@
        <div><b>Date</b>: {{event.date}} UTC</div>
        <div><b>Location</b>: {{event.location}}</div>
 
-       {{body | safe}}
+       {{description | safe}}
 
        Organized by <a href="/group/{{ group.gid }}">{{ group.name }}</a>.
     </div>
