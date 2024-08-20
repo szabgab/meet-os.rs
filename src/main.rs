@@ -119,6 +119,38 @@ async fn index(
     )
 }
 
+#[get("/events")]
+async fn events(
+    cookies: &CookieJar<'_>,
+    db: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    rocket::info!("home");
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, db, myconfig).await;
+
+    let events = match get_events(db).await {
+        Ok(val) => val,
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "Internal error", message: "Internal error", config, visitor},
+            );
+        }
+    };
+
+    Template::render(
+        "events",
+        context! {
+            title: "Events",
+            events,
+            config,
+            visitor,
+        },
+    )
+}
+
 #[get("/about")]
 async fn about(
     cookies: &CookieJar<'_>,
@@ -990,6 +1022,7 @@ fn rocket() -> _ {
                 add_event_get,
                 add_event_post,
                 event_get,
+                events,
                 groups_get,
                 group_get,
                 index,

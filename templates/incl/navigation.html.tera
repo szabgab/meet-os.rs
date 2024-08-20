@@ -12,6 +12,7 @@
         <div class="navbar-start">
           <a href="/" class="navbar-item">Home</a>
           <a href="/groups" class="navbar-item">Groups</a>
+          <a href="/events" class="navbar-item">Events</a>
           {% if visitor.logged_in %}
             <a href="/users" class="navbar-item">Users</a>
           {% endif %}
