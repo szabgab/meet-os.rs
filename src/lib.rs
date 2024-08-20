@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
 
 pub mod db;
-pub use db::*;
 
 pub mod notifications;
 pub use notifications::*;

@@ -28,14 +28,14 @@ use pbkdf2::{
     Pbkdf2,
 };
 
+use surrealdb::engine::remote::ws::Client;
+use surrealdb::Surreal;
+
 use meetings::db;
 
 use meetings::{get_public_config, sendgrid, EmailAddress, Event, MyConfig, User};
 
 use web::Visitor;
-
-use surrealdb::engine::remote::ws::Client;
-use surrealdb::Surreal;
 
 #[derive(FromForm)]
 struct EventForm<'r> {

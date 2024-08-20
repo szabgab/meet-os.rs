@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-use meetings::{get_user_by_email, MyConfig, User};
-
 use rocket::http::CookieJar;
 use rocket::State;
 
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
+
+use crate::db;
+use meetings::{MyConfig, User};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CookieUser {
@@ -34,7 +35,7 @@ impl Visitor {
 
         if let Some(cookie_user) = get_logged_in(cookies) {
             me.logged_in = true;
-            if let Ok(user) = get_user_by_email(dbh, &cookie_user.email).await {
+            if let Ok(user) = db::get_user_by_email(dbh, &cookie_user.email).await {
                 me.user = user;
                 //rocket::info!("email: {}", user.email);
                 if myconfig.admins.contains(&cookie_user.email.clone()) {
@@ -57,7 +58,7 @@ impl Visitor {
             user: None,
         };
 
-        if let Ok(user) = get_user_by_email(dbh, email).await {
+        if let Ok(user) = db::get_user_by_email(dbh, email).await {
             me.user = user;
             //rocket::info!("email: {}", user.email);
             if myconfig.admins.contains(&email.to_owned()) {

@@ -1,7 +1,7 @@
 //use std::env;
 use clap::{Parser, Subcommand};
 
-use meetings::get_database;
+use meetings::db;
 
 #[derive(Subcommand)]
 enum Commands {
@@ -32,7 +32,7 @@ async fn main() -> surrealdb::Result<()> {
     simple_logger::init_with_env().unwrap();
     log::info!("Starting CLI");
 
-    let _db = get_database().await;
+    let _dbh = db::get_database().await;
     match args.command {
         Some(Commands::Admin { add }) => {
             log::info!("add: {}", add);
