@@ -67,6 +67,14 @@ struct ProfileForm<'r> {
 }
 
 #[derive(FromForm)]
+struct GroupForm<'r> {
+    gid: usize,
+    name: &'r str,
+    location: &'r str,
+    description: &'r str,
+}
+
+#[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
     password: &'r str,
@@ -948,6 +956,88 @@ async fn user(
     )
 }
 
+#[get("/edit-group?<gid>")]
+async fn edit_group_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    gid: usize,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    Template::render(
+        "edit_group",
+        context! {
+            title: "Edit Group",
+            config: get_public_config(),
+            visitor,
+            gid,
+            group
+        },
+    )
+}
+
+#[post("/edit-group", data = "<input>")]
+async fn edit_group_post(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    input: Form<GroupForm<'_>>,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let gid = input.gid;
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    let name = input.name;
+    let location = input.location;
+    let description = input.description;
+    db::update_group(dbh, gid, name, location, description)
+        .await
+        .unwrap();
+
+    Template::render(
+        "message",
+        context! {title: "Group updated", message: format!(r#"Check out the <a href="/group/{gid}">group</a>"#, ), config, visitor},
+    )
+}
+
 #[get("/add-event?<gid>")]
 async fn add_event_get(
     cookies: &CookieJar<'_>,
@@ -1074,6 +1164,8 @@ fn rocket() -> _ {
             routes![
                 add_event_get,
                 add_event_post,
+                edit_group_get,
+                edit_group_post,
                 edit_profile_get,
                 edit_profile_post,
                 event_get,

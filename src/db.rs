@@ -112,6 +112,35 @@ pub async fn verify_code(
     Ok(entry)
 }
 
+pub async fn update_group(
+    dbh: &Surreal<Client>,
+    gid: usize,
+    name: &str,
+    location: &str,
+    description: &str,
+) -> surrealdb::Result<Option<Group>> {
+    rocket::info!("update group: '{gid}'");
+
+    let mut response = dbh
+        .query(
+            "
+            UPDATE group
+            SET
+                name=$name,
+                location=$location,
+                description=$description
+            WHERE gid=$gid;",
+        )
+        .bind(("name", name))
+        .bind(("location", location))
+        .bind(("description", description))
+        .bind(("gid", gid))
+        .await?;
+
+    let entry: Option<Group> = response.take(0)?;
+    Ok(entry)
+}
+
 pub async fn update_user(
     dbh: &Surreal<Client>,
     uid: usize,
