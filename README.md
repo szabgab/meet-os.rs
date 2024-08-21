@@ -46,7 +46,7 @@ There is now a [Zulip stream](https://osdc.zulipchat.com/#narrow/stream/422181-m
 
 ```
 docker volume create my-surreal-db
-docker run --name surrealdb --rm -p 8001:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+docker run --name surrealdb --rm -p 127.0.0.1:8001:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
 ```
 
 ```
