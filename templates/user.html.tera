@@ -25,9 +25,12 @@
     {% if groups %}
       <h2 class="title is-4">Group Membership</h2>
       <table>
-        <tr><th>Name</th></tr>
+        <tr><th>Name</th><th>Join Date</th></tr>
         {% for group in groups %}
-          <tr><td><a href="/group/{{group.gid}}">{{group.name}}</a></td></tr>
+          <tr>
+            <td><a href="/group/{{group.0.gid}}">{{group.0.name}}</a></td>
+            <td>{{group.1.join_date}}</td>
+          </tr>
         {% endfor %}
       </table>
     {% endif %}

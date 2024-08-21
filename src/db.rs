@@ -240,10 +240,13 @@ pub async fn get_groups(dbh: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> 
     Ok(entries)
 }
 
+/// # Panics
+///
+/// Panics when there is an error
 pub async fn get_groups_by_membership_id(
     dbh: &Surreal<Client>,
     uid: usize,
-) -> surrealdb::Result<Vec<Group>> {
+) -> surrealdb::Result<Vec<(Group, Membership)>> {
     rocket::info!("get_groups_by_membership_id: '{uid}'");
 
     // let mut response = dbh
@@ -291,7 +294,9 @@ pub async fn get_groups_by_membership_id(
 
         let entries: Vec<Group> = response2.take(0)?;
         rocket::info!("entries: {entries:?}");
-        groups.extend(entries);
+        let group = entries.first().unwrap().clone();
+        //groups.push((group, member.join_date));
+        groups.push((group, member));
     }
 
     Ok(groups)
@@ -393,9 +398,12 @@ pub async fn get_event_by_eid(
 pub async fn join_group(dbh: &Surreal<Client>, gid: usize, uid: usize) -> surrealdb::Result<()> {
     rocket::info!("user {} joins group: {}", uid, gid);
 
+    let date: DateTime<Utc> = Utc::now();
+
     let membership = Membership {
         uid,
         gid,
+        join_date: date,
         admin: false,
     };
 

@@ -25,7 +25,7 @@ pub struct User {
     pub about: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Group {
     pub gid: usize,
     pub name: String,
@@ -39,6 +39,7 @@ pub struct Group {
 pub struct Membership {
     pub gid: usize,
     pub uid: usize,
+    pub join_date: DateTime<Utc>,
     pub admin: bool,
 }
 
