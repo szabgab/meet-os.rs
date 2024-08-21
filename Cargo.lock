@@ -2160,6 +2160,7 @@ dependencies = [
 name = "meetings"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "clap",
  "log",
  "markdown",
