@@ -25,17 +25,6 @@ pub struct User {
     pub about: Option<String>,
 }
 
-// TODO is there a better way to set the id of the event to the filename?
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Event {
-    pub eid: usize,
-    pub title: String,
-    pub date: String,
-    pub location: String,
-    pub group_id: usize,
-    pub description: String,
-}
-
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Group {
     pub gid: usize,
@@ -51,6 +40,16 @@ pub struct Membership {
     pub gid: usize,
     pub uid: usize,
     pub admin: bool,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Event {
+    pub eid: usize,
+    pub title: String,
+    pub date: String,
+    pub location: String,
+    pub group_id: usize,
+    pub description: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
