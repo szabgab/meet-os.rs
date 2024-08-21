@@ -6,10 +6,15 @@
        <h1 class="title is-3">{{group.name}}</h1>
         <div><b>Location</b>: {{group.location}}</div>
       
+        <div id="description">
         {{description | safe}}
+        </div>
 
         <div>
         Owner: <a href="/user/{{owner.uid}}">{{owner.name}}</a>
+        </div>
+        <div>
+        Created: {{group.creation_date}}
         </div>
         {% if visitor.logged_in %}
           {% if visitor.user.uid == owner.uid %}
@@ -27,14 +32,21 @@
           <a href="/login">Login</a>
         {% endif %}
 
+        <h2>Events</h2>
         {% if events %}
-          <h2>Events</h2>
+          
           <ul>
             {% for event in events %}
               <li><a href="/event/{{event.eid}}">{{event.date}} - {{event.title}}</a></li>
             {% endfor %}
           </ul>
+        {% else %}
+           No events scheduled for this group.
         {% endif %}
+
+
+        <h2>Members</h2>
+
     </div>
   </div>
 </section>

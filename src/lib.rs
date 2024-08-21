@@ -39,6 +39,7 @@ pub struct Group {
     pub location: String,
     pub description: String,
     pub owner: usize,
+    pub creation_date: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

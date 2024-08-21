@@ -1,3 +1,5 @@
+use chrono::{DateTime, Utc};
+
 use rocket::form::Form;
 use rocket::http::CookieJar;
 use rocket::Route;
@@ -189,12 +191,14 @@ async fn create_group_post(
     //let owner_id = owner.unwrap().uid;
 
     rocket::info!("group_id: {gid}");
+    let creation_date: DateTime<Utc> = Utc::now();
     let group = Group {
         name: input.name.to_owned(),
         location: input.location.to_owned(),
         description: input.description.to_owned(),
         owner: input.owner,
         gid,
+        creation_date,
     };
 
     db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
