@@ -2,6 +2,8 @@
 
 use std::env;
 
+use chrono::{DateTime, Utc};
+
 use rocket::fairing::AdHoc;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::engine::remote::ws::Ws;
@@ -79,10 +81,20 @@ pub async fn verify_code(
     rocket::info!("verification code: '{code}' process = '{process}'");
     let verified = true;
 
+    let utc: DateTime<Utc> = Utc::now();
     let mut response = dbh
-        .query("UPDATE ONLY user SET verified=$verified, code='' WHERE code=$code AND process=$process;")
+        .query(
+            "
+            UPDATE ONLY user
+                SET
+                    verified=$verified,
+                    code='',
+                    verification_date=$date
+                WHERE code=$code AND process=$process;",
+        )
         .bind(("verified", verified))
         .bind(("code", code))
+        .bind(("date", utc))
         .bind(("process", process))
         .await?;
 

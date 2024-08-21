@@ -16,6 +16,8 @@ use std::env;
 use std::fs::File;
 use std::io::Write;
 
+use chrono::{DateTime, Utc};
+
 use rocket::form::Form;
 use rocket::fs::{relative, FileServer};
 use rocket::http::CookieJar;
@@ -410,6 +412,7 @@ async fn register_post(
     };
 
     let uid = db::increment(dbh, "user").await.unwrap();
+    let utc: DateTime<Utc> = Utc::now();
 
     let user = User {
         uid,
@@ -418,7 +421,8 @@ async fn register_post(
         password: hashed_password,
         process: process.to_owned(),
         code: format!("{code}"),
-        date: "date".to_owned(), // TODO get current timestamp
+        registration_date: utc,
+        verification_date: None,
         verified: false,
     };
     match db::add_user(dbh, &user).await {

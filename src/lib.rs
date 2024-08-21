@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use std::fs::read_to_string;
@@ -16,7 +17,8 @@ pub struct User {
     pub code: String,
     pub process: String,
     pub verified: bool,
-    pub date: String,
+    pub registration_date: DateTime<Utc>,
+    pub verification_date: Option<DateTime<Utc>>,
 }
 
 // TODO is there a better way to set the id of the event to the filename?
