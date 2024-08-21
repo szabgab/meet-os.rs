@@ -22,6 +22,7 @@ pub struct User {
     pub github: Option<String>,
     pub gitlab: Option<String>,
     pub linkedin: Option<String>,
+    pub about: Option<String>,
 }
 
 // TODO is there a better way to set the id of the event to the filename?

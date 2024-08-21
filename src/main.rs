@@ -63,6 +63,7 @@ struct ProfileForm<'r> {
     github: &'r str,
     gitlab: &'r str,
     linkedin: &'r str,
+    about: &'r str,
 }
 
 #[derive(FromForm)]
@@ -435,6 +436,7 @@ async fn register_post(
         github: None,
         gitlab: None,
         linkedin: None,
+        about: None,
     };
     match db::add_user(dbh, &user).await {
         Ok(result) => result,
@@ -658,9 +660,16 @@ async fn show_profile(
     let groups = db::get_groups_by_membership_id(dbh, uid).await.unwrap();
     rocket::info!("{groups:?}");
 
+    let about = visitor
+        .user
+        .clone()
+        .unwrap()
+        .about
+        .map(|text| markdown2html(&text).unwrap());
+
     Template::render(
         "profile",
-        context! {title: "Profile", user: visitor.user.clone(), owned_groups, groups, config, visitor},
+        context! {title: "Profile", user: visitor.user.clone(), about, owned_groups, groups, config, visitor},
     )
 }
 
@@ -708,7 +717,8 @@ async fn edit_profile_post(
     let github = input.github;
     let gitlab = input.gitlab;
     let linkedin = input.linkedin;
-    db::update_user(dbh, uid, name, github, gitlab, linkedin)
+    let about = input.about;
+    db::update_user(dbh, uid, name, github, gitlab, linkedin, about)
         .await
         .unwrap();
 
@@ -915,6 +925,8 @@ async fn user(
         );
     }
 
+    let about = user.clone().about.map(|text| markdown2html(&text).unwrap());
+
     Template::render(
         "user",
         context! {
@@ -922,6 +934,7 @@ async fn user(
             config ,
             visitor,
             user,
+            about,
         },
     )
 }
