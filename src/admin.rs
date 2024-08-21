@@ -22,7 +22,13 @@ struct GroupForm<'r> {
 }
 
 pub fn routes() -> Vec<Route> {
-    routes![admin, admin_users, create_group_get, create_group_post,]
+    routes![
+        admin,
+        admin_users,
+        audit_get,
+        create_group_get,
+        create_group_post,
+    ]
 }
 
 #[get("/")]
@@ -191,6 +197,9 @@ async fn create_group_post(
         gid,
     };
 
+    db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
+        .await
+        .unwrap();
     match db::add_group(dbh, &group).await {
         Ok(_result) => Template::render(
             "message",
@@ -204,4 +213,38 @@ async fn create_group_post(
             )
         }
     }
+}
+
+#[get("/audit")]
+async fn audit_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let user = visitor.user.clone().unwrap();
+
+    rocket::info!("cookie value received from user: {}", user.email);
+    if !visitor.admin {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
+        );
+    };
+
+    let audit = db::get_audit(dbh).await.unwrap();
+
+    Template::render(
+        "audit",
+        context! {title: "Audit", audit, user: user, config, visitor},
+    )
 }

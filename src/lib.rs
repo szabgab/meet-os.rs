@@ -48,6 +48,12 @@ pub struct Membership {
     pub admin: bool,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Audit {
+    pub date: DateTime<Utc>,
+    pub text: String,
+}
+
 #[derive(Debug)]
 pub struct EmailAddress {
     pub name: String,

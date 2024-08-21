@@ -568,6 +568,9 @@ async fn join_group_get(
     // TODO if uid is already a member - reject
 
     db::join_group(dbh, gid, uid).await.unwrap();
+    db::audit(dbh, format!("User {uid} joined group {gid}"))
+        .await
+        .unwrap();
 
     Template::render(
         "message",
@@ -612,6 +615,9 @@ async fn leave_group_get(
     // TODO if uid is not a member - reject
 
     db::leave_group(dbh, gid, uid).await.unwrap();
+    db::audit(dbh, format!("User {uid} left group {gid}"))
+        .await
+        .unwrap();
 
     Template::render(
         "message",

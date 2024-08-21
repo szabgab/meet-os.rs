@@ -10,7 +10,7 @@ use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::{Counter, Event, Group, Membership, User};
+use crate::{Audit, Counter, Event, Group, Membership, User};
 
 /// # Panics
 ///
@@ -401,4 +401,22 @@ pub async fn get_membership(
     let entry: Option<Membership> = response.take(0)?;
 
     Ok(entry)
+}
+
+pub async fn audit(dbh: &Surreal<Client>, text: String) -> surrealdb::Result<()> {
+    rocket::info!("audit {text}");
+
+    let date: DateTime<Utc> = Utc::now();
+    let entry = Audit { date, text };
+
+    dbh.create(Resource::from("audit")).content(entry).await?;
+
+    Ok(())
+}
+
+pub async fn get_audit(dbh: &Surreal<Client>) -> surrealdb::Result<Vec<Audit>> {
+    rocket::info!("get_audits");
+    let mut response = dbh.query("SELECT * FROM audit;").await?;
+    let entries: Vec<Audit> = response.take(0)?;
+    Ok(entries)
 }
