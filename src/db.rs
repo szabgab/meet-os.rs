@@ -117,6 +117,8 @@ pub async fn update_user(
     uid: usize,
     name: &str,
     github: &str,
+    gitlab: &str,
+    linkedin: &str,
 ) -> surrealdb::Result<Option<User>> {
     rocket::info!("update user: '{uid}'");
 
@@ -126,11 +128,15 @@ pub async fn update_user(
             UPDATE user
             SET
                 name=$name,
+                gitlab=$gitlab,
+                linkedin=$linkedin,
                 github=$github
             WHERE uid=$uid;",
         )
         .bind(("name", name))
         .bind(("github", github))
+        .bind(("gitlab", gitlab))
+        .bind(("linkedin", linkedin))
         .bind(("uid", uid))
         .await?;
 

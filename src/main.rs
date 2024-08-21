@@ -61,6 +61,8 @@ struct RegistrationForm<'r> {
 struct ProfileForm<'r> {
     name: &'r str,
     github: &'r str,
+    gitlab: &'r str,
+    linkedin: &'r str,
 }
 
 #[derive(FromForm)]
@@ -431,6 +433,8 @@ async fn register_post(
         verification_date: None,
         verified: false,
         github: None,
+        gitlab: None,
+        linkedin: None,
     };
     match db::add_user(dbh, &user).await {
         Ok(result) => result,
@@ -702,7 +706,11 @@ async fn edit_profile_post(
     let uid = visitor.user.clone().unwrap().uid;
     let name = input.name;
     let github = input.github;
-    db::update_user(dbh, uid, name, github).await.unwrap();
+    let gitlab = input.gitlab;
+    let linkedin = input.linkedin;
+    db::update_user(dbh, uid, name, github, gitlab, linkedin)
+        .await
+        .unwrap();
 
     Template::render(
         "message",

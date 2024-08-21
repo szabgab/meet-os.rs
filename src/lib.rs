@@ -20,6 +20,8 @@ pub struct User {
     pub registration_date: DateTime<Utc>,
     pub verification_date: Option<DateTime<Utc>>,
     pub github: Option<String>,
+    pub gitlab: Option<String>,
+    pub linkedin: Option<String>,
 }
 
 // TODO is there a better way to set the id of the event to the filename?
