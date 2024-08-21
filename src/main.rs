@@ -926,6 +926,10 @@ async fn user(
     }
 
     let about = user.clone().about.map(|text| markdown2html(&text).unwrap());
+    let owned_groups = db::get_groups_by_owner_id(dbh, user.uid).await.unwrap();
+    let groups = db::get_groups_by_membership_id(dbh, user.uid)
+        .await
+        .unwrap();
 
     Template::render(
         "user",
@@ -935,6 +939,8 @@ async fn user(
             visitor,
             user,
             about,
+            groups,
+            owned_groups
         },
     )
 }

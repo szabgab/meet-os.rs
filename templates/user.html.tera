@@ -11,6 +11,27 @@
             <tr><td>{% if user.linkedin %}<a href="{{user.linkedin}}">LinkedIn</a>{% else %}No LinkedIn provided.{% endif %}</td><td></td></tr>
             <div>{{about | safe}}</div>
         </table>
+
+    {% if owned_groups %}
+      <h2 class="title is-4">Owned Groups</h2>
+      <table>
+        <tr><th>Name</th></tr>
+        {% for group in owned_groups %}
+          <tr><td><a href="/group/{{group.gid}}">{{group.name}}</a></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if groups %}
+      <h2 class="title is-4">Group Membership</h2>
+      <table>
+        <tr><th>Name</th></tr>
+        {% for group in groups %}
+          <tr><td><a href="/group/{{group.gid}}">{{group.name}}</a></td></tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
     </div>
   </div>
 </section>
