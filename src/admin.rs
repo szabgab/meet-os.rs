@@ -203,7 +203,7 @@ async fn create_group_post(
     match db::add_group(dbh, &group).await {
         Ok(_result) => Template::render(
             "message",
-            context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}/{}</a></b>created"#, gid, group.name), config, visitor},
+            context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},
         ),
         Err(err) => {
             rocket::info!("Error while trying to add group {err}");
