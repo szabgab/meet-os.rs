@@ -58,6 +58,12 @@ struct RegistrationForm<'r> {
 }
 
 #[derive(FromForm)]
+struct ProfileForm<'r> {
+    name: &'r str,
+    github: &'r str,
+}
+
+#[derive(FromForm)]
 struct LoginForm<'r> {
     email: &'r str,
     password: &'r str,
@@ -424,6 +430,7 @@ async fn register_post(
         registration_date: utc,
         verification_date: None,
         verified: false,
+        github: None,
     };
     match db::add_user(dbh, &user).await {
         Ok(result) => result,
@@ -650,6 +657,56 @@ async fn show_profile(
     Template::render(
         "profile",
         context! {title: "Profile", user: visitor.user.clone(), owned_groups, groups, config, visitor},
+    )
+}
+
+#[get("/edit-profile")]
+async fn edit_profile_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    Template::render(
+        "edit_profile",
+        context! {title: "Edit Profile", user: visitor.user.clone(), config, visitor},
+    )
+}
+
+#[post("/edit-profile", data = "<input>")]
+async fn edit_profile_post(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    input: Form<ProfileForm<'_>>,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let name = input.name;
+    let github = input.github;
+    db::update_user(dbh, uid, name, github).await.unwrap();
+
+    Template::render(
+        "message",
+        context! {title: "Profile updated", message: format!(r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/{uid}">{name}</a>"#, ), config, visitor},
     )
 }
 
@@ -987,6 +1044,8 @@ fn rocket() -> _ {
             routes![
                 add_event_get,
                 add_event_post,
+                edit_profile_get,
+                edit_profile_post,
                 event_get,
                 events,
                 groups_get,

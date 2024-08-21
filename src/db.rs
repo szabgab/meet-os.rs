@@ -112,6 +112,32 @@ pub async fn verify_code(
     Ok(entry)
 }
 
+pub async fn update_user(
+    dbh: &Surreal<Client>,
+    uid: usize,
+    name: &str,
+    github: &str,
+) -> surrealdb::Result<Option<User>> {
+    rocket::info!("update user: '{uid}'");
+
+    let mut response = dbh
+        .query(
+            "
+            UPDATE user
+            SET
+                name=$name,
+                github=$github
+            WHERE uid=$uid;",
+        )
+        .bind(("name", name))
+        .bind(("github", github))
+        .bind(("uid", uid))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
+    Ok(entry)
+}
+
 pub async fn get_user_by_id(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Result<Option<User>> {
     rocket::info!("get_user_by_id: '{uid}'");
 

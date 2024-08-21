@@ -6,6 +6,8 @@
        <h1 class="title is-3">{{title}}</h1>
         <table>
             <tr><td>Name:</td><td>{{user.name}}</td></tr>
+            <tr><td>{% if user.github %}<a href="https://github.com/{{user.github}}">GitHub</a>{% else %}No GitHub provided.{% endif %}</td><td></td></tr>
+
         </table>
     </div>
   </div>

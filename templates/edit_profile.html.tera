@@ -1,0 +1,21 @@
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">Register</h1>
+
+        <form method="POST" action="/edit-profile">
+        <table>
+        <tr><td>Name:</td><td><input name="name" id="name" type="text" value="{{user.name}}"></td></tr>
+        <tr><td>GitHub Username:</td><td><input name="github" id="github" type="text" value="{{user.github}}"></td></tr>
+        </table>
+        <input type="submit" value="Save">
+        </form>
+    
+    </div>
+  </div>
+</section>
+
+
+{% include "incl/footer" %}

@@ -5,6 +5,12 @@
     <div class="content">
        <h1 class="title is-3">{{user.name}}</h1>
         <div><b>email</b>: {{user.email}}</div>
+        <div>Registration date: {{user.registration_date}}</div>
+        <div>{% if user.github %}<a href="https://github.com/{{user.github}}">GitHub</a>{% else %}No GitHub provided.{% endif %}</div>
+    </div>
+    <div>
+      <a href="/edit-profile">edit profile</a>
+      <a href="/user/{{user.uid}}">view profile</a>
     </div>
 
     {% if owned_groups %}
