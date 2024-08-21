@@ -795,6 +795,8 @@ async fn group_get(
         None
     };
 
+    let members = db::get_members_of_group(dbh, gid).await.unwrap();
+
     let events = db::get_events_by_group_id(dbh, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
@@ -810,6 +812,7 @@ async fn group_get(
             config,
             visitor,
             owner,
+            members,
             membership,
         },
     )

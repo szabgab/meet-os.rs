@@ -46,6 +46,18 @@
 
 
         <h2>Members</h2>
+        {% if members %}
+          <table>
+            {% for member in members %}
+              <tr>
+                <td><a href="/user/{{member.0.uid}}">{{member.0.name}}</a></td>
+                <td>{{member.1.join_date}}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% else %}
+           No members in this group.
+        {% endif %}
 
     </div>
   </div>

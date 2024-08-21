@@ -302,6 +302,40 @@ pub async fn get_groups_by_membership_id(
     Ok(groups)
 }
 
+/// # Panics
+///
+/// Panics when there is an error
+pub async fn get_members_of_group(
+    dbh: &Surreal<Client>,
+    gid: usize,
+) -> surrealdb::Result<Vec<(User, Membership)>> {
+    rocket::info!("get_members_of_group: '{gid}'");
+
+    let mut response = dbh
+        .query("SELECT * FROM membership WHERE gid=$gid;")
+        .bind(("gid", gid))
+        .await?;
+
+    let memberships: Vec<Membership> = response.take(0)?;
+    rocket::info!("members: {memberships:?}");
+
+    let mut users = vec![];
+    for member in memberships {
+        rocket::info!("uid: {}", member.uid);
+        let mut response2 = dbh
+            .query("SELECT * FROM user WHERE uid=$uid;")
+            .bind(("uid", member.uid))
+            .await?;
+
+        let entries: Vec<User> = response2.take(0)?;
+        rocket::info!("entries: {entries:?}");
+        let user = entries.first().unwrap().clone();
+        users.push((user, member));
+    }
+
+    Ok(users)
+}
+
 pub async fn get_groups_by_owner_id(
     dbh: &Surreal<Client>,
     uid: usize,
