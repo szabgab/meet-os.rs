@@ -181,6 +181,13 @@ sudo systemctl enable meetings.service
 sudo systemctl start meetings.service
 ```
 
+```
+docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8001:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+
+docker stop surreal
+docker restart surreal
+```
+
 
 ## Release and deployment
 
