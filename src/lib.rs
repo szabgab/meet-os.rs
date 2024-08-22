@@ -84,6 +84,9 @@ pub struct MyConfig {
     pub sendgrid_api_key: String,
 
     pub admins: Vec<String>,
+
+    pub from_name: String,
+    pub from_email: String,
 }
 
 fn get_empty_string() -> String {

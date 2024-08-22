@@ -21,10 +21,9 @@ pub async fn admin_new_user_registered(myconfig: &MyConfig, user: &User) {
         user.name, user.email
     );
 
-    // TODO: read from some config file
     let from = EmailAddress {
-        name: String::from("Meet OS"),
-        email: String::from("gabor@szabgab.com"),
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
     };
 
     //let admins = myconfig.clone().admins.clone();
@@ -69,10 +68,9 @@ pub async fn admin_new_user_verified(myconfig: &MyConfig, user: &User) {
         user.name, user.email
     );
 
-    // TODO: read from some config file
     let from = EmailAddress {
-        name: String::from("Meet OS"),
-        email: String::from("gabor@szabgab.com"),
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
     };
 
     //let admins = myconfig.clone().admins.clone();
@@ -125,10 +123,9 @@ pub async fn owner_user_joined_group(
         user.uid, user.name, group.gid, group.name
     );
 
-    // TODO: read from some config file
     let from = EmailAddress {
-        name: String::from("Meet OS"),
-        email: String::from("gabor@szabgab.com"),
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
     };
 
     send_to_group_owner(dbh, myconfig, &from, group, &subject, &text).await;
@@ -153,10 +150,9 @@ pub async fn owner_user_left_group(
         user.uid, user.name, group.gid, group.name
     );
 
-    // TODO: read from some config file
     let from = EmailAddress {
-        name: String::from("Meet OS"),
-        email: String::from("gabor@szabgab.com"),
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
     };
 
     send_to_group_owner(dbh, myconfig, &from, group, &subject, &text).await;

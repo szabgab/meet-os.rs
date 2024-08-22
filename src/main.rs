@@ -353,10 +353,11 @@ async fn logout_get(
 //     );
 
 //     // TODO: read from some config file
-//     let from = EmailAddress {
-//         name: String::from("Meet OS"),
-//         email: String::from("gabor@szabgab.com"),
-//     };
+// let from = EmailAddress {
+//     name: myconfig.from_name.clone(),
+//     email: myconfig.from_email.clone(),
+// };
+
 //     let to_address = &EmailAddress {
 //         name: user.name.clone(),
 //         email: input.email.to_owned(),
@@ -479,10 +480,9 @@ async fn register_post(
     "#
     );
 
-    // TODO: read from some config file
     let from = EmailAddress {
-        name: String::from("Meet OS"),
-        email: String::from("gabor@szabgab.com"),
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
     };
     let to_address = &EmailAddress {
         name: input.name.to_owned(),
