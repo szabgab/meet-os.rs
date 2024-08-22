@@ -763,6 +763,9 @@ async fn event_get(
 
     let description = markdown2html(&event.description).unwrap();
 
+    let utc: DateTime<Utc> = Utc::now();
+    let editable = utc < event.date;
+
     Template::render(
         "event",
         context! {
@@ -772,6 +775,7 @@ async fn event_get(
             group,
             config: get_public_config(),
             visitor,
+            editable,
         },
     )
 }
@@ -1147,13 +1151,14 @@ async fn add_event_post(
 
     #[allow(clippy::arithmetic_side_effects)]
     let date = ts.to_utc() + Duration::minutes(offset);
-    // TODO validate date format and that it is in the futurn (at least 1 hour ahead)?
-    // if date_str != "hello" {
-    //     return Template::render(
-    //         "message",
-    //         context! {title: "Invalid date", message: format!("Valid date_str '{}' offset '{}' date: {}", date_str, offset, date), config, visitor},
-    //     );
-    // }
+
+    let utc: DateTime<Utc> = Utc::now();
+    if date < utc {
+        return Template::render(
+            "message",
+            context! {title: "Can't schedule event to the past", message: format!("Can't schedule event to the past '{}'", date), config, visitor},
+        );
+    }
 
     let eid = db::increment(dbh, "event").await.unwrap();
 

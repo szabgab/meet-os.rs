@@ -15,8 +15,9 @@
 
        {% if visitor.logged_in %}
          {% if visitor.user.uid == group.owner %}
-            if in future
+            {% if editable %}
               <a href="/edit-event?eid={{event.eid}}">edit</a>
+            {% endif %}
          {% endif %}
        {% endif %}
 
