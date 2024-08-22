@@ -3,17 +3,18 @@
 <section class="section">
   <div class="container">
     <div class="content">
-       <h1 class="title is-3">Add event</h1>
+       <h1 class="title is-3">Add event to the '{{group.name}}' group</h1>
 
-        <form method="POST" action="/edit-event">
+        <form method="POST" action="/edit-event" id="edit-event">
             <input type="hidden" name="gid" value="{{gid}}">
+            <input type="hidden" name="offset" id="offset">
             <div>Title: <input name="title" id="title" type="text"></div>
-            <div>Date: <input name="date" id="date" type="text"></div>
+            <div>Date: <input placeholder="YYYY-MM-DD HH::MM" name="date" id="date" type="text"> <span id="timezone"></span></div>
             <div>Location: <input name="location" id="location" type="text"></div>
             <div>Description: <textarea name="description" id="description"></textarea></div>
             <input type="submit" value="Create">
         </form>
-    
+
     </div>
   </div>
 </section>

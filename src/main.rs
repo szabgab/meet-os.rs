@@ -16,7 +16,7 @@ use std::env;
 use std::fs::File;
 use std::io::Write;
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 
 use rocket::form::Form;
 use rocket::fs::{relative, FileServer};
@@ -47,6 +47,7 @@ struct EventForm<'r> {
     date: &'r str,
     location: &'r str,
     description: &'r str,
+    offset: i64,
     gid: usize,
 }
 
@@ -1080,10 +1081,11 @@ async fn add_event_get(
     Template::render(
         "edit_event",
         context! {
-            title: "Add event",
+            title: format!("Add event to the '{}' group", group.name),
             config: get_public_config(),
             visitor: Visitor::new(cookies, dbh, myconfig).await,
-            gid: gid
+            gid: gid,
+            group,
         },
     )
 }
@@ -1133,8 +1135,25 @@ async fn add_event_post(
 
     let location = input.location.to_owned();
 
-    let date = input.date.to_owned();
+    let date_str = input.date.to_owned();
+    let offset = input.offset.to_owned();
+    let mydate = format!("{date_str}:00 +00:00");
+    let Ok(ts) = DateTime::parse_from_str(&mydate, "%Y-%m-%d %H:%M:%S %z") else {
+        return Template::render(
+            "message",
+            context! {title: "Invalid date", message: format!("Invalid date '{}' offset '{}'", date_str, offset), config, visitor},
+        );
+    };
+
+    #[allow(clippy::arithmetic_side_effects)]
+    let date = ts.to_utc() + Duration::minutes(offset);
     // TODO validate date format and that it is in the futurn (at least 1 hour ahead)?
+    // if date_str != "hello" {
+    //     return Template::render(
+    //         "message",
+    //         context! {title: "Invalid date", message: format!("Valid date_str '{}' offset '{}' date: {}", date_str, offset, date), config, visitor},
+    //     );
+    // }
 
     let eid = db::increment(dbh, "event").await.unwrap();
 

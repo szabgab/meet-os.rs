@@ -47,7 +47,7 @@ pub struct Membership {
 pub struct Event {
     pub eid: usize,
     pub title: String,
-    pub date: String,
+    pub date: DateTime<Utc>,
     pub location: String,
     pub group_id: usize,
     pub description: String,
