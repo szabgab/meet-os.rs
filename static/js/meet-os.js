@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Assume a date format of "2021-04-13T19:00:00+03:00";
     // Display time in localtime of the browser.
 
-    const dates = document.getElementsByTagName("time");
+    const dates = document.getElementsByClassName("datetime");
     for (let ix=0; ix < dates.length; ix++) {
         //const mydate = dates[ix].getAttribute("x-schedule");
-        const mydate = dates[ix].getAttribute("datetime");
+        const mydate = dates[ix].getAttribute("value");
         const date = new Date(mydate);
 
         dates[ix].innerHTML = date.toLocaleDateString( [], {
@@ -40,16 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (document.getElementById("edit-event")) {
-    const date = new Date();
-    //console.log(Intl.DateTimeFormat().resolvedOptions().timeZone); // e.g. Asia/Jerusalem
-    //console.log(date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4)); // Israel Daylight Time
-    //console.log(date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'short' }).substring(4)); // GMT+3
-    //const offset = date.getTimezoneOffset();
-    //console.log(offset); // -180
-    let text = date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'short' }).substring(4);
-    text += "(" + date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4) + ")";
-    document.getElementById("timezone").innerHTML = text;
-    document.getElementById("offset").value = date.getTimezoneOffset();
+  function set_local_timezone() {
+    if (document.getElementById("edit-event")) {
+      const date = new Date();
+      //console.log(Intl.DateTimeFormat().resolvedOptions().timeZone); // e.g. Asia/Jerusalem
+      //console.log(date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4)); // Israel Daylight Time
+      //console.log(date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'short' }).substring(4)); // GMT+3
+      //const offset = date.getTimezoneOffset();
+      //console.log(offset); // -180
+      let text = date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'short' }).substring(4);
+      text += "(" + date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4) + ")";
+      document.getElementById("timezone").innerHTML = text;
+      document.getElementById("offset").value = date.getTimezoneOffset();
+    }
   }
+
+  set_local_timezone();
+  set_local_date();
 });
