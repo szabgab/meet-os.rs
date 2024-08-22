@@ -585,6 +585,7 @@ async fn join_group_get(
     }
     let group = group.unwrap();
 
+    let user = visitor.user.clone().unwrap();
     let uid = visitor.user.clone().unwrap().uid;
     if uid == group.owner {
         return Template::render(
@@ -599,7 +600,7 @@ async fn join_group_get(
     db::audit(dbh, format!("User {uid} joined group {gid}"))
         .await
         .unwrap();
-
+    notify::owner_user_joined_group(dbh, myconfig, &user, &group).await;
     Template::render(
         "message",
         context! {title: "Membership", message: format!(r#"User added to <a href="/group/{gid}">group</a>"#), config, visitor},
@@ -632,6 +633,7 @@ async fn leave_group_get(
     }
     let group = group.unwrap();
 
+    let user = visitor.user.clone().unwrap();
     let uid = visitor.user.clone().unwrap().uid;
     if uid == group.owner {
         return Template::render(
@@ -643,6 +645,7 @@ async fn leave_group_get(
     // TODO if uid is not a member - reject
 
     db::leave_group(dbh, gid, uid).await.unwrap();
+    notify::owner_user_left_group(dbh, myconfig, &user, &group).await;
     db::audit(dbh, format!("User {uid} left group {gid}"))
         .await
         .unwrap();
