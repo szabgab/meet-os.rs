@@ -223,6 +223,13 @@ async fn login_post(
         );
     };
 
+    if !user.verified {
+        return Template::render(
+            "message",
+            context! {title: "Unverified email", message: "Email must be verified before login.", config,visitor},
+        );
+    }
+
     rocket::info!("email: {}", user.email);
 
     let password = input.password.trim().as_bytes();

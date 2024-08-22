@@ -425,3 +425,35 @@ fn login_with_bad_password() {
         check_guest_menu(&html);
     });
 }
+
+#[test]
+fn login_with_unverified_email() {
+    run_external(|port| {
+        let client = reqwest::blocking::Client::new();
+        let url = format!("http://localhost:{port}/");
+
+        let res = client
+            .post(format!("{url}/register"))
+            .form(&[
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+
+        let res = client
+            .post(format!("{url}/login"))
+            .form(&[("email", "foo@meet-os.com"), ("password", "123456")])
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+
+        assert!(res.headers().get("set-cookie").is_none());
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Unverified email");
+        assert!(html.contains("Email must be verified before login."));
+        check_guest_menu(&html);
+    });
+}
