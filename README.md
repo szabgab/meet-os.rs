@@ -175,11 +175,11 @@ I have a folder called `/home/gabor/work` with all of the projects. The deployme
 
 ```
 cd /home/gabor/work
-git clone git@github.com:szabgab/meet-os.rs.git
+git clone git@github.com:szabgab/meet-os.rs.git meet-os.com
 ```
 
 ```
-sudo cp /home/gabor/work/meet-os.rs/meet-os.service /etc/systemd/system/meet-os.service
+sudo cp /home/gabor/work/meet-os.com/meet-os.service /etc/systemd/system/meet-os.service
 sudo systemctl daemon-reload
 sudo systemctl enable meet-os.service
 sudo systemctl start meet-os.service
@@ -197,7 +197,7 @@ docker restart surreal
 
 ```
 ssh s7
-cd /home/gabor/work/meet-os.rs/
+cd /home/gabor/work/meet-os.com/
 git pull
 cargo build --release
 sudo systemctl restart meet-os.service

@@ -5,11 +5,19 @@ Description=Meet-OS Service
 Type=simple
 User=root
 Group=root
-ExecStart=/home/gabor/work/meetings.rs/target/release/meetings
+ExecStart=/home/gabor/work/meet-os.com/target/release/meetings
 Restart=always
-WorkingDirectory=/home/gabor/work/meetings.rs
+WorkingDirectory=/home/gabor/work/meet-os.com
 Nice=19
 LimitNOFILE=16384
+
+# Set the database
+Environment="DATABASE_NAMESPACE=meet-os-ns"
+Environment="DATABASE_NAME=meet-os-db"
+
+# Try to make sure the docker container with SurrealDB already runs
+ExecStartPre=/bin/sleep 10
+
 
 [Install]
 WantedBy=multi-user.target
