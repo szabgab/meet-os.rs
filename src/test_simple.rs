@@ -27,15 +27,15 @@ fn simple_check_empty_home() {
 pub fn run_inprocess(func: fn()) {
     let tmp_dir = tempfile::tempdir().unwrap();
     println!("tmp_dir: {:?}", tmp_dir);
-    std::env::set_var("ROCKET_CONFIG", "Rocket.skeleton.toml");
-    std::env::set_var(
-        "DATABASE_NAMESPACE",
-        format!("test-namespace-{}", rand::random::<f64>()),
-    );
-    std::env::set_var(
-        "DATABASE_NAME",
-        format!("test-name-{}", rand::random::<f64>()),
-    );
+    let rocket_toml = std::fs::read_to_string("Rocket.skeleton.toml").unwrap();
+    let db_name = format!("test-name-{}", rand::random::<f64>());
+    let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
+    let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
+    let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
+    let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
+    std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
+
+    std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
     std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
 
     func();

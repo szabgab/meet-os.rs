@@ -32,7 +32,9 @@ async fn main() -> surrealdb::Result<()> {
     simple_logger::init_with_env().unwrap();
     log::info!("Starting CLI");
 
-    let _dbh = db::get_database().await;
+    let database_name = "meet-os-ns";
+    let database_namespace = "meet-os-ns";
+    let _dbh = db::get_database(database_name, database_namespace).await;
     match args.command {
         Some(Commands::Admin { add }) => {
             log::info!("add: {}", add);

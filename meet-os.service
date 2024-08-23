@@ -11,10 +11,6 @@ WorkingDirectory=/home/gabor/work/meet-os.com
 Nice=19
 LimitNOFILE=16384
 
-# Set the database
-Environment="DATABASE_NAMESPACE=meet-os-ns"
-Environment="DATABASE_NAME=meet-os-db"
-
 # Try to make sure the docker container with SurrealDB already runs
 ExecStartPre=/bin/sleep 10
 

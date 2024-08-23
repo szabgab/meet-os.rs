@@ -1,7 +1,5 @@
 #![allow(clippy::std_instead_of_core)]
 
-use std::env;
-
 use chrono::{DateTime, Utc};
 
 use rocket::fairing::AdHoc;
@@ -10,7 +8,7 @@ use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::{Audit, Counter, Event, Group, Membership, User};
+use crate::{Audit, Counter, Event, Group, Membership, MyConfig, User};
 
 /// # Panics
 ///
@@ -19,7 +17,9 @@ use crate::{Audit, Counter, Event, Group, Membership, User};
 pub fn fairing() -> AdHoc {
     // TODO handle errors here properly by using AdHoc::try_on_ignite instead of AdHoc::on_ignite.
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
-        let dbh = get_database().await;
+        let config = rocket.state::<MyConfig>().unwrap();
+
+        let dbh = get_database(&config.database_name, &config.database_namespace).await;
         rocket.manage(dbh)
     })
 }
@@ -27,12 +27,10 @@ pub fn fairing() -> AdHoc {
 /// # Panics
 ///
 /// Panics when it fails to create the database folder or set up the database.
-pub async fn get_database() -> Surreal<Client> {
+pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> {
     let address = "127.0.0.1:8000";
     let dbh = Surreal::new::<Ws>(address).await.unwrap();
-    let db_namespace = env::var("DATABASE_NAMESPACE").unwrap();
-    let db_name = env::var("DATABASE_NAME").unwrap();
-    dbh.use_ns(&db_namespace).use_db(&db_name).await.unwrap();
+    dbh.use_ns(db_namespace).use_db(db_name).await.unwrap();
     // TODO: do this only when we create the database
     dbh.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
         .await

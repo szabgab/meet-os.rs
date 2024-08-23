@@ -1222,8 +1222,8 @@ fn rocket() -> _ {
         )
         .mount("/", FileServer::from(relative!("static")))
         .attach(Template::fairing())
-        .attach(db::fairing())
         .attach(AdHoc::config::<MyConfig>())
+        .attach(db::fairing())
 }
 
 #[cfg(test)]

@@ -6,6 +6,8 @@ sendgrid_api_key = "replace me"
 admins           = ["admin@meet-os.com"]
 from_email       = "no-reply@meet-os.com"
 from_name        = "Meet-OS"
+database_namespace = "meet-os-local-ns"
+database_name      = "meet-os-local-db"
 
 
 # We have this section to be able to try the --release flag during development
