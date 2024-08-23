@@ -1225,3 +1225,6 @@ fn rocket() -> _ {
         .attach(db::fairing())
         .attach(AdHoc::config::<MyConfig>())
 }
+
+#[cfg(test)]
+mod test_simple;
