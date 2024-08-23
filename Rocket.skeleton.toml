@@ -1,10 +1,11 @@
 [debug]
-secret_key = "qqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
-base_url = "http://localhost:8001"
+secret_key       = "qqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
+base_url         = "http://localhost:8001"
+port             = 8001
 sendgrid_api_key = "replace me"
-admins  = ["admin@meet-os.com"]
-from_email = "no-reply@meet-os.com"
-from_name = "Meet-OS"
+admins           = ["admin@meet-os.com"]
+from_email       = "no-reply@meet-os.com"
+from_name        = "Meet-OS"
 
 
 # We have this section to be able to try the --release flag during development
