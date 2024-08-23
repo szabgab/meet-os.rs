@@ -199,3 +199,21 @@ cargo build --release
 sudo systemctl restart meet-os.service
 ```
 
+## Deploy the development and testing service
+
+
+```
+docker volume create my-surreal-db
+docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+
+git clone git@github.com:szabgab/meet-os.rs.git dev.meet-os.com
+git clone git@github.com:szabgab/meet-os.com-secrets.git
+cd dev.meet-os.com
+cp ../meet-os.com-secrets/dev/Rocket.toml .
+
+sudo cp dev.meet-os.com.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable meet-os.service
+sudo systemctl start meet-os.service
+
+```
