@@ -30,9 +30,8 @@ pub fn fairing() -> AdHoc {
 pub async fn get_database() -> Surreal<Client> {
     let address = "127.0.0.1:8000";
     let dbh = Surreal::new::<Ws>(address).await.unwrap();
-    let db_namespace =
-        env::var("DATABASE_NAMESPACE").unwrap_or_else(|_| String::from("meet-os-ns"));
-    let db_name = env::var("DATABASE_NAME").unwrap_or_else(|_| String::from("meet-os-ns"));
+    let db_namespace = env::var("DATABASE_NAMESPACE").unwrap();
+    let db_name = env::var("DATABASE_NAME").unwrap();
     dbh.use_ns(&db_namespace).use_db(&db_name).await.unwrap();
     // TODO: do this only when we create the database
     dbh.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")

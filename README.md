@@ -79,7 +79,7 @@ Install [cargo-watch](https://github.com/watchexec/cargo-watch)
 Run
 
 ```
-cargo watch -x "run --bin meetings"
+./local.sh
 ```
 
 ## Testing
