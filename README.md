@@ -164,6 +164,10 @@ Registered users who is not logged in
 
 ## Deploy
 
+* Set up meet-os.com on https://forwardemail.net/
+* Set up meet-os.com on https://sendgrid.com/
+
+
 * We have nginx server configured as a reverse proxy in-front of the application.
 
 
