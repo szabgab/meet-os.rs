@@ -347,7 +347,7 @@ async fn logout_get(
 //     If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to finish the login process.
 //     <p>
 //     <p>
-//     If it was not you, we would like to apolozie. You don't need to do anything..
+//     If it was not you, we would like to apologize. You don't need to do anything..
 //     ";
 //     "#
 //     );
@@ -475,7 +475,7 @@ async fn register_post(
     If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
-    If it was not you, we would like to apolozie. You don't need to do anything. We'll discard your registration if it is not validated.
+    If it was not you, we would like to apologize. You don't need to do anything. We'll discard your registration if it is not validated.
     ";
     "#
     );
