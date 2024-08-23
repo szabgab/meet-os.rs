@@ -7,7 +7,7 @@ description = "Web application to help organize meetings."
 keywords = ["web", "server", "rocket"]
 categories = ["web-programming::http-server"]
 readme = "README.md"
-repository = "https://github.com/szabgab/meetings.rs/"
+repository = "https://github.com/szabgab/meet-os.rs/"
 homepage = "https://meet-os.com/"
 
 
