@@ -176,6 +176,8 @@ I have a folder called `/home/gabor/work` with all of the projects. The deployme
 ```
 cd /home/gabor/work
 git clone git@github.com:szabgab/meet-os.rs.git meet-os.com
+
+cp ../meet-os.com-secrets/prod/Rocket.toml .
 ```
 
 ```
