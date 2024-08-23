@@ -214,6 +214,7 @@ git clone git@github.com:szabgab/meet-os.rs.git dev.meet-os.com
 git clone git@github.com:szabgab/meet-os.com-secrets.git
 cd dev.meet-os.com
 cp ../meet-os.com-secrets/dev/Rocket.toml .
+cargo build --release
 
 sudo cp dev.meet-os.com.service /etc/systemd/system/
 sudo systemctl daemon-reload
