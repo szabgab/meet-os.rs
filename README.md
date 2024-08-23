@@ -171,14 +171,14 @@ I have a folder called `/home/gabor/work` with all of the projects. The deployme
 
 ```
 cd /home/gabor/work
-git clone git@github.com:szabgab/meetings.rs.git
+git clone git@github.com:szabgab/meet-os.rs.git
 ```
 
 ```
-sudo cp /home/gabor/work/meetings.rs/meetings.service /etc/systemd/system/meetings.service
+sudo cp /home/gabor/work/meet-os.rs/meet-os.service /etc/systemd/system/meet-os.service
 sudo systemctl daemon-reload
-sudo systemctl enable meetings.service
-sudo systemctl start meetings.service
+sudo systemctl enable meet-os.service
+sudo systemctl start meet-os.service
 ```
 
 ```
@@ -193,8 +193,9 @@ docker restart surreal
 
 ```
 ssh s7
-cd /home/gabor/work/meetings.rs/
+cd /home/gabor/work/meet-os.rs/
 git pull
 cargo build --release
-sudo systemctl restart meetings.service
+sudo systemctl restart meet-os.service
 ```
+
