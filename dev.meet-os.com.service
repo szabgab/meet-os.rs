@@ -1,0 +1,17 @@
+[Unit]
+Description=Meet-OS Development Service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/home/gabor/work/dev.meet-os.com/target/release/meetings
+Restart=always
+WorkingDirectory=/home/gabor/work/dev.meet-os.com
+Nice=19
+LimitNOFILE=16384
+Environment="DATABASE_NAMESPACE=dev-meet-os-ns"
+Environment="DATABASE_NAME=dev-meet-os-db"
+
+[Install]
+WantedBy=multi-user.target
