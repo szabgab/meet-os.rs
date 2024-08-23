@@ -4,8 +4,6 @@ use utilities::{check_guest_menu, check_html};
 
 #[test]
 fn simple_check_empty_home() {
-    //let client = Client::tracked(super::rocket()).unwrap();
-
     run_inprocess(|| {
         let client = Client::tracked(super::rocket()).unwrap();
 
@@ -30,7 +28,6 @@ pub fn run_inprocess(func: fn()) {
     let tmp_dir = tempfile::tempdir().unwrap();
     println!("tmp_dir: {:?}", tmp_dir);
     std::env::set_var("ROCKET_CONFIG", "Rocket.skeleton.toml");
-    std::env::set_var("DATABASE_PATH", tmp_dir.path().join("db"));
     std::env::set_var(
         "DATABASE_NAMESPACE",
         format!("test-namespace-{}", rand::random::<f64>()),
