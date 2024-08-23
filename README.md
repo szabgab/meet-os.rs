@@ -46,7 +46,7 @@ There is now a [Zulip stream](https://osdc.zulipchat.com/#narrow/stream/422181-m
 
 ```
 docker volume create my-surreal-db
-docker run --name surrealdb --rm -p 127.0.0.1:8001:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+docker run --name surrealdb --rm -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
 ```
 
 ```
@@ -186,7 +186,7 @@ sudo systemctl start meet-os.service
 ```
 
 ```
-docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8001:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
 
 docker stop surreal
 docker restart surreal
@@ -218,7 +218,7 @@ cargo build --release
 
 sudo cp dev.meet-os.com.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable meet-os.service
-sudo systemctl start meet-os.service
+sudo systemctl enable dev.meet-os.com.service
+sudo systemctl start dev.meet-os.com.service
 
 ```

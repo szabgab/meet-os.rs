@@ -28,7 +28,7 @@ pub fn fairing() -> AdHoc {
 ///
 /// Panics when it fails to create the database folder or set up the database.
 pub async fn get_database() -> Surreal<Client> {
-    let address = "127.0.0.1:8001";
+    let address = "127.0.0.1:8000";
     let dbh = Surreal::new::<Ws>(address).await.unwrap();
     let db_namespace =
         env::var("DATABASE_NAMESPACE").unwrap_or_else(|_| String::from("meet-os-ns"));

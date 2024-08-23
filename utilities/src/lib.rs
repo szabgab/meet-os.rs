@@ -127,7 +127,7 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
 
     let email_file = std::env::var("EMAIL_FILE").unwrap();
     let email_content = std::fs::read_to_string(email_file).unwrap();
-    let re = Regex::new(r"http://localhost:8000/verify/register/([a-z0-9-]+)").unwrap();
+    let re = Regex::new(r"http://localhost:8001/verify/register/([a-z0-9-]+)").unwrap();
     let code = match re.captures(&email_content) {
         Some(value) => value[1].to_owned(),
         None => panic!("Code not found in email: {email_content}"),
