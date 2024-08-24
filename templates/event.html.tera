@@ -16,7 +16,8 @@
       {% endif %}
     {% endif %}
     <div class="columns is-vcentered">
-      <div class="column is-one-fifth">
+    <!--
+      <div class="column is-2">
           <figure class="image is-128x128">
             <img
                 src="https://bulma.io/assets/images/placeholders/128x128.png"
@@ -24,6 +25,7 @@
             />
           </figure>
       </div>
+      -->
       <div class="column">
         <section class="hero">
           <div class="hero-body">
