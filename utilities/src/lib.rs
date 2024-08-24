@@ -86,8 +86,6 @@ pub fn run_external(func: fn(&str, std::path::PathBuf)) {
     let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
     std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
 
-    std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
-
     compile();
 
     match fork() {
@@ -103,7 +101,9 @@ pub fn run_external(func: fn(&str, std::path::PathBuf)) {
         }
         Ok(Fork::Child) => {
             println!("Starting the web server in the child process");
-            let _result = Command::new("./target/debug/meetings").exec();
+            let _result = Command::new("./target/debug/meetings")
+                .env("ROCKET_CONFIG", rocket_toml_path)
+                .exec();
         }
         Err(_) => println!("Fork failed"),
     }
