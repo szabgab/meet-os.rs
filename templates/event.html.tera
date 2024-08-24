@@ -33,6 +33,9 @@
                 {{event.title}}
             </p>
             <p class="subtitle">
+                <span class="icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
                 <span class="datetime" value="{{event.date}}"></span>
             </p>
             <p class="is-size-6">
