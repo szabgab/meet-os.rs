@@ -3,25 +3,39 @@
 
 <section class="section">
   <div class="container">
-    <div class="content">
-       <h1 class="title is-3">{{event.title}}</h1>
-
-       <div ><b>Date</b>: <span class="datetime" value="{{event.date}}"></span></div>
-       <div><b>Location</b>: {{event.location}}</div>
-
-       {{description | safe}}
-
-       Organized by <a href="/group/{{ group.gid }}">{{ group.name }}</a>.
-
-       {% if visitor.logged_in %}
-         {% if visitor.user.uid == group.owner %}
-            {% if editable %}
-              <a href="/edit-event?eid={{event.eid}}">edit</a>
-            {% endif %}
-         {% endif %}
-       {% endif %}
-
+    {% if visitor.logged_in %}
+      {% if visitor.user.uid == group.owner %}
+          {% if editable %}
+              <a href="/edit-event?eid={{event.eid}}">Edit Event</a>
+              <br />
+          {% endif %}
+      {% endif %}
+    {% endif %}
+    <div class="columns is-vcentered">
+      <div class="column is-one-fifth">
+          <figure class="image is-128x128">
+            <img src="https://bulma.io/assets/images/placeholders/128x128.png" />
+          </figure>
+      </div>
+      <div class="column">
+        <section class="hero">
+          <div class="hero-body">
+            <p class="title">
+                {{event.title}}
+            </p>
+            <p class="subtitle">
+                <span class="datetime" value="{{event.date}}"></span>
+            </p>
+            <p class="is-size-6">
+                Organized by <a href="/group/{{ group.gid }}">{{ group.name }}</a>.
+            </p>
+          </div>
+        </section>
+      </div>
     </div>
+    <p class="is-size-3">
+        {{description | safe}}
+    </p>
   </div>
 </section>
 
