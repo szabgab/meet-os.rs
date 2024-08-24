@@ -12,8 +12,6 @@ pub(crate) mod web;
 
 mod notify;
 
-use std::env;
-
 use chrono::{DateTime, Duration, Utc};
 
 use rocket::form::Form;
