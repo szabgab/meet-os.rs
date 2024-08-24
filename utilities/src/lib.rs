@@ -82,7 +82,7 @@ pub fn run_external(func: fn(&str)) {
 
     std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
 
-    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
+    std::env::set_var("EMAIL_FOLDER", tmp_dir.path().join("emails"));
     std::env::set_var("ROCKET_PORT", &port);
     compile();
 
@@ -132,8 +132,20 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
     .unwrap();
     assert_eq!(res.status(), 200);
 
-    let email_file = std::env::var("EMAIL_FILE").unwrap();
+    let email_folder = std::env::var("EMAIL_FOLDER").unwrap();
+    let email_folder = std::path::Path::new(&email_folder);
+    let dir = email_folder
+    .read_dir()
+    .expect("read_dir call failed")
+    .flatten()
+    .collect::<Vec<_>>();
+    println!("dir: {}", dir.len());
+
+     // -2 because after the email with the code we also send a notification to the admin.
+    let filename = format!("{}.txt", dir.len()-2); 
+    let email_file = email_folder.join(filename);
     let email_content = std::fs::read_to_string(email_file).unwrap();
+    println!("email_content: {email_content}");
     let re = Regex::new(r"http://localhost:8001/verify/register/([a-z0-9-]+)").unwrap();
     let code = match re.captures(&email_content) {
         Some(value) => value[1].to_owned(),

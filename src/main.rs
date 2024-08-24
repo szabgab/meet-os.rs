@@ -13,8 +13,6 @@ pub(crate) mod web;
 mod notify;
 
 use std::env;
-use std::fs::File;
-use std::io::Write;
 
 use chrono::{DateTime, Duration, Utc};
 
@@ -37,7 +35,7 @@ use surrealdb::Surreal;
 
 use meetings::db;
 
-use meetings::{get_public_config, sendgrid, EmailAddress, Event, MyConfig, User};
+use meetings::{get_public_config, sendmail, EmailAddress, Event, MyConfig, User};
 
 use web::Visitor;
 
@@ -363,13 +361,7 @@ async fn logout_get(
 //         email: input.email.to_owned(),
 //     };
 
-//     if let Ok(email_file) = env::var("EMAIL_FILE") {
-//         rocket::info!("email_file: {email_file}");
-//         let mut file = File::create(email_file).unwrap();
-//         writeln!(&mut file, "{}", &text).unwrap();
-//     } else {
-//         sendgrid(&myconfig.sendgrid_api_key, &from, to_address, subject, &text).await;
-//     }
+//     sendmail(&myconfig, &from, to_address, subject, &text).await;
 
 //     Template::render(
 //         "message",
@@ -489,23 +481,7 @@ async fn register_post(
         email: input.email.to_owned(),
     };
 
-    if let Ok(email_file) = env::var("EMAIL_FILE") {
-        rocket::info!("email_file: {email_file}");
-        let mut file = File::create(email_file).unwrap();
-        writeln!(&mut file, "{}", &text).unwrap();
-    } else {
-        // TODO display some error if the sendgrid key is empty
-        // TODO display some error if the email sending failed
-        sendgrid(
-            &myconfig.sendgrid_api_key,
-            &from,
-            to_address,
-            subject,
-            &text,
-        )
-        .await;
-    }
-
+    sendmail(myconfig, &from, to_address, subject, &text).await;
     notify::admin_new_user_registered(myconfig, &user).await;
 
     Template::render(

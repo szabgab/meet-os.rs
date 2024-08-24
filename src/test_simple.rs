@@ -36,7 +36,7 @@ pub fn run_inprocess(func: fn()) {
     std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
 
     std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
-    std::env::set_var("EMAIL_FILE", tmp_dir.path().join("email.txt"));
+    std::env::set_var("EMAIL_FOLDER", tmp_dir.path().join("emails"));
 
     func();
 }

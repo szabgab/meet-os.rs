@@ -47,8 +47,8 @@ fn register_user() {
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         check_guest_menu(&html);
 
-        let email_file = std::env::var("EMAIL_FILE").unwrap();
-
+        let email_folder = std::env::var("EMAIL_FOLDER").unwrap();
+        let email_file = format!("{email_folder}/0.txt");
         let email_content = std::fs::read_to_string(email_file).unwrap();
         // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
         let re = Regex::new("http://localhost:8001/verify/register/([a-z0-9-]+)").unwrap();
@@ -269,7 +269,8 @@ fn login_admin_user() {
 //         // TODO: get the user from the database and check if there is a code and if the process is "login"
 
 //         // get the email and extract the code from the link
-//         let email_file = std::env::var("EMAIL_FILE").unwrap();
+//         let email_folder = std::env::var("EMAIL_FOLDER").unwrap();
+//         let email_file = format!("{email_folder}/0.txt");
 //         let email = std::fs::read_to_string(email_file).unwrap();
 //         // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
 //         let re = Regex::new("http://localhost:8001/verify/login/([a-z0-9-]+)").unwrap();

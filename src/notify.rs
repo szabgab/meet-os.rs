@@ -1,11 +1,7 @@
-use std::env;
-use std::fs::File;
-use std::io::Write;
-
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
-use meetings::{db, sendgrid, EmailAddress, Group, MyConfig, User};
+use meetings::{db, sendmail, EmailAddress, Group, MyConfig, User};
 
 pub async fn admin_new_user_registered(myconfig: &MyConfig, user: &User) {
     let base_url = &myconfig.base_url;
@@ -35,23 +31,7 @@ pub async fn admin_new_user_registered(myconfig: &MyConfig, user: &User) {
             email: admin_email.clone(),
         };
 
-        if let Ok(email_file) = env::var("EMAIL_FILE") {
-            let email_file = format!("{email_file}_notify");
-            rocket::info!("email_file: {email_file}");
-            let mut file = File::create(email_file).unwrap();
-            writeln!(&mut file, "{}", &text).unwrap();
-        } else {
-            // TODO display some error if the sendgrid key is empty
-            // TODO display some error if the email sending failed
-            sendgrid(
-                &myconfig.sendgrid_api_key,
-                &from,
-                to_address,
-                subject,
-                &text,
-            )
-            .await;
-        }
+        sendmail(myconfig, &from, to_address, subject, &text).await;
     }
 }
 
@@ -82,23 +62,7 @@ pub async fn admin_new_user_verified(myconfig: &MyConfig, user: &User) {
             email: admin_email.clone(),
         };
 
-        if let Ok(email_file) = env::var("EMAIL_FILE") {
-            let email_file = format!("{email_file}_notify");
-            rocket::info!("email_file: {email_file}");
-            let mut file = File::create(email_file).unwrap();
-            writeln!(&mut file, "{}", &text).unwrap();
-        } else {
-            // TODO display some error if the sendgrid key is empty
-            // TODO display some error if the email sending failed
-            sendgrid(
-                &myconfig.sendgrid_api_key,
-                &from,
-                to_address,
-                subject,
-                &text,
-            )
-            .await;
-        }
+        sendmail(myconfig, &from, to_address, subject, &text).await;
     }
 }
 
@@ -172,16 +136,7 @@ async fn send_to_group_owner(
         name: owner.name,
         email: owner.email,
     };
-    if let Ok(email_file) = env::var("EMAIL_FILE") {
-        let email_file = format!("{email_file}_notify");
-        rocket::info!("email_file: {email_file}");
-        let mut file = File::create(email_file).unwrap();
-        writeln!(&mut file, "{}", &text).unwrap();
-    } else {
-        // TODO display some error if the sendgrid key is empty
-        // TODO display some error if the email sending failed
-        sendgrid(&myconfig.sendgrid_api_key, from, to_address, subject, text).await;
-    }
+    sendmail(myconfig, from, to_address, subject, text).await;
 }
 
 async fn send_to_admins(
@@ -199,15 +154,6 @@ async fn send_to_admins(
             email: admin_email.clone(),
         };
 
-        if let Ok(email_file) = env::var("EMAIL_FILE") {
-            let email_file = format!("{email_file}_notify");
-            rocket::info!("email_file: {email_file}");
-            let mut file = File::create(email_file).unwrap();
-            writeln!(&mut file, "{}", &text).unwrap();
-        } else {
-            // TODO display some error if the sendgrid key is empty
-            // TODO display some error if the email sending failed
-            sendgrid(&myconfig.sendgrid_api_key, from, to_address, subject, text).await;
-        }
+        sendmail(myconfig, from, to_address, subject, text).await;
     }
 }
