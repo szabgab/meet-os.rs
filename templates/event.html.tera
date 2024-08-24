@@ -36,8 +36,11 @@
         </section>
       </div>
     </div>
-    <p class="subtitle">
-        <b>Location</b>: {{event.location}}
+    <p>
+         <span class="icon">
+            <i class="fas fa-map-marker-alt"></i>
+        </span>
+        {{event.location}}
     </p>
     <p class="is-size-3">
         {{description | safe}}
