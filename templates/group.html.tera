@@ -18,9 +18,19 @@
         </div>
         {% if visitor.logged_in %}
           {% if visitor.user.uid == owner.uid %}
-             you are the owner of this group
-             <a href="/add-event?gid={{group.gid}}">Add event</a>
-             <a href="/edit-group?gid={{group.gid}}">Edit group<a>
+             <p>
+                you are the owner of this group
+             </p>
+             <a href="/add-event?gid={{group.gid}}">
+                <button class="button is-link">
+                    Add event
+                </button>
+             </a>
+             <a href="/edit-group?gid={{group.gid}}">
+                <button class="button is-link">
+                    Edit group
+                </button>
+            <a>
           {% else %}
             {% if membership %}
                You are a member. <a href="/leave-group?gid={{group.gid}}">leave group</a>

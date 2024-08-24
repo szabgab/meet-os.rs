@@ -12,8 +12,16 @@
         <div>{{about | safe}}</div>
     </div>
     <div>
-      <a href="/edit-profile">edit profile</a>
-      <a href="/user/{{user.uid}}">view profile</a>
+      <a href="/edit-profile">
+        <button class="button is-link">
+            Edit Profile
+        </button>
+      </a>
+      <a href="/user/{{user.uid}}">
+        <button class="button is-link">
+            View Profile
+        </button>
+      </a>
     </div>
 
     {% if owned_groups %}
