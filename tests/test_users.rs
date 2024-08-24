@@ -50,7 +50,7 @@ fn register_user() {
         let email_file = email_folder.join("0.txt");
         let email_content = std::fs::read_to_string(email_file).unwrap();
         // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-        let re = Regex::new("http://localhost:8001/verify/register/([a-z0-9-]+)").unwrap();
+        let re = Regex::new("http://localhost:[0-9]+/verify/register/([a-z0-9-]+)").unwrap();
 
         println!("email content: {email_content}");
         let code = match re.captures(&email_content) {
@@ -278,7 +278,7 @@ fn login_admin_user() {
 //         let email_file = format!("{email_folder}/0.txt");
 //         let email = std::fs::read_to_string(email_file).unwrap();
 //         // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-//         let re = Regex::new("http://localhost:8001/verify/login/([a-z0-9-]+)").unwrap();
+//         let re = Regex::new("http://localhost:[0-9]+/verify/login/([a-z0-9-]+)").unwrap();
 
 //         log::info!("email: {email}");
 //         let code = match re.captures(&email) {

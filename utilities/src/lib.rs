@@ -80,12 +80,14 @@ pub fn run_external(func: fn(&str, std::path::PathBuf)) {
     let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
     let rocket_toml = rocket_toml.replace("Sendgrid | Folder", "Folder");
     let rocket_toml = rocket_toml.replace("/path/to/email_folder", email_folder.to_str().unwrap());
+    let rocket_toml = rocket_toml.replace("8001",&port);
+    println!("{rocket_toml}");
+
     let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
     std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
 
     std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
 
-    std::env::set_var("ROCKET_PORT", &port);
     compile();
 
     match fork() {
@@ -146,7 +148,7 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
     let email_file = email_folder.join(filename);
     let email_content = std::fs::read_to_string(email_file).unwrap();
     println!("email_content: {email_content}");
-    let re = Regex::new(r"http://localhost:8001/verify/register/([a-z0-9-]+)").unwrap();
+    let re = Regex::new(r"http://localhost:[0-9]+/verify/register/([a-z0-9-]+)").unwrap();
     let code = match re.captures(&email_content) {
         Some(value) => value[1].to_owned(),
         None => panic!("Code not found in email: {email_content}"),

@@ -37,6 +37,7 @@ pub fn run_inprocess(func: fn()) {
         "/path/to/email_folder",
         tmp_dir.path().join("emails").to_str().unwrap(),
     );
+
     let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
     std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
 
