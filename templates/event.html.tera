@@ -14,7 +14,10 @@
     <div class="columns is-vcentered">
       <div class="column is-one-fifth">
           <figure class="image is-128x128">
-            <img src="https://bulma.io/assets/images/placeholders/128x128.png" />
+            <img
+                src="https://bulma.io/assets/images/placeholders/128x128.png"
+                alt="Image for the {{event.title}} event"
+            />
           </figure>
       </div>
       <div class="column">
