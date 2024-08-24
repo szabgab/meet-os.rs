@@ -36,6 +36,9 @@
         </section>
       </div>
     </div>
+    <p class="subtitle">
+        <b>Location</b>: {{event.location}}
+    </p>
     <p class="is-size-3">
         {{description | safe}}
     </p>
