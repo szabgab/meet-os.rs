@@ -6,7 +6,11 @@
     {% if visitor.logged_in %}
       {% if visitor.user.uid == group.owner %}
           {% if editable %}
-              <a href="/edit-event?eid={{event.eid}}">Edit Event</a>
+              <a href="/edit-event?eid={{event.eid}}">
+                <button class="button is-link">
+                    Edit Event
+                </button>
+              </a>
               <br />
           {% endif %}
       {% endif %}
