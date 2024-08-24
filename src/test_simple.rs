@@ -32,7 +32,7 @@ pub fn run_inprocess(func: fn()) {
     let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
     let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
     let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
-    let rocket_toml = rocket_toml.replace("sendgrid | folder", "Folder");
+    let rocket_toml = rocket_toml.replace("Sendgrid | Folder", "Folder");
     let rocket_toml = rocket_toml.replace(
         "/path/to/email_folder",
         tmp_dir.path().join("emails").to_str().unwrap(),
