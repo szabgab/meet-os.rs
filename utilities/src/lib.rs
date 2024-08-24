@@ -1,7 +1,7 @@
 use fork::{fork, Fork};
 use nix::sys::signal;
 use nix::unistd::Pid;
-use std::net::TcpListener;
+use std::{net::TcpListener, path::PathBuf};
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 use scraper::{Html, Selector};
@@ -64,25 +64,27 @@ pub fn check_html_list(html: &str, tag: &str, text: Vec<&str>) {
     }
 }
 
-pub fn run_external(func: fn(&str)) {
+pub fn run_external(func: fn(&str, std::path::PathBuf)) {
     let tmp_dir = tempfile::tempdir().unwrap();
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port().to_string();
     drop(listener);
     println!("port: {port}");
     println!("tmp_dir: {:?}", tmp_dir);
+    let email_folder = tmp_dir.path().join("emails");
 
     let rocket_toml = std::fs::read_to_string("Rocket.skeleton.toml").unwrap();
     let db_name = format!("test-name-{}", rand::random::<f64>());
     let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
     let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
     let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
+    let rocket_toml = rocket_toml.replace("sendgrid | folder", "Folder");
+    let rocket_toml = rocket_toml.replace("/path/to/email_folder", email_folder.to_str().unwrap());
     let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
     std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
 
     std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
 
-    std::env::set_var("EMAIL_FOLDER", tmp_dir.path().join("emails"));
     std::env::set_var("ROCKET_PORT", &port);
     compile();
 
@@ -91,7 +93,7 @@ pub fn run_external(func: fn(&str)) {
             println!("Child PID: {}", child);
             std::thread::sleep(std::time::Duration::from_secs(1));
 
-            func(&port);
+            func(&port, email_folder);
 
             signal::kill(Pid::from_raw(child), signal::Signal::SIGTERM).unwrap();
 
@@ -124,7 +126,7 @@ pub fn check_profile_page(client: &reqwest::blocking::Client, url: &str, cookie_
     }
 }
 
-pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name: &str, email: &str, password: &str) -> String {
+pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name: &str, email: &str, password: &str, email_folder: &PathBuf) -> String {
     let res = client
     .post(format!("{url}/register"))
     .form(&[("name", name), ("email", email), ("password", password)])
@@ -132,8 +134,6 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
     .unwrap();
     assert_eq!(res.status(), 200);
 
-    let email_folder = std::env::var("EMAIL_FOLDER").unwrap();
-    let email_folder = std::path::Path::new(&email_folder);
     let dir = email_folder
     .read_dir()
     .expect("read_dir call failed")

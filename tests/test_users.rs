@@ -7,7 +7,7 @@ use utilities::{
 
 #[test]
 fn try_page_without_cookie() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}");
 
@@ -26,7 +26,7 @@ fn try_page_without_cookie() {
 
 #[test]
 fn register_user() {
-    run_external(|port| {
+    run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}");
         let res = client
@@ -47,8 +47,7 @@ fn register_user() {
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         check_guest_menu(&html);
 
-        let email_folder = std::env::var("EMAIL_FOLDER").unwrap();
-        let email_file = format!("{email_folder}/0.txt");
+        let email_file = email_folder.join("0.txt");
         let email_content = std::fs::read_to_string(email_file).unwrap();
         // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
         let re = Regex::new("http://localhost:8001/verify/register/([a-z0-9-]+)").unwrap();
@@ -89,7 +88,7 @@ fn register_user() {
 
 #[test]
 fn verify_with_non_existent_code() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
         let res = client
@@ -106,7 +105,7 @@ fn verify_with_non_existent_code() {
 
 #[test]
 fn duplicate_email() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
         let res = client
@@ -146,12 +145,18 @@ fn duplicate_email() {
 
 #[test]
 fn login_regular_user() {
-    run_external(|port| {
+    run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let _cookie_str =
-            register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123456");
+        let _cookie_str = register_user_helper(
+            &client,
+            &url,
+            "Foo Bar",
+            "foo@meet-os.com",
+            "123456",
+            &email_folder,
+        );
         //println!("cookie: {cookie_str}");
         //check_profile_page(&client, &url, &cookie_str, "Peti Bar");
 
@@ -197,14 +202,14 @@ fn login_regular_user() {
 
 #[test]
 fn login_admin_user() {
-    run_external(|port| {
+    run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
         let name = "Site Manager";
         let email = "admin@meet-os.com";
         let password = "123456";
 
-        let _cookie_str = register_user_helper(&client, &url, name, email, password);
+        let _cookie_str = register_user_helper(&client, &url, name, email, password, &email_folder);
 
         let res = client
             .post(format!("{url}/login"))
@@ -247,7 +252,7 @@ fn login_admin_user() {
 
 // #[test]
 // fn login() {
-//     run_external(|port| {
+//     run_external(|port, _email_folder| {
 //         let client = reqwest::blocking::Client::new();
 //         let url = format!("http://localhost:{port}/");
 
@@ -323,7 +328,7 @@ fn login_admin_user() {
 
 #[test]
 fn register_with_bad_email_address() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         // register new user
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
@@ -349,7 +354,7 @@ fn register_with_bad_email_address() {
 
 // #[test]
 // fn event_page() {
-//     run_external(|port| {
+//     run_external(|port, _email_folder| {
 //         let client = reqwest::blocking::Client::new();
 //         let url = format!("http://localhost:{port}/");
 //         let res = client.get(format!("{url}/event/1")).send().unwrap();
@@ -365,7 +370,7 @@ fn register_with_bad_email_address() {
 
 // #[test]
 // fn group_page() {
-//     run_external(|port| {
+//     run_external(|port, _email_folder| {
 //         let client = reqwest::blocking::Client::new();
 //         let url = format!("http://localhost:{port}/");
 //         let res = client.get(format!("{url}/group/1")).send().unwrap();
@@ -385,7 +390,7 @@ fn register_with_bad_email_address() {
 
 #[test]
 fn login_with_unregistered_email() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
@@ -405,12 +410,18 @@ fn login_with_unregistered_email() {
 
 #[test]
 fn login_with_bad_password() {
-    run_external(|port| {
+    run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let _cookie_str =
-            register_user_helper(&client, &url, "Foo Bar", "foo@meet-os.com", "123456");
+        let _cookie_str = register_user_helper(
+            &client,
+            &url,
+            "Foo Bar",
+            "foo@meet-os.com",
+            "123456",
+            &email_folder,
+        );
 
         let res = client
             .post(format!("{url}/login"))
@@ -429,7 +440,7 @@ fn login_with_bad_password() {
 
 #[test]
 fn login_with_unverified_email() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 

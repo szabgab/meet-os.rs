@@ -76,12 +76,22 @@ pub struct PublicConfig {
     google_analytics: String,
 }
 
+#[non_exhaustive]
+#[derive(Deserialize, Serialize, Debug)]
+pub enum EmailMethod {
+    Sendgrid,
+    Folder,
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct MyConfig {
     pub base_url: String,
 
+    pub email: EmailMethod,
+
     #[serde(default = "get_empty_string")]
     pub sendgrid_api_key: String,
+    pub email_folder: Option<String>,
 
     pub admins: Vec<String>,
 

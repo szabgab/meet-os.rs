@@ -2,7 +2,9 @@
 secret_key       = "qqrqdOg7fX4YNaDFzXf1mu6050BQ9okssS5sKkZFMVsd"
 base_url         = "http://localhost:8001"
 port             = 8001
+email            = "Sendgrid | Folder"
 sendgrid_api_key = "replace me"
+email_folder     = "/path/to/email_folder"
 admins           = ["admin@meet-os.com"]
 from_email       = "no-reply@meet-os.com"
 from_name        = "Meet-OS"

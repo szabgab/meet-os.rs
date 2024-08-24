@@ -32,11 +32,15 @@ pub fn run_inprocess(func: fn()) {
     let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
     let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
     let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
+    let rocket_toml = rocket_toml.replace("sendgrid | folder", "Folder");
+    let rocket_toml = rocket_toml.replace(
+        "/path/to/email_folder",
+        tmp_dir.path().join("emails").to_str().unwrap(),
+    );
     let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
     std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
 
     std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
-    std::env::set_var("EMAIL_FOLDER", tmp_dir.path().join("emails"));
 
     func();
 }

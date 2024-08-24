@@ -4,7 +4,7 @@ use utilities::{check_html, run_external};
 
 #[test]
 fn register_page() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let res = client
             .get(format!("http://localhost:{port}/register"))
@@ -26,7 +26,7 @@ fn register_page() {
 
 #[test]
 fn login_page() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let res = client
             .get(format!("http://localhost:{port}/login"))
@@ -42,7 +42,7 @@ fn login_page() {
 
 #[test]
 fn fixed_pages() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
 
         let res = client

@@ -2,7 +2,7 @@ use utilities::{check_guest_menu, check_html, run_external};
 
 #[test]
 fn check_empty_home() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let url = format!("http://localhost:{port}");
         let res = reqwest::blocking::get(format!("{url}/")).unwrap();
         assert_eq!(res.status(), 200);

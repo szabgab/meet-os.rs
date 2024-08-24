@@ -13,7 +13,7 @@ use utilities::{check_html, register_user_helper, run_external};
 
 #[test]
 fn create_group_by_admin() {
-    run_external(|port| {
+    run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
@@ -23,10 +23,17 @@ fn create_group_by_admin() {
             "Site Manager",
             "admin@meet-os.com",
             "123Secret",
+            &email_folder,
         );
         println!("admin_cookie_str: {admin_cookie_str}");
-        let peti_cookie_str =
-            register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com", "123peti");
+        let peti_cookie_str = register_user_helper(
+            &client,
+            &url,
+            "Peti Bar",
+            "peti@meet-os.com",
+            "123peti",
+            &email_folder,
+        );
         println!("peti_cookie_str: {peti_cookie_str}");
 
         // Access the Group creation page with authorized user
@@ -95,12 +102,18 @@ fn create_group_by_admin() {
 
 #[test]
 fn create_group_unauthorized() {
-    run_external(|port| {
+    run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
-        let peti_cookie_str =
-            register_user_helper(&client, &url, "Peti Bar", "peti@meet-os.com", "petibar");
+        let peti_cookie_str = register_user_helper(
+            &client,
+            &url,
+            "Peti Bar",
+            "peti@meet-os.com",
+            "petibar",
+            &email_folder,
+        );
         println!("peti_cookie_str: {peti_cookie_str}");
 
         // Access the Group creation page with unauthorized user
@@ -145,7 +158,7 @@ fn create_group_unauthorized() {
 
 #[test]
 fn create_group_guest() {
-    run_external(|port| {
+    run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}");
 
