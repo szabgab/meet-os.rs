@@ -1062,7 +1062,7 @@ async fn add_event_get(
     }
 
     Template::render(
-        "edit_event",
+        "add_event",
         context! {
             title: format!("Add event to the '{}' group", group.name),
             config: get_public_config(),
