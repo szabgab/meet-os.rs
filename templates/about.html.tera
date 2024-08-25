@@ -12,6 +12,19 @@
        The source code is available in a <a href="https://github.com/szabgab/meet-os.rs">git repository</a>.
        <p>
 
+       <h1 class="title is-3">FAQ</h1>
+       
+       <h2 class="title is-5">How can I get support?</h2>
+       <div>
+         The best way is to open an issue on the <a href="https://github.com/szabgab/meet-os.rs">meet-os git repository</a>.
+       </div>
+
+       <h2 class="title is-5">Who can create a new group?</h2>
+       <div>
+       Right now only the site owner can create new groups. If you'd like to have a group, first register on the web-site and then send a message
+       to <a href="https://szabgab.com/contact">Gabor</a> to apply for a group. Please send the name of the group and describe its planned activities.
+       </div>
+
     </div>
   </div>
 </section>
