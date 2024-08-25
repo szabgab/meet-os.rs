@@ -1145,7 +1145,7 @@ async fn add_event_post(
 
     let event = Event {
         eid,
-        title,
+        title: title.clone(),
         description,
         date,
         location,
@@ -1165,7 +1165,7 @@ async fn add_event_post(
 
     Template::render(
         "message",
-        context! {title: "Event added", message: "Event added", config, visitor},
+        context! {title: "Event added", message: format!(r#"Event added: <a href="/event/{}">{}</a>"#, eid, title ), config, visitor},
     )
 }
 
