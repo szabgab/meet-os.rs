@@ -78,7 +78,7 @@ fn test_complex() {
         // Add event 1
         let first_event_title = "The first meeting";
         let res = client
-            .post(format!("{url}/edit-event"))
+            .post(format!("{url}/add-event"))
             .form(&[
                 ("gid", "1"),
                 ("offset", "-180"),
@@ -113,7 +113,7 @@ fn test_complex() {
         let html = res.text().unwrap();
         assert!(html.contains(format!(r#"<a href="/event/1">{first_event_title}</a>"#).as_str()));
 
-        // TODO check event pages
+        // check event 1 page
         let res = client.get(format!("{url}/event/1")).send().unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
@@ -126,7 +126,7 @@ fn test_complex() {
         // Add event 2
         let second_event_title = "The second excursion";
         let res = client
-            .post(format!("{url}/edit-event"))
+            .post(format!("{url}/add-event"))
             .form(&[
                 ("gid", "1"),
                 ("offset", "-180"),
@@ -143,7 +143,7 @@ fn test_complex() {
         // Add event 3
         let third_event_title = "The 3rd party";
         let res = client
-            .post(format!("{url}/edit-event"))
+            .post(format!("{url}/add-event"))
             .form(&[
                 ("gid", "1"),
                 ("offset", "-180"),
@@ -176,7 +176,50 @@ fn test_complex() {
         assert!(html.contains(format!(r#"<a href="/event/2">{second_event_title}</a>"#).as_str()));
         assert!(html.contains(format!(r#"<a href="/event/3">{third_event_title}</a>"#).as_str()));
 
-        // TODO change event
-        // TODO check event pages
+        // Change event 2
+        let second_event_title_2 = "New title for the 2nd event";
+        let res = client
+            .post(format!("{url}/edit-event"))
+            .form(&[
+                ("eid", "2"),
+                ("offset", "-180"),
+                ("title", second_event_title_2),
+                ("location", "Ramat Gan"),
+                ("description", "We need new description"),
+                ("date", "2029-06-03 10:10"),
+            ])
+            .header("Cookie", format!("meet-os={owner_cookie_str}"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+
+        std::thread::sleep(std::time::Duration::from_millis(1000));
+        // events page
+        let res = client.get(format!("{url}/events")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains(format!(r#"<a href="/event/1">{first_event_title}</a>"#).as_str()));
+        assert!(html.contains(format!(r#"<a href="/event/2">{second_event_title_2}</a>"#).as_str()));
+        assert!(html.contains(format!(r#"<a href="/event/3">{third_event_title}</a>"#).as_str()));
+
+        // check event 1 page
+        let res = client.get(format!("{url}/event/1")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains(format!(r#"<title>{first_event_title}</title>"#).as_str()));
+        assert!(html.contains(format!(r#"<p class="title">{first_event_title}</p>"#).as_str()));
+        assert!(
+            html.contains(format!(r#"Organized by <a href="/group/1">{group_name}</a>."#).as_str())
+        );
+
+        // check event 2 page
+        let res = client.get(format!("{url}/event/2")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains(format!(r#"<title>{second_event_title_2}</title>"#).as_str()));
+        assert!(html.contains(format!(r#"<p class="title">{second_event_title_2}</p>"#).as_str()));
+        assert!(
+            html.contains(format!(r#"Organized by <a href="/group/1">{group_name}</a>."#).as_str())
+        );
     });
 }

@@ -62,6 +62,40 @@ pub async fn add_event(dbh: &Surreal<Client>, event: &Event) -> surrealdb::Resul
     Ok(())
 }
 
+pub async fn update_event(dbh: &Surreal<Client>, event: &Event) -> surrealdb::Result<()> {
+    rocket::info!(
+        "update_event: eid: '{}' new title: '{}'",
+        event.eid,
+        event.title
+    );
+
+    let mut response = dbh
+        .query(
+            "
+            UPDATE event
+                SET
+                    title=$title,
+                    date=$date,
+                    location=$location,
+                    description=$description
+                WHERE eid=$eid;",
+        )
+        .bind(("title", event.title.clone()))
+        .bind(("location", event.location.clone()))
+        .bind(("date", event.date))
+        .bind(("description", event.description.clone()))
+        .bind(("eid", event.eid))
+        .await?;
+
+    rocket::info!("response {:?}", response);
+    let entry: Option<Event> = response.take(0)?;
+    if let Some(entry) = entry.as_ref() {
+        rocket::info!("event updated '{}', '{}'", entry.title, entry.date);
+    }
+
+    Ok(())
+}
+
 pub async fn add_group(dbh: &Surreal<Client>, group: &Group) -> surrealdb::Result<()> {
     rocket::info!("add group: '{}'", group.name);
 

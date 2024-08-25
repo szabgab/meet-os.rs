@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function set_local_timezone() {
-    if (document.getElementById("edit-event")) {
+    if (document.getElementById("add-event") || document.getElementById("edit-event")) {
       const date = new Date();
       //console.log(Intl.DateTimeFormat().resolvedOptions().timeZone); // e.g. Asia/Jerusalem
       //console.log(date.toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4)); // Israel Daylight Time
@@ -53,6 +53,23 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("timezone").innerHTML = text;
       document.getElementById("offset").value = date.getTimezoneOffset();
     }
+
+    if (document.getElementById("edit-event")) {
+      let date_str = document.getElementById("date").getAttribute("original-value");
+      console.log(date_str);
+      let date = new Date(date_str);
+      console.log(date);
+      //let text = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+      let text = date.getFullYear() + '-';
+      text += String(date.getMonth() + 1).padStart(2, '0') + '-';
+      text += String(date.getDate()).padStart(2, '0') + ' '
+      text += String(date.getHours()).padStart(2, '0') + ':';
+      text += String(date.getMinutes()).padStart(2, '0');
+
+      console.log(text);
+      document.getElementById("date").value = text;
+    }
+
   }
 
   set_local_timezone();

@@ -5,7 +5,7 @@
     <div class="content">
        <h1 class="title is-3">Add event to the '{{group.name}}' group</h1>
 
-        <form method="POST" action="/edit-event" id="edit-event">
+        <form method="POST" action="/add-event" id="add-event">
             <input type="hidden" name="gid" value="{{gid}}">
             <input type="hidden" name="offset" id="offset">
             <div>Title: <input name="title" id="title" type="text"></div>

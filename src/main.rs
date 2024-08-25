@@ -45,13 +45,23 @@ struct ContactMembersForm<'r> {
 }
 
 #[derive(FromForm)]
-struct EventForm<'r> {
+struct AddEventForm<'r> {
     title: &'r str,
     date: &'r str,
     location: &'r str,
     description: &'r str,
     offset: i64,
     gid: usize,
+}
+
+#[derive(FromForm)]
+struct EditEventForm<'r> {
+    title: &'r str,
+    date: &'r str,
+    location: &'r str,
+    description: &'r str,
+    offset: i64,
+    eid: usize,
 }
 
 #[derive(FromForm)]
@@ -1032,53 +1042,12 @@ async fn edit_group_post(
     )
 }
 
-#[get("/add-event?<gid>")]
-async fn add_event_get(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
-    gid: usize,
-) -> Template {
-    rocket::info!("add-event to {gid}");
-    let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
-
-    let uid = visitor.user.clone().unwrap().uid;
-    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
-
-    if group.owner != uid {
-        return Template::render(
-            "message",
-            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
-        );
-    }
-
-    Template::render(
-        "add_event",
-        context! {
-            title: format!("Add event to the '{}' group", group.name),
-            config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
-            gid: gid,
-            group,
-        },
-    )
-}
-
-#[post("/edit-event", data = "<input>")]
+#[post("/add-event", data = "<input>")]
 async fn add_event_post(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    input: Form<EventForm<'_>>,
+    input: Form<AddEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: gid: {:?} title: '{:?}'", input.gid, input.title);
 
@@ -1164,6 +1133,190 @@ async fn add_event_post(
     Template::render(
         "message",
         context! {title: "Event added", message: format!(r#"Event added: <a href="/event/{}">{}</a>"#, eid, title ), config, visitor},
+    )
+}
+
+#[get("/add-event?<gid>")]
+async fn add_event_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    gid: usize,
+) -> Template {
+    rocket::info!("add-event to {gid}");
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    Template::render(
+        "add_event",
+        context! {
+            title: format!("Add event to the '{}' group", group.name),
+            config: get_public_config(),
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
+            gid: gid,
+            group,
+        },
+    )
+}
+
+#[get("/edit-event?<eid>")]
+async fn edit_event_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    eid: usize,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+
+    let event = db::get_event_by_eid(dbh, eid).await.unwrap().unwrap();
+
+    let group = db::get_group_by_gid(dbh, event.group_id)
+        .await
+        .unwrap()
+        .unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    Template::render(
+        "edit_event",
+        context! {
+            title: format!("Edit event in the '{}' group", group.name),
+            config: get_public_config(),
+            visitor,
+            event,
+            group,
+        },
+    )
+}
+
+#[post("/edit-event", data = "<input>")]
+async fn edit_event_post(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    input: Form<EditEventForm<'_>>,
+) -> Template {
+    rocket::info!("input: eid: {:?} title: '{:?}'", input.eid, input.title);
+
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let event = db::get_event_by_eid(dbh, input.eid).await.unwrap().unwrap();
+
+    let group = db::get_group_by_gid(dbh, event.group_id)
+        .await
+        .unwrap()
+        .unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    let min_title_length = 10;
+    let title = input.title.to_owned();
+    if title.len() < min_title_length {
+        return Template::render(
+            "message",
+            context! {title: "Too short a title", message: format!("Minimal title length {} Current title len: {}", min_title_length, title.len()), config, visitor},
+        );
+    }
+    // TODO: no < in title
+
+    let description = input.description.to_owned();
+    // TODO validate the description - disable < character
+
+    let location = input.location.to_owned();
+
+    let date_str = input.date.to_owned();
+    let offset = input.offset.to_owned();
+    let mydate = format!("{date_str}:00 +00:00");
+    let Ok(ts) = DateTime::parse_from_str(&mydate, "%Y-%m-%d %H:%M:%S %z") else {
+        return Template::render(
+            "message",
+            context! {title: "Invalid date", message: format!("Invalid date '{}' offset '{}'", date_str, offset), config, visitor},
+        );
+    };
+
+    #[allow(clippy::arithmetic_side_effects)]
+    let date = ts.to_utc() + Duration::minutes(offset);
+
+    let utc: DateTime<Utc> = Utc::now();
+    if date < utc {
+        return Template::render(
+            "message",
+            context! {title: "Can't schedule event to the past", message: format!("Can't schedule event to the past '{}'", date), config, visitor},
+        );
+    }
+
+    let event = Event {
+        eid: input.eid,
+        title: title.clone(),
+        description,
+        date,
+        location,
+        group_id: event.group_id,
+    };
+    match db::update_event(dbh, &event).await {
+        Ok(result) => result,
+        Err(err) => {
+            rocket::info!("Error while trying to add event {err}");
+            // TODO special reporting when the email is already in the system
+            return Template::render(
+                "message",
+                context! {title: "Adding event failed", message: "Could not add event.", config, visitor},
+            );
+        }
+    };
+
+    Template::render(
+        "message",
+        context! {title: "Event udapted", message: format!(r#"Event updated: <a href="/event/{}">{}</a>"#, input.eid, title ), config, visitor},
     )
 }
 
@@ -1269,6 +1422,8 @@ fn rocket() -> _ {
                 add_event_post,
                 contact_members_get,
                 contact_members_post,
+                edit_event_get,
+                edit_event_post,
                 edit_group_get,
                 edit_group_post,
                 edit_profile_get,
