@@ -13,7 +13,7 @@
        <p>
 
        <h1 class="title is-3">FAQ</h1>
-       
+
        <h2 class="title is-5">How can I get support?</h2>
        <div>
          The best way is to open an issue on the <a href="https://github.com/szabgab/meet-os.rs">meet-os git repository</a>.
@@ -25,6 +25,29 @@
        to <a href="https://szabgab.com/contact">Gabor</a> to apply for a group. Please send the name of the group and describe its planned activities.
        </div>
 
+      <h2 class="title is-5">Fees, how much does it cost to use Meet-OS?</h2>
+      <div>
+         The organizations that I invite initially will get a <b>lifetime free hosting</b>. This will include some sponsored links. e.g. links to <a href="https://szabgab.com/">Rust, Python, etc. courses</a>, job offers of sponsors, other messages of sponsors.
+      </div>
+      <div>
+         Later, if the platform is successful and the costs start to rise some other fee structure might be introduces for new groups only (!). At some point the features of Meet-OS might be divided into tiers and some will be only enabled to paying groups.
+      </div>
+
+
+      <h2 class="title is-5">How is Meet-OS financed?</h2>
+      <div>
+         Every Open Source project requires time and devotion. Hosted services, even if they are based on Open Source software need other things as well. Support, hosting fees etc.
+      </div>
+      <div>
+         The hope is that many people, especially in the Rust community, but also in the wider Open Source community will find the project valuable to support financially and will sponsor
+         it via <a href="https://github.com/sponsors/szabgab/">Github Sponsors</a>.
+      </div>
+      <div>
+        The platform will help promoting the <a href="https://szabgab.com/">training courses of Gabor Szabo</a>, the main author. That will generate some income.
+      </div>
+      <div>
+        There will be companies that will want to sponsor the service, potentially to promote their job offers through the system.
+      </div>
     </div>
   </div>
 </section>

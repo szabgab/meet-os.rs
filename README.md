@@ -12,10 +12,6 @@
 * Then talk to Python groups and see if I can win them over one by one.
 * Then extend it to other technology related group.
 
-## Fees
-
-* The organizations that I invite will get a lifetime free hosting. These will probably include some sponsored links. e.g. link to my own Rust, Python, etc. courses and job offers of sponsors.
-* Later, if the platform is successful and the costs start to rise I'll think of a fee structure for new groups and we might add some features that will be enabled only for corporations.
 
 ## Source code, License, reusability
 
@@ -30,12 +26,6 @@
 * UI Design, graphics.
 * Hosting is probably less than $50 / month for a long time.
 * Email sending - depending on the service, but it won't go over $50/month for quite some time either.
-
-## Financing
-
-* I hope that many people, especially in the Rust community, but also in the wider Open Source community will find the project valuable to support it financially.
-* The platform will help promoting the training courses of Gabor Szabo, the main author. That can generate income.
-* Income from companies that would like to promote their job offers through the system.
 
 
 ## Community
