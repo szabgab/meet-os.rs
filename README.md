@@ -44,17 +44,38 @@ There is now a [Zulip stream](https://osdc.zulipchat.com/#narrow/stream/422181-m
 
 ## Development
 
-```
-docker volume create my-surreal-db
-docker run --name surrealdb --rm -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
-```
+* Start the Docker that Runs the SurrealDB
 
 ```
-git clone https://github.com/szabgab/meeting.rs
-cd meeting.rs
+docker volume create my-surreal-db
+docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+```
+
+* At the end of the development session you might want to stop the docker container.
+```
+docker stop surreal
+```
+
+* For the next session you can start it again.
+
+```
+docker restart surreal
+```
+
+* Install [Rust](https://www.rust-lang.org/tools/install).
+
+* Install [cargo-watch](https://github.com/watchexec/cargo-watch).
+
+* Get the Source code:
+
+```
+git clone https://github.com/szabgab/meet-os.rs
+cd meet-os.rs
 ```
 
 * Install [pre-commit](https://pre-commit.com/)
+
+* Set up the pre-commit:
 
 ```
 pre-commit install
@@ -62,19 +83,32 @@ pre-commit install
 
 Copy `Rocket.skeleton.toml` to `Rocket.toml`
 
-Create an account on Sendgrid and add your API key to the `[debug]` section of `Rocket.toml`:
+The system sends emails. You can either setup a [Sendgrid](https://sendgrid.com/) account (the free account might be enough during development)
+or you might use the "file-based delivery" which basically means that every email is saved as a file. The file-based system is used for testing.
+
+* If using sendgrid then create an account on Sendgrid and add your API key to the `[debug]` section of `Rocket.toml`:
 
 ```
+email            = "Sendgrid"
 sendgrid_api_key = "SG.blabla"
 ```
+
+* If using the file-based delivery system then create and empty folder (e.g. emails/ in the current folder)  edit `Rocket.toml` and add
+the full path to this folder.
+
+```
+email            = "Folder"
+email_folder     = "/path/to/email_folder"
+```
+
+
+TODO: This needs rework:
 
 Create `config.yaml` adding the Google Analytics code:
 
 ```
 google_analytics: G-SOME-CODE
 ```
-
-Install [cargo-watch](https://github.com/watchexec/cargo-watch)
 
 Run
 
@@ -167,17 +201,20 @@ Registered users who is not logged in
 * Set up meet-os.com on https://forwardemail.net/
 * Set up meet-os.com on https://sendgrid.com/
 
-
 * We have nginx server configured as a reverse proxy in-front of the application.
 
+* We use [SurrealDB](https://surrealdb.com/) in a Docker container.
+
+```
+docker volume create my-surreal-db
+docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+```
 
 I have a folder called `/home/gabor/work` with all of the projects. The deployment described here is relative to that.
 
 ```
 cd /home/gabor/work
 git clone git@github.com:szabgab/meet-os.rs.git meet-os.com
-
-cp ../meet-os.com-secrets/prod/Rocket.toml .
 ```
 
 ```
@@ -187,12 +224,6 @@ sudo systemctl enable meet-os.service
 sudo systemctl start meet-os.service
 ```
 
-```
-docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
-
-docker stop surreal
-docker restart surreal
-```
 
 
 ## Release and deployment
@@ -208,19 +239,33 @@ sudo systemctl restart meet-os.service
 ## Deploy the development and testing service
 
 
+
 ```
 docker volume create my-surreal-db
 docker run --name surrealdb --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+```
 
 git clone git@github.com:szabgab/meet-os.rs.git dev.meet-os.com
-git clone git@github.com:szabgab/meet-os.com-secrets.git
 cd dev.meet-os.com
-cp ../meet-os.com-secrets/dev/Rocket.toml .
 cargo build --release
+```
 
+Upload the Rocket.toml with the configuration of the dev server.
+
+```
 sudo cp dev.meet-os.com.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable dev.meet-os.com.service
 sudo systemctl start dev.meet-os.com.service
+```
+
+### Upgrade the development and testing service
 
 ```
+cd dev.meet-os.com
+git pull
+cargo build --release
+sudo systemctl restart dev.meet-os.com.service
+```
+
+
