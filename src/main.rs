@@ -103,7 +103,6 @@ async fn index(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
-    rocket::info!("home");
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
@@ -147,7 +146,6 @@ async fn events(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
 ) -> Template {
-    rocket::info!("home");
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
@@ -658,7 +656,7 @@ async fn show_profile(
     let owned_groups = db::get_groups_by_owner_id(dbh, uid).await.unwrap();
 
     let groups = db::get_groups_by_membership_id(dbh, uid).await.unwrap();
-    rocket::info!("{groups:?}");
+    rocket::info!("groups: {groups:?}");
 
     let about = visitor
         .user
@@ -1041,7 +1039,7 @@ async fn add_event_get(
     myconfig: &State<MyConfig>,
     gid: usize,
 ) -> Template {
-    rocket::info!("add-event");
+    rocket::info!("add-event to {gid}");
     let config = get_public_config();
 
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
