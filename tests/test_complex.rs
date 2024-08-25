@@ -6,6 +6,13 @@ fn test_complex() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
 
+        // main page
+        let res = client.get(format!("{url}")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(!html.contains("<h2>Events</h2>"));
+        assert!(!html.contains("<h2>Groups</h2>"));
+
         let admin_name = "Admin";
         let admin_email = "admin@meet-os.com";
         let admin_password = "123456";
@@ -85,8 +92,37 @@ fn test_complex() {
             .unwrap();
         assert_eq!(res.status(), 200);
 
-        // TODO list events
+        // main page
+        let res = client.get(format!("{url}")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains("<h2>Events</h2>"));
+        assert!(html.contains("<h2>Groups</h2>"));
+        assert!(html.contains(format!(r#"<a href="/group/1">{group_name}</a>"#).as_str()));
+        assert!(html.contains(format!(r#"<a href="/event/1">{event_title}</a>"#).as_str()));
+
+        // groups page
+        let res = client.get(format!("{url}/groups")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains(format!(r#"<a href="/group/1">{group_name}</a>"#).as_str()));
+
+        // events page
+        let res = client.get(format!("{url}/events")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains(format!(r#"<a href="/event/1">{event_title}</a>"#).as_str()));
+
         // TODO check event pages
+        let res = client.get(format!("{url}/event/1")).send().unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        assert!(html.contains(format!(r#"<title>{event_title}</title>"#).as_str()));
+        assert!(html.contains(format!(r#"<p class="title">{event_title}</p>"#).as_str()));
+        assert!(
+            html.contains(format!(r#"Organized by <a href="/group/1">{group_name}</a>."#).as_str())
+        );
+
         // TODO change event
         // TODO check event pages
     });

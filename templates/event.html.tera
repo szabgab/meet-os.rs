@@ -29,9 +29,7 @@
       <div class="column">
         <section class="hero">
           <div class="hero-body">
-            <p class="title">
-                {{event.title}}
-            </p>
+            <p class="title">{{event.title}}</p>
             <p class="subtitle">
                 <span class="icon">
                     <i class="fas fa-calendar-alt"></i>
