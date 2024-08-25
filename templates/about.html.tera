@@ -48,6 +48,29 @@
       <div>
         There will be companies that will want to sponsor the service, potentially to promote their job offers through the system.
       </div>
+
+      <h2 class="title is-5">Email notifications - Who can send email messages?</h2>
+      <div>
+        
+      <ul>
+         <li>Group owner can send message to all the members.</li>
+      </ul>
+      </div>
+
+
+      <h2 class="title is-5">Email notifications - What kind of automatic notifications are in the system?</h2>
+      <ul>
+        <li>When new group is create the new own receives an email.</li>
+        <li>When a user joins a group the owner receives and email.</li>
+        <li>When a user leaves a group the owner receives and email.</li>
+      </ul>
+
+      <h2 class="title is-5">Email notifications - filtering</h2>
+      <div>
+         Currently there is no way to select which kind of email notifications one receives.
+         We'll have to add some way for the users to control what kind of email messages are sent to them.
+      </div>
+
     </div>
   </div>
 </section>
