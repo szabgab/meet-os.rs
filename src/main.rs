@@ -38,6 +38,13 @@ use meetings::{get_public_config, sendmail, EmailAddress, Event, MyConfig, User}
 use web::Visitor;
 
 #[derive(FromForm)]
+struct ContactMembersForm<'r> {
+    subject: &'r str,
+    content: &'r str,
+    gid: usize,
+}
+
+#[derive(FromForm)]
 struct EventForm<'r> {
     title: &'r str,
     date: &'r str,
@@ -1162,6 +1169,96 @@ async fn add_event_post(
     )
 }
 
+#[get("/contact-members?<gid>")]
+async fn contact_members_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    gid: usize,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    Template::render(
+        "contact_members",
+        context! {
+            title: format!("Contact members of the '{}' group", group.name),
+            config: get_public_config(),
+            visitor: Visitor::new(cookies, dbh, myconfig).await,
+            gid: gid,
+            group,
+        },
+    )
+}
+
+#[post("/contact-members", data = "<input>")]
+async fn contact_members_post(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    input: Form<ContactMembersForm<'_>>,
+) -> Template {
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let uid = visitor.user.clone().unwrap().uid;
+    let group = db::get_group_by_gid(dbh, input.gid).await.unwrap().unwrap();
+
+    if group.owner != uid {
+        return Template::render(
+            "message",
+            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+        );
+    }
+
+    let min_subject_length = 5;
+    let subject = input.subject.to_owned();
+    if subject.len() < min_subject_length {
+        return Template::render(
+            "message",
+            context! {title: "Too short a subject", message: format!("Minimal subject length {} Current subject len: {}", min_subject_length, subject.len()), config, visitor},
+        );
+    }
+    // TODO: no < in title
+
+    let content = input.content.to_owned();
+    let html = markdown2html(&content).unwrap();
+    // TODO validate the content - disable < character
+
+    notify::group_members(dbh, myconfig, &subject, &html, input.gid).await;
+
+    Template::render(
+        "message",
+        context! {title: "Message sent", message: "Message sent", config, visitor},
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -1172,6 +1269,8 @@ fn rocket() -> _ {
             routes![
                 add_event_get,
                 add_event_post,
+                contact_members_get,
+                contact_members_post,
                 edit_group_get,
                 edit_group_post,
                 edit_profile_get,

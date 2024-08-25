@@ -30,7 +30,12 @@
                 <button class="button is-link">
                     Edit group
                 </button>
-            <a>
+             </a>
+             <a href="/contact-members?gid={{group.gid}}">
+                <button class="button is-link">
+                    Contact members
+                </button>
+             </a>
           {% else %}
             {% if membership %}
                You are a member. <a href="/leave-group?gid={{group.gid}}">leave group</a>

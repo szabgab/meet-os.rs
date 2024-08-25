@@ -152,6 +152,41 @@ pub async fn owner_user_left_group(
     send_to_admins(dbh, myconfig, &from, &subject, &text).await;
 }
 
+pub async fn group_members(
+    dbh: &Surreal<Client>,
+    myconfig: &MyConfig,
+    subject: &str,
+    text: &str,
+    gid: usize,
+) {
+    let from = EmailAddress {
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
+    };
+
+    let members = db::get_members_of_group(dbh, gid).await.unwrap();
+    for member in members {
+        let to_address = &EmailAddress {
+            name: member.0.name,
+            email: member.0.email,
+        };
+
+        sendmail(myconfig, &from, to_address, subject, text).await;
+    }
+
+    // send to group owner as well
+
+    let admins = myconfig.admins.clone();
+    for admin_email in admins {
+        let to_address = &EmailAddress {
+            name: String::new(),
+            email: admin_email.clone(),
+        };
+
+        sendmail(myconfig, &from, to_address, subject, text).await;
+    }
+}
+
 async fn send_to_group_owner(
     dbh: &Surreal<Client>,
     myconfig: &MyConfig,

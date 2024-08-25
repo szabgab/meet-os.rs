@@ -1,0 +1,20 @@
+{% include "incl/header" %}
+
+<section class="section">
+  <div class="container">
+    <div class="content">
+       <h1 class="title is-3">{{title}}</h1>
+
+        <form method="POST" action="/contact-members" id="contact-members">
+            <input type="hidden" name="gid" value="{{gid}}">
+            <div>Subject: <input name="subject" id="subject" type="text"></div>
+            <div>Content: <textarea name="content" id="content"></textarea></div>
+            <input type="submit" value="Send">
+        </form>
+
+    </div>
+  </div>
+</section>
+
+
+{% include "incl/footer" %}
