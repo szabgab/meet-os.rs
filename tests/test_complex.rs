@@ -69,21 +69,21 @@ fn test_complex() {
         //assert_eq!(html, "");
 
         // TODO Add events
-        // let event_title = "The first meeting";
-        // let res = client
-        //     .post(format!("{url}/add-events"))
-        //     .form(&[
-        //         ("gid", "1"),
-        //         ("offset", "-180"),
-        //         ("title", event_title),
-        //         ("location", "Virtual"),
-        //         ("description", ""),
-        //         ("date", "2030-01-01 10:10"),
-        //     ])
-        //     .header("Cookie", format!("meet-os={owner_cookie_str}"))
-        //     .send()
-        //     .unwrap();
-        // assert_eq!(res.status(), 200);
+        let event_title = "The first meeting";
+        let res = client
+            .post(format!("{url}/edit-event"))
+            .form(&[
+                ("gid", "1"),
+                ("offset", "-180"),
+                ("title", event_title),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("date", "2030-01-01 10:10"),
+            ])
+            .header("Cookie", format!("meet-os={owner_cookie_str}"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
 
         // TODO list events
         // TODO check event pages
