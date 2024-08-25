@@ -11,6 +11,7 @@ use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
 use crate::db;
+use crate::notify;
 use crate::web::Visitor;
 use crate::{get_public_config, MyConfig};
 use meetings::Group;
@@ -201,14 +202,19 @@ async fn create_group_post(
         creation_date,
     };
 
-    db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
-        .await
-        .unwrap();
+    let owner = db::get_user_by_id(dbh, input.owner).await.unwrap().unwrap();
+
     match db::add_group(dbh, &group).await {
-        Ok(_result) => Template::render(
-            "message",
-            context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},
-        ),
+        Ok(_result) => {
+            notify::owner_group_was_created(dbh, myconfig, &owner, &group).await;
+            db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
+                .await
+                .unwrap();
+            Template::render(
+                "message",
+                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},
+            )
+        }
         Err(err) => {
             rocket::info!("Error while trying to add group {err}");
             Template::render(

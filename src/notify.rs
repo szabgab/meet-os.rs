@@ -66,6 +66,35 @@ pub async fn admin_new_user_verified(myconfig: &MyConfig, user: &User) {
     }
 }
 
+pub async fn owner_group_was_created(
+    dbh: &Surreal<Client>,
+    myconfig: &MyConfig,
+    owner: &User,
+    group: &Group,
+) {
+    let base_url = &myconfig.base_url;
+    let subject = format!("Meet-OS: new group '{}' was created for you!", group.name);
+    let text = format!(
+        r#"Hi {},
+        <p>
+        A new group was created for you. <a href="{base_url}/group/{}">{}</a>.
+        <p>
+        Enjoy!
+    <p>
+    Sent from {base_url}
+    "#,
+        owner.name, group.gid, group.name
+    );
+
+    let from = EmailAddress {
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
+    };
+
+    send_to_group_owner(dbh, myconfig, &from, group, &subject, &text).await;
+    send_to_admins(dbh, myconfig, &from, &subject, &text).await;
+}
+
 pub async fn owner_user_joined_group(
     dbh: &Surreal<Client>,
     myconfig: &MyConfig,
