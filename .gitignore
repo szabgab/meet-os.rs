@@ -2,3 +2,5 @@
 /db/
 /Rocket.toml
 /emails/
+*.bak
+*.swp
