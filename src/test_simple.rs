@@ -1,4 +1,4 @@
-use rocket::http::Status;
+use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 use utilities::{check_guest_menu, check_html};
 
@@ -21,6 +21,44 @@ fn simple_check_empty_home() {
         assert!(!html.contains("<h2>Events</h2>"));
         assert!(!html.contains("<h2>Groups</h2>"));
         check_guest_menu(&html);
+
+        // register user
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=Foo Bar&email=foo@meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        assert!(res.headers().get_one("set-cookie").is_none());
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "We sent you an email");
+        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
+        check_guest_menu(&html);
+
+        // register with same email should fail
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=Foo Bar&email=foo@meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Registration failed");
+        assert!(html.contains("Could not register <b>foo@meet-os.com</b>"));
+
+        // register with invalid email address
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=Foo Bar&email=meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid email address");
+        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+
+        //assert_eq!(html, "");
     });
 }
 
