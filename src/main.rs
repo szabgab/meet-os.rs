@@ -101,7 +101,7 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
         text,
         &markdown::Options {
             compile: markdown::CompileOptions {
-                allow_dangerous_html: true,
+                allow_dangerous_html: false,
                 ..markdown::CompileOptions::default()
             },
             ..markdown::Options::gfm()

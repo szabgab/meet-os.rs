@@ -86,11 +86,11 @@ fn test_simple() {
         assert!(html.contains(r#"The github username `szabgab*` is not valid."#));
 
         // TODO test the validation of the other fields as well!
-        // TODO verify that if we submit html tags to the about field, those are properly escaped in the result
 
         //assert_eq!(html, "");
 
         // edit profile page
+        // verify that if we submit html tags to the about field, those are properly escaped in the result
         let res = client
             .post("/edit-profile")
             .private_cookie(("meet-os", email))
@@ -126,8 +126,8 @@ fn test_simple() {
 <li>text</li>
 <li>more</li>
 <li><a href="https://meet-os.com/">link</a></li>
-<li><b>bold</b></li>
-<li><a href="https://meet-os.com/">bad link</a></li>
+<li>&lt;b&gt;bold&lt;/b&gt;</li>
+<li>&lt;a href=&quot;https://meet-os.com/&quot;&gt;bad link&lt;/a&gt;</li>
 </ul>
 </div>"#
         ));
