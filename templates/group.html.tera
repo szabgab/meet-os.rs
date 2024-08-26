@@ -38,9 +38,9 @@
              </a>
           {% else %}
             {% if membership %}
-               You are a member. <a href="/leave-group?gid={{group.gid}}">leave group</a>
+               You are a member. <a href="/leave-group?gid={{group.gid}}"><button class="button is-link">leave group</button></a>
             {% else %}
-               <a href="/join-group?gid={{group.gid}}">join this group</a>
+               <a href="/join-group?gid={{group.gid}}"><button class="button is-link">join this group</button></a>
             {% endif %}
           {% endif %}
         {% else %}
