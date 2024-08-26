@@ -41,8 +41,6 @@ fn test_simple() {
         let res = client.get(format!("/verify/register/{code}")).dispatch();
         assert_eq!(res.status(), Status::Ok);
 
-        //let cookie_str = extract_cookie_local(&res);
-
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Thank you for registering");
         assert!(html.contains("Your email was verified."));
@@ -121,8 +119,3 @@ pub fn check_profile_page_in_process(email: String, h1: &str) {
         check_html(&html, "h1", h1);
     }
 }
-
-// pub fn extract_cookie_local(res: &rocket::local::blocking::LocalResponse) -> String {
-//     let cookie = res.headers().get_one("set-cookie").unwrap();
-//     extract_cookie_from_str(cookie)
-// }
