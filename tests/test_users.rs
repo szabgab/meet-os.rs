@@ -47,7 +47,7 @@ fn register_user() {
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         check_guest_menu(&html);
 
-        let code = read_code_from_email(email_folder, "0.txt");
+        let code = read_code_from_email(&email_folder, "0.txt");
 
         println!("code: {code}");
 

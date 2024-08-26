@@ -144,15 +144,8 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
     println!("dir: {}", dir.len());
 
      // -2 because after the email with the code we also send a notification to the admin.
-    let filename = format!("{}.txt", dir.len()-2); 
-    let email_file = email_folder.join(filename);
-    let email_content = std::fs::read_to_string(email_file).unwrap();
-    println!("email_content: {email_content}");
-    let re = Regex::new(r"http://localhost:[0-9]+/verify/register/([a-z0-9-]+)").unwrap();
-    let code = match re.captures(&email_content) {
-        Some(value) => value[1].to_owned(),
-        None => panic!("Code not found in email: {email_content}"),
-    };
+    let filename = format!("{}.txt", dir.len()-2);
+    let code = read_code_from_email(email_folder, &filename);
     println!("code: {code}");
 
     let res = client
@@ -191,7 +184,7 @@ println!("cookie_str: {cookie_str}");
 }
 
 
-pub fn read_code_from_email(email_folder: std::path::PathBuf, filename: &str) -> String {
+pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -> String {
     let email_file = email_folder.join(filename);
     let email_content = std::fs::read_to_string(email_file).unwrap();
     // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
