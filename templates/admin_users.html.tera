@@ -4,22 +4,8 @@
   <div class="container">
     <div class="content">
        <h1 class="title is-3">{{title}}</h1>
-        <table>
-          <tr>
-            <td>User</td>
-            <td>Registration Date</td>
-            <td>Verified</td>
-            <td>Verification Date</td>
-          </tr>
-        {% for user in users %}
-            <tr>
-              <td><a href="/user/{{ user.uid }}">{{ user.name }}</a></td>
-              <td>{{ user.registration_date }}</td>
-              <td>{{ user.verified }}</td>
-              <td>{{ user.verification_date }}</td>
-            </tr>
-        {% endfor %}
-        </table>
+        {% include "incl/admin_list_users" %}
+
     </div>
   </div>
 </section>

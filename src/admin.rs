@@ -13,7 +13,7 @@ use surrealdb::Surreal;
 use crate::db;
 use crate::notify;
 use crate::web::Visitor;
-use crate::{get_public_config, MyConfig};
+use crate::{get_public_config, MyConfig, User};
 use meetings::Group;
 
 #[derive(FromForm)]
@@ -24,6 +24,12 @@ struct GroupForm<'r> {
     owner: usize,
 }
 
+#[derive(FromForm)]
+struct SearchForm<'r> {
+    query: &'r str,
+    table: &'r str,
+}
+
 pub fn routes() -> Vec<Route> {
     routes![
         admin,
@@ -31,6 +37,8 @@ pub fn routes() -> Vec<Route> {
         audit_get,
         create_group_get,
         create_group_post,
+        search_get,
+        search_post,
     ]
 }
 
@@ -115,11 +123,90 @@ async fn admin_users(
     )
 }
 
-#[get("/create-group")]
+#[get("/search")]
+async fn search_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let user = visitor.user.clone().unwrap();
+
+    if !visitor.admin {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
+        );
+    };
+
+    let users: Vec<User> = vec![];
+
+    Template::render(
+        "search",
+        context! {title: "Search", query: "", table: "user", users, user: user, config, visitor},
+    )
+}
+
+#[post("/search", data = "<input>")]
+async fn search_post(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    input: Form<SearchForm<'_>>,
+) -> Template {
+    rocket::info!("search_post: {:?}", input.query);
+    let config = get_public_config();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let user = visitor.user.clone().unwrap();
+
+    if !visitor.admin {
+        return Template::render(
+            "message",
+            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
+        );
+    }
+
+    let query = input.query.to_lowercase();
+
+    let users = db::get_users(dbh)
+        .await
+        .unwrap()
+        .into_iter()
+        .filter(|usr| {
+            usr.name.to_lowercase().contains(&query) || usr.email.to_lowercase().contains(&query)
+        })
+        .collect::<Vec<_>>();
+
+    Template::render(
+        "search",
+        context! {title: "Search", query: input.query, table: input.table, users, user: user, config, visitor},
+    )
+}
+
+#[get("/create-group?<uid>")]
 async fn create_group_get(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    uid: usize,
 ) -> Template {
     let config = get_public_config();
     let visitor = Visitor::new(cookies, dbh, myconfig).await;
@@ -141,11 +228,11 @@ async fn create_group_get(
         );
     };
 
-    let users = db::get_users(dbh).await.unwrap();
+    let owner = db::get_user_by_id(dbh, uid).await.unwrap().unwrap();
 
     Template::render(
         "create_group",
-        context! {title: "Create Group", users, user: user, config, visitor},
+        context! {title: "Create Group", owner, user: user, config, visitor},
     )
 }
 

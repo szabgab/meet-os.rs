@@ -1,0 +1,18 @@
+        <table>
+          <tr>
+            <td>User</td>
+            <td>Registration Date</td>
+            <td>Verified</td>
+            <td>Verification Date</td>
+          </tr>
+
+        {% for user in users %}
+            <tr>
+              <td><a href="/user/{{ user.uid }}">{{ user.name }}</a></td>
+              <td>{{ user.registration_date }}</td>
+              <td>{{ user.verified }}</td>
+              <td>{{ user.verification_date }}</td>
+              <td><a href="/admin/create-group?uid={{user.uid}}">create group</a></td>
+            </tr>
+        {% endfor %}
+        </table>

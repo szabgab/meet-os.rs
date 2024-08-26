@@ -6,7 +6,7 @@
     <div class="content">
         <h1 class="title is-3">{{title}}</h1>
 
-        <div><a href="/admin/create-group">Create group</a></div>
+        <div><a href="/admin/search">Search</a></div>
         <div><a href="/admin/users">List users</a></div>
         <div><a href="/admin/audit">Audit</a></div>
     </div>

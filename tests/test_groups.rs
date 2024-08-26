@@ -38,7 +38,7 @@ fn create_group_by_admin() {
 
         // Access the Group creation page with authorized user
         let res = client
-            .get(format!("{url}/admin/create-group"))
+            .get(format!("{url}/admin/create-group?uid=1"))
             .header("Cookie", format!("meet-os={admin_cookie_str}"))
             .send()
             .unwrap();
@@ -118,7 +118,7 @@ fn create_group_unauthorized() {
 
         // Access the Group creation page with unauthorized user
         let res = client
-            .get(format!("{url}/admin/create-group"))
+            .get(format!("{url}/admin/create-group?uid=1"))
             .header("Cookie", format!("meet-os={peti_cookie_str}"))
             .send()
             .unwrap();
@@ -164,7 +164,7 @@ fn create_group_guest() {
 
         // Access the Group creation page without user
         let res = client
-            .get(format!("{url}/admin/create-group"))
+            .get(format!("{url}/admin/create-group?uid=1"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);

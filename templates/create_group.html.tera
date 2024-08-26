@@ -10,11 +10,8 @@
           <div>Location: <input name="location" id="location" type="text"></div>
           <div>Description: <textarea name="description" id="description"></textarea></div>
           <div>
-          Owner: <select name="owner">
-          {% for user in users %}
-            <option value="{{ user.uid }}">{{ user.name }}</option>
-          {% endfor %}
-          </select>
+          <input type="hidden" name="owner" value="{{owner.uid}}">
+          Owner: {{owner.name}} {{owner.email}}
           </div>
           <input type="submit" value="Create">
         </form>
