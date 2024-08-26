@@ -23,6 +23,8 @@ use rocket_dyn_templates::{context, Template};
 
 use markdown::message;
 
+use regex::Regex;
+
 use pbkdf2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Pbkdf2,
@@ -720,12 +722,22 @@ async fn edit_profile_post(
         );
     };
 
+    let re = Regex::new("^[a-zA-Z0-9]+$").unwrap();
+
     let uid = visitor.user.clone().unwrap().uid;
     let name = input.name;
     let github = input.github;
     let gitlab = input.gitlab;
     let linkedin = input.linkedin;
     let about = input.about;
+
+    if !re.is_match(github) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid GitHub username", message: format!("The github username `{github}` is not valid."), config, visitor},
+        );
+    }
+
     db::update_user(dbh, uid, name, github, gitlab, linkedin, about)
         .await
         .unwrap();

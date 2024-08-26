@@ -72,9 +72,64 @@ fn test_simple() {
         check_html(&html, "title", "Invalid email address");
         assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
 
+        let email = "foo@meet-os.com";
+        // edit profile page invalid github account
+        let res = client
+            .post("/edit-profile")
+            .private_cookie(("meet-os", email))
+            .header(ContentType::Form)
+            .body("name=XX&github=szabgab*&gitlab=&linkedin&about=")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid GitHub username");
+        assert!(html.contains(r#"The github username `szabgab*` is not valid."#));
+
+        // TODO test the validation of the other fields as well!
+        // TODO verify that if we submit html tags to the about field, those are properly escaped in the result
+
         //assert_eq!(html, "");
 
-        // TODO edit profile page
+        // edit profile page
+        let res = client
+            .post("/edit-profile")
+            .private_cookie(("meet-os", email))
+            .header(ContentType::Form)
+            .body("name=Luis XI&github=szabgab&gitlab=szabgab&linkedin=https://www.linkedin.com/in/szabgab/&about=* text\n* more\n* [link](https://meet-os.com/)\n")
+            .dispatch();
+        // * <b>bold</b>\n* <a href="https://meet-os.com/">bad link</a>
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Profile updated");
+        assert!(html.contains(r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Luis XI</a>"#));
+
+        // Check updated profile
+        let res = client
+            .get("/profile")
+            .private_cookie(("meet-os", email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Profile");
+        assert!(html.contains(r#"<div><a href="https://github.com/szabgab">GitHub</a></div>"#));
+        assert!(html.contains(r#"<div><a href="https://gitlab.com/szabgab">GitLab</a></div>"#));
+
+        // TODO: do we need to escape the characters when we submit them in the test or is this really what should be expected?
+        assert!(html.contains(r#"<div><a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;szabgab&#x2F;">LinkedIn</a></div>"#));
+        //assert!(html.contains(r#"<div><a href="https:://www.linkedin.com/in/szabgab/">LinkedIn</a></div>"#));
+
+        eprintln!("{html}");
+        //assert_eq!(html, "");
+        assert!(html.contains(
+            r#"<div><ul>
+<li>text</li>
+<li>more</li>
+<li><a href="https://meet-os.com/">link</a></li>
+</ul>
+</div>"#
+        ));
+
         // TODO resend code?
         // TODO reset password?
     });
