@@ -2,7 +2,7 @@ use regex::Regex;
 
 use utilities::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page, check_user_menu,
-    register_user_helper, run_external,
+    read_code_from_email, register_user_helper, run_external,
 };
 
 #[test]
@@ -47,16 +47,7 @@ fn register_user() {
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         check_guest_menu(&html);
 
-        let email_file = email_folder.join("0.txt");
-        let email_content = std::fs::read_to_string(email_file).unwrap();
-        // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-        let re = Regex::new("http://localhost:[0-9]+/verify/register/([a-z0-9-]+)").unwrap();
-
-        println!("email content: {email_content}");
-        let code = match re.captures(&email_content) {
-            Some(value) => value[1].to_owned(),
-            None => panic!("Code not found in email: {email_content}"),
-        };
+        let code = read_code_from_email(email_folder, "0.txt");
 
         println!("code: {code}");
 

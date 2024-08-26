@@ -189,3 +189,19 @@ let cookie_str = match re.captures(cookie) {
 println!("cookie_str: {cookie_str}");
     cookie_str
 }
+
+
+pub fn read_code_from_email(email_folder: std::path::PathBuf, filename: &str) -> String {
+    let email_file = email_folder.join(filename);
+    let email_content = std::fs::read_to_string(email_file).unwrap();
+    // https://meet-os.com/verify/register/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let re = Regex::new("http://localhost:[0-9]+/verify/register/([a-z0-9-]+)").unwrap();
+
+    //println!("email content: {email_content}");
+    let code = match re.captures(&email_content) {
+        Some(value) => value[1].to_owned(),
+        None => panic!("Code not find in email: {email_content}"),
+    };
+
+    code
+}
