@@ -146,7 +146,6 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
      // -2 because after the email with the code we also send a notification to the admin.
     let filename = format!("{}.txt", dir.len()-2);
     let code = read_code_from_email(email_folder, &filename);
-    println!("code: {code}");
 
     let res = client
     .get(format!("{url}/verify/register/{code}"))
@@ -181,6 +180,7 @@ pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -
         Some(value) => value[1].to_owned(),
         None => panic!("Code not find in email: {email_content}"),
     };
+    println!("code: {code}");
 
     code
 }

@@ -47,8 +47,6 @@ fn register_user() {
 
         let code = read_code_from_email(&email_folder, "0.txt");
 
-        println!("code: {code}");
-
         // Verify the email
         let res = client
             .get(format!("{url}/verify/register/{code}"))
