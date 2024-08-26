@@ -95,9 +95,9 @@ fn test_simple() {
             .post("/edit-profile")
             .private_cookie(("meet-os", email))
             .header(ContentType::Form)
-            .body("name=Luis XI&github=szabgab&gitlab=szabgab&linkedin=https://www.linkedin.com/in/szabgab/&about=* text\n* more\n* [link](https://meet-os.com/)\n")
+            .body("name=Luis XI&github=szabgab&gitlab=szabgab&linkedin=https://www.linkedin.com/in/szabgab/&about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n")
             .dispatch();
-        // * <b>bold</b>\n* <a href="https://meet-os.com/">bad link</a>
+
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Profile updated");
@@ -126,6 +126,8 @@ fn test_simple() {
 <li>text</li>
 <li>more</li>
 <li><a href="https://meet-os.com/">link</a></li>
+<li><b>bold</b></li>
+<li><a href="https://meet-os.com/">bad link</a></li>
 </ul>
 </div>"#
         ));
