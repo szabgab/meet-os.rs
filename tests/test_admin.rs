@@ -1,5 +1,3 @@
-//use regex::Regex;
-
 use utilities::{login_helper, register_user_helper, run_external};
 
 #[test]

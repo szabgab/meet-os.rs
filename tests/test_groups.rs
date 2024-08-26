@@ -1,5 +1,3 @@
-//use regex::Regex;
-
 use utilities::{check_html, register_user_helper, run_external};
 
 // GET /create-group show form

@@ -1,8 +1,6 @@
-use regex::Regex;
-
 use utilities::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page, check_user_menu,
-    read_code_from_email, register_user_helper, run_external,
+    extract_cookie, read_code_from_email, register_user_helper, run_external,
 };
 
 #[test]
@@ -57,15 +55,8 @@ fn register_user() {
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
-        let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
-        println!("cookie: {cookie}");
-        assert!(cookie.contains("meet-os="));
-        let re = Regex::new("meet-os=([^;]+);").unwrap();
-        let cookie_str = match re.captures(cookie) {
-            Some(value) => value[1].to_owned(),
-            None => panic!("Code not found cookie"),
-        };
-        println!("cookie_str: {cookie_str}");
+
+        let cookie_str = extract_cookie(&res);
 
         let html = res.text().unwrap();
         check_html(&html, "title", "Thank you for registering");
@@ -158,15 +149,7 @@ fn login_regular_user() {
             .unwrap();
         assert_eq!(res.status(), 200);
 
-        let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
-        println!("cookie: {cookie}");
-        assert!(cookie.contains("meet-os="));
-        let re = Regex::new("meet-os=([^;]+);").unwrap();
-        let cookie_str = match re.captures(cookie) {
-            Some(value) => value[1].to_owned(),
-            None => panic!("Code not found cookie"),
-        };
-        println!("cookie_str: {cookie_str}");
+        let cookie_str = extract_cookie(&res);
 
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
@@ -209,15 +192,7 @@ fn login_admin_user() {
             .unwrap();
         assert_eq!(res.status(), 200);
 
-        let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
-        println!("cookie: {cookie}");
-        assert!(cookie.contains("meet-os="));
-        let re = Regex::new("meet-os=([^;]+);").unwrap();
-        let cookie_str = match re.captures(cookie) {
-            Some(value) => value[1].to_owned(),
-            None => panic!("Code not found cookie"),
-        };
-        println!("cookie_str: {cookie_str}");
+        let cookie_str = extract_cookie(&res);
 
         let html = res.text().unwrap();
         //assert_eq!(html, "x");
@@ -285,16 +260,7 @@ fn login_admin_user() {
 //             .send()
 //             .unwrap();
 //         assert_eq!(res.status(), 200);
-//         let cookie = res.headers().get("set-cookie").unwrap().to_str().unwrap();
-//         println!("cookie: {cookie}");
-//         assert!(cookie.contains("meet-os="));
-//         let re = Regex::new("meet-os=([^;]+);").unwrap();
-//         let cookie_str = match re.captures(cookie) {
-//             Some(value) => value[1].to_owned(),
-//             None => panic!("Code not found cookie"),
-//         };
-//         println!("cookie_str: {cookie_str}");
-
+//         let cookie_str = extract_cookie(&res);
 //         let html = res.text().unwrap();
 //         //assert_eq!(html, "x");
 //         check_html(&html, "title", "Welcome back");

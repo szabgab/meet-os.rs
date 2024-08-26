@@ -1,5 +1,3 @@
-//use regex::Regex;
-
 use utilities::{check_html, run_external};
 
 #[test]
