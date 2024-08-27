@@ -111,7 +111,29 @@ pub async fn add_group(dbh: &Surreal<Client>, group: &Group) -> surrealdb::Resul
     Ok(())
 }
 
-pub async fn verify_code(
+pub async fn get_user_by_code(
+    dbh: &Surreal<Client>,
+    process: &str,
+    code: &str,
+) -> surrealdb::Result<Option<User>> {
+    rocket::info!("verification code: '{code}' process = '{process}'");
+
+    let mut response = dbh
+        .query("SELECT * FROM user WHERE code=$code AND process=$process;")
+        .bind(("code", code))
+        .bind(("process", process))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
+
+    if let Some(entry) = entry.as_ref() {
+        rocket::info!("Foud user {}, {}", entry.name, entry.email);
+    }
+
+    Ok(entry)
+}
+
+pub async fn verify_email_with_code(
     dbh: &Surreal<Client>,
     process: &str,
     code: &str,
@@ -176,6 +198,47 @@ pub async fn update_group(
         .await?;
 
     let entry: Option<Group> = response.take(0)?;
+    Ok(entry)
+}
+
+pub async fn remove_code(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Result<Option<User>> {
+    rocket::info!("remove code '{uid}'");
+
+    let mut response = dbh
+        .query(
+            "
+            UPDATE user
+            SET
+                code=''
+            WHERE uid=$uid;",
+        )
+        .bind(("uid", uid))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
+    Ok(entry)
+}
+
+pub async fn save_password(
+    dbh: &Surreal<Client>,
+    uid: usize,
+    password: &str,
+) -> surrealdb::Result<Option<User>> {
+    rocket::info!("save password for '{uid}'");
+
+    let mut response = dbh
+        .query(
+            "
+            UPDATE user
+            SET
+                password=$password
+            WHERE uid=$uid;",
+        )
+        .bind(("password", password))
+        .bind(("uid", uid))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
     Ok(entry)
 }
 

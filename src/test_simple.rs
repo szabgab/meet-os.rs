@@ -38,7 +38,7 @@ fn test_simple() {
 
         // validate the email
         let code = read_code_from_email(&email_folder, "0.txt");
-        let res = client.get(format!("/verify/register/{code}")).dispatch();
+        let res = client.get(format!("/verify-email/{code}")).dispatch();
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();

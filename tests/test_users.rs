@@ -49,7 +49,7 @@ fn register_user() {
 
         // Verify the email
         let res = client
-            .get(format!("{url}/verify/register/{code}"))
+            .get(format!("{url}/verify-email/{code}"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -72,7 +72,7 @@ fn verify_with_non_existent_code() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
         let res = client
-            .get(format!("{url}/verify/register/abc"))
+            .get(format!("{url}/verify-email/abc"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);

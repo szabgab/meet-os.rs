@@ -10,6 +10,10 @@
         Password: <input name="password" id="password" type="password">
         <input type="submit" value="Login">
         </form>
+
+        <hr>
+        <a href="/reset-password">Reset password</a>
+
     
     </div>
   </div>

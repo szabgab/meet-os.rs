@@ -98,6 +98,18 @@ struct LoginForm<'r> {
     password: &'r str,
 }
 
+#[derive(FromForm)]
+struct ResetPasswordForm<'r> {
+    email: &'r str,
+}
+
+#[derive(FromForm)]
+struct SavePasswordForm<'r> {
+    uid: usize,
+    code: &'r str,
+    password: &'r str,
+}
+
 fn markdown2html(text: &str) -> Result<String, message::Message> {
     markdown::to_html_with_options(
         text,
@@ -192,11 +204,13 @@ fn login_get(
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
 ) -> Template {
+    let config = get_public_config();
+
     Template::render(
         "login",
         context! {
             title: "Login",
-            config: get_public_config(),
+            config,
             visitor,
         },
     )
@@ -284,98 +298,223 @@ async fn login_post(
 #[get("/logout")]
 fn logout_get(cookies: &CookieJar<'_>, visitor: Visitor, logged_in: LoggedIn) -> Template {
     cookies.remove_private("meet-os");
+    let config = get_public_config();
 
     #[allow(clippy::shadow_unrelated)]
     let visitor = Visitor::new_after_logout();
 
     Template::render(
         "message",
-        context! {title: "Logged out", message: "We have logged you out from the system", config: get_public_config(), visitor},
+        context! {title: "Logged out", message: "We have logged you out from the system", config, visitor},
     )
 }
 
-// #[post("/reset-password", data = "<input>")]
-// async fn reset_password_post(
-//     cookies: &CookieJar<'_>,
-//     dbh: &State<Surreal<Db>>,
-//     input: Form<LoginForm<'_>>,
-//     myconfig: &State<MyConfig>,
-// ) -> Template {
-//     rocket::info!("rocket login: {:?}", input.email);
+#[get("/reset-password")]
+fn reset_password_get(visitor: Visitor) -> Template {
+    let config = get_public_config();
 
-//     let email = input.email.to_lowercase().trim().to_owned();
-//     if !validator::validate_email(&email) {
-//         return Template::render(
-//             "message",
-//             context! {title: "Invalid email address", message: format!("Invalid email address <b>{}</b>. Please try again", input.email), config: get_public_config(), visitor},
-//         );
-//     }
+    Template::render(
+        "reset_password",
+        context! {
+            title: "Reset password",
+            config,
+            visitor,
+        },
+    )
+}
 
-//     let user: User = match db::get_user_by_email(dbh, &email).await {
-//         Ok(user) => match user {
-//             Some(user) => user,
-//             None => {
-//                 return Template::render(
-//                     "message",
-//                     context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(),visitor},
-//                 )
-//             }
-//         },
-//         Err(err) => {
-//             rocket::error!("Error: {err}");
-//             return Template::render(
-//                 "message",
-//                 context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config: get_public_config(), visitor},
-//             );
-//         }
-//     };
+#[post("/reset-password", data = "<input>")]
+async fn reset_password_post(
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    visitor: Visitor,
+    input: Form<ResetPasswordForm<'_>>,
+) -> Template {
+    rocket::info!("reset password for: {:?}", input.email);
+    let config = get_public_config();
 
-//     let process = "login";
-//     let code = Uuid::new_v4();
+    let email = input.email.to_lowercase().trim().to_owned();
 
-//     match add_login_code_to_user(dbh, &email, process, code.to_string().as_str()).await {
-//         Ok(_result) => (),
-//         Err(err) => {
-//             rocket::info!("Error while trying to add user {err}");
-//             return Template::render(
-//                 "message",
-//                 context! {title: "Internal error", message: "Oups", config: get_public_config(), visitor,},
-//             );
-//         }
-//     };
+    let user: User = match db::get_user_by_email(dbh, &email).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => {
+                // TODO: we should probably limit the number of such request from the same visitor so a bot won't be able to try to guess email addresses
+                return Template::render(
+                    "message",
+                    context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
+                );
+            }
+        },
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
+            );
+        }
+    };
 
-//     let base_url = &myconfig.base_url;
+    let process = "reset";
+    let code = Uuid::new_v4();
 
-//     let subject = "Verify your Meet-OS login!";
-//     let text = format!(
-//         r#"Hi,
-//     Someone used your email to try to login the Meet-OS web site.
-//     If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to finish the login process.
-//     <p>
-//     <p>
-//     If it was not you, we would like to apologize. You don't need to do anything..
-//     ";
-//     "#
-//     );
+    match db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str()).await {
+        Ok(_result) => (),
+        Err(err) => {
+            rocket::info!("Error while trying to add user {err}");
+            return Template::render(
+                "message",
+                context! {title: "Internal error", message: "Oups", config, visitor,},
+            );
+        }
+    };
 
-//     // TODO: read from some config file
-// let from = EmailAddress {
-//     name: myconfig.from_name.clone(),
-//     email: myconfig.from_email.clone(),
-// };
+    let base_url = &myconfig.base_url;
 
-//     let to_address = &EmailAddress {
-//         name: user.name.clone(),
-//         email: input.email.to_owned(),
-//     };
+    let subject = "Reset your Meet-OS password!";
+    let text = format!(
+        r#"Hi,
+    <p>
+    Someone asked to reset the password on the Meet-OS web site connected to this email address.
+    If it was you, please <a href="{base_url}/save-password/{code}">click on this link</a> to set your new password.
+    <p>
+    <p>
+    If it was not you, we would like to apologize. You don't need to do anything...
+    ";
+    "#
+    );
 
-//     sendmail(&myconfig, &from, to_address, subject, &text).await;
+    let from = EmailAddress {
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
+    };
+    let to_address = &EmailAddress {
+        name: user.name.clone(),
+        email: user.email.clone(),
+    };
 
-//     Template::render(
-//         "message",
-//         context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please click on the link to finish the login process.", to_address.email), config: get_public_config(), visitor},
-//     )
-// }
+    sendmail(myconfig, &from, to_address, subject, &text).await;
+    //notify::admin_user_asked_to_reset_password(myconfig, &user).await;
+
+    Template::render(
+        "message",
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please click on the link to reset your password.", to_address.email), config, visitor},
+    )
+}
+
+#[get("/save-password/<code>")]
+async fn save_password_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    visitor: Visitor,
+    code: &str,
+) -> Template {
+    rocket::info!("save-password code: {code}");
+    let config = get_public_config();
+
+    let Some(user) = db::get_user_by_code(dbh, "reset", code).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
+        );
+    };
+
+    let uid = user.uid;
+
+    Template::render(
+        "save_password",
+        context! {
+            title: "Type in your new password",
+            config,
+            visitor,
+            uid,
+            code,
+        },
+    )
+}
+
+#[post("/save-password", data = "<input>")]
+async fn save_password_post(
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    visitor: Visitor,
+    input: Form<SavePasswordForm<'_>>,
+) -> Template {
+    let config = get_public_config();
+    let uid = input.uid;
+    let code = input.code;
+
+    let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "Invalid userid", message: format!("Invalid userid {uid}."), config, visitor},
+        );
+    };
+
+    if code != user.code {
+        rocket::warn!("Invalid code {code} for uid {uid}");
+        return Template::render(
+            "message",
+            context! {title: "Invalid code", message: format!("Invalid code."), config, visitor},
+        );
+    }
+
+    let password = input.password.trim().as_bytes();
+    let pw_min_length = 6;
+    if password.len() < pw_min_length {
+        return Template::render(
+            "message",
+            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, visitor},
+        );
+    }
+    let process = "register";
+
+    let salt = SaltString::generate(&mut OsRng);
+    let hashed_password = match Pbkdf2.hash_password(password, &salt) {
+        Ok(val) => val.to_string(),
+        Err(err) => {
+            rocket::error!("Error: {err}");
+            return Template::render(
+                "message",
+                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, visitor},
+            );
+        }
+    };
+
+    db::save_password(dbh, uid, &hashed_password).await.unwrap();
+    db::remove_code(dbh, uid).await.unwrap();
+
+    let base_url = &myconfig.base_url;
+
+    let subject = "Your Meet-OS password was reset!";
+    let text = format!(
+        r#"Hi,
+    <p>
+    The password of your <a href="{base_url}/">Meet-OS</a> account was reset. Please log in.
+    <p>
+    If it was not done by you, please <a href="{base_url}">reset your password</a> and contact us ASAP!
+    ";
+    "#
+    );
+
+    let from = EmailAddress {
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
+    };
+    let to_address = &EmailAddress {
+        name: user.name.clone(),
+        email: user.email.clone(),
+    };
+
+    sendmail(myconfig, &from, to_address, subject, &text).await;
+    //notify::admin_user_asked_to_reset_password(myconfig, &user).await;
+
+    Template::render(
+        "message",
+        context! {title: "Password updated", message: "Your password was updated.", config, visitor},
+    )
+}
 
 #[get("/register")]
 fn register_get(
@@ -384,11 +523,13 @@ fn register_get(
     // myconfig: &State<MyConfig>,
     visitor: Visitor,
 ) -> Template {
+    let config = get_public_config();
+
     Template::render(
         "register",
         context! {
             title: "Register",
-            config: get_public_config(),
+            config,
             visitor,
         },
     )
@@ -472,8 +613,9 @@ async fn register_post(
     let subject = "Verify your Meet-OS registration!";
     let text = format!(
         r#"Hi,
+    <p>
     Someone used your email to register on the Meet-OS web site.
-    If it was you, please <a href="{base_url}/verify/{process}/{code}">click on this link</a> to verify your email address.
+    If it was you, please <a href="{base_url}/verify-email/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything. We'll discard your registration if it is not validated.
@@ -500,43 +642,39 @@ async fn register_post(
 }
 
 // TODO limit the possible values for the process to register and login
-#[get("/verify/<process>/<code>")]
-async fn verify(
+#[get("/verify-email/<code>")]
+async fn verify_email(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
-    process: &str,
     code: &str,
 ) -> Template {
-    rocket::info!("process: {process}, code: {code}");
+    rocket::info!("verify-email using code: {code}");
 
     let config = get_public_config();
 
-    // TODO take the process into account at the verification
-    if let Ok(Some(user)) = db::verify_code(dbh, process, code).await {
-        rocket::info!("verified: {}", user.email);
-        cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
-        let (title, message) = match process {
-            "register" => ("Thank you for registering", "Your email was verified."),
-            "login" => ("Welcome back", "Welcome back"),
-            _ => ("Oups", "Big opus and TODO"),
-        };
-
-        notify::admin_new_user_verified(myconfig, &user).await;
-
-        // take into account the newly set cookie value
-        #[allow(clippy::shadow_unrelated)]
-        let visitor = Visitor::new_after_login(&user.email, dbh, myconfig).await;
-
+    let Some(user) = db::verify_email_with_code(dbh, "register", code)
+        .await
+        .unwrap()
+    else {
         return Template::render(
             "message",
-            context! {title: title, message: message, config, visitor},
+            context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
         );
-    }
+    };
+
+    rocket::info!("verified code for {}", user.email);
+    cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
+    notify::admin_new_user_verified(myconfig, &user).await;
+
+    // take into account the newly set cookie value
+    #[allow(clippy::shadow_unrelated)]
+    let visitor = Visitor::new_after_login(&user.email, dbh, myconfig).await;
+
     Template::render(
         "message",
-        context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
+        context! {title: "Thank you for registering", message: "Your email was verified.", config, visitor},
     )
 }
 
@@ -827,6 +965,8 @@ async fn event_get(
     visitor: Visitor,
     id: usize,
 ) -> Template {
+    let config = get_public_config();
+
     let event = db::get_event_by_eid(dbh, id).await.unwrap().unwrap();
     let group = db::get_group_by_gid(dbh, event.group_id)
         .await
@@ -845,7 +985,7 @@ async fn event_get(
             event: &event,
             description,
             group,
-            config: get_public_config(),
+            config,
             visitor,
             editable,
         },
@@ -1043,7 +1183,7 @@ async fn edit_group_get(
         "edit_group",
         context! {
             title: "Edit Group",
-            config: get_public_config(),
+            config,
             visitor,
             gid,
             group
@@ -1467,11 +1607,15 @@ fn rocket() -> _ {
                 login_post,
                 register_get,
                 register_post,
+                reset_password_get,
+                reset_password_post,
+                save_password_get,
+                save_password_post,
                 rsvp_yes_event_get,
                 rsvp_no_event_get,
                 show_profile,
                 user,
-                verify
+                verify_email
             ],
         )
         .mount("/", FileServer::from(relative!("static")))
