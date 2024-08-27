@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use rocket::http::CookieJar;
+use rocket::http::Status;
 use rocket::outcome::Outcome;
 use rocket::request::{self, FromRequest, Request};
 use rocket::State;
@@ -14,6 +15,30 @@ use meetings::{MyConfig, User};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CookieUser {
     email: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct LoggedIn;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for LoggedIn {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, ()> {
+        match Visitor::from_request(request).await {
+            Outcome::Success(visitor) => {
+                if visitor.logged_in {
+                    Outcome::Success(LoggedIn)
+                } else {
+                    Outcome::Error((Status::Unauthorized, ()))
+                }
+            }
+            // This should never happen
+            Outcome::Error(_) | Outcome::Forward(_) => {
+                Outcome::Error((Status::InternalServerError, ()))
+            }
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

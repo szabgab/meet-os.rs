@@ -157,7 +157,20 @@ fn login_regular_user() {
         // // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, "Foo Bar");
 
+        // logout requires user logged in user
         let res = client.get(format!("{url}/logout")).send().unwrap();
+        assert_eq!(res.status(), 401);
+
+        let html = res.text().unwrap();
+        check_html(&html, "title", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+
+        // logout
+        let res = client
+            .get(format!("{url}/logout"))
+            .header("Cookie", format!("meet-os={cookie_str}"))
+            .send()
+            .unwrap();
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         check_html(&html, "title", "Logged out");
@@ -200,7 +213,12 @@ fn login_admin_user() {
         // // Access the profile with the cookie
         check_profile_page(&client, &url, &cookie_str, name);
 
-        let res = client.get(format!("{url}/logout")).send().unwrap();
+        let res = client
+            .get(format!("{url}/logout"))
+            .header("Cookie", format!("meet-os={cookie_str}"))
+            .send()
+            .unwrap();
+
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         check_html(&html, "title", "Logged out");

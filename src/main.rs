@@ -18,7 +18,7 @@ use rocket::form::Form;
 use rocket::fs::{relative, FileServer};
 use rocket::http::CookieJar;
 use rocket::serde::uuid::Uuid;
-use rocket::{fairing::AdHoc, State};
+use rocket::{fairing::AdHoc, Request, State};
 use rocket_dyn_templates::{context, Template};
 
 use markdown::message;
@@ -37,7 +37,7 @@ use meetings::db;
 
 use meetings::{get_public_config, sendmail, EmailAddress, Event, MyConfig, User};
 
-use web::Visitor;
+use web::{LoggedIn, Visitor};
 
 #[derive(FromForm)]
 struct ContactMembersForm<'r> {
@@ -116,7 +116,6 @@ async fn index(
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
 ) -> Template {
-    rocket::info!("index: {visitor:?}");
     let config = get_public_config();
 
     let events = match db::get_events(dbh).await {
@@ -155,9 +154,9 @@ async fn index(
 
 #[get("/events")]
 async fn events(
-    _cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    _myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
     visitor: Visitor,
 ) -> Template {
     let config = get_public_config();
@@ -286,12 +285,9 @@ fn logout_get(
     cookies: &CookieJar<'_>,
     //dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
-    visitor: Visitor,
+    _visitor: Visitor,
+    _unused: LoggedIn,
 ) -> Template {
-    if !visitor.logged_in {
-        rocket::warn!("Trying to log out while not logged in");
-    }
-
     cookies.remove_private("meet-os");
 
     #[allow(clippy::shadow_unrelated)]
@@ -1531,6 +1527,20 @@ async fn contact_members_post(
     )
 }
 
+#[catch(401)]
+async fn http_401(request: &Request<'_>) -> Template {
+    let cookies = request.cookies();
+    let dbh = request.rocket().state::<Surreal<Client>>().unwrap();
+    let myconfig = request.rocket().state::<MyConfig>().unwrap();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+    let config = get_public_config();
+    Template::render(
+        "message",
+        context! {title: "Not logged in", message: format!("You are not logged in"), config, visitor},
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -1573,6 +1583,7 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(AdHoc::config::<MyConfig>())
         .attach(db::fairing())
+        .register("/", catchers![http_401])
 }
 
 #[cfg(test)]
