@@ -11,7 +11,8 @@ use surrealdb::Surreal;
 
 use crate::db;
 use crate::notify;
-use crate::web::Visitor;
+use crate::web::{LoggedIn, Visitor};
+
 use crate::{get_public_config, MyConfig, User};
 use meetings::Group;
 
@@ -47,15 +48,9 @@ fn admin(
     // dbh: &State<Surreal<Client>>,
     // myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     rocket::info!(
         "cookie value received from user: {}",
@@ -85,15 +80,9 @@ async fn admin_users(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     rocket::info!(
         "cookie value received from user: {}",
@@ -126,15 +115,9 @@ fn search_get(
     // dbh: &State<Surreal<Client>>,
     // myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let user = visitor.user.clone().unwrap();
 
@@ -159,17 +142,11 @@ async fn search_post(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
     input: Form<SearchForm<'_>>,
 ) -> Template {
     rocket::info!("search_post: {:?}", input.query);
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let user = visitor.user.clone().unwrap();
 
@@ -203,16 +180,10 @@ async fn create_group_get(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let user = visitor.user.clone().unwrap();
 
@@ -238,17 +209,11 @@ async fn create_group_post(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     rocket::info!(
         "cookie value received from user: {}",
@@ -313,15 +278,9 @@ async fn audit_get(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    _logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let user = visitor.user.clone().unwrap();
 

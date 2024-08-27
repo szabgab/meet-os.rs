@@ -12,11 +12,11 @@ fn try_page_without_cookie() {
         for path in ["/profile", "/admin/create-group?uid=1", "/admin"] {
             // Access the profile without a cookie
             let res = client.get(format!("{url}{path}")).send().unwrap();
-            assert_eq!(res.status(), 200);
+            assert_eq!(res.status(), 401, "{path}");
             let html = res.text().unwrap();
             //assert_eq!(html, "");
             check_html(&html, "title", "Not logged in");
-            assert!(html.contains("It seems you are not logged in"));
+            assert!(html.contains("You are not logged in"));
             check_guest_menu(&html);
         }
     });

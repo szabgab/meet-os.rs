@@ -1,4 +1,6 @@
 #![allow(clippy::std_instead_of_core)]
+#![allow(unused_variables)]
+#![allow(clippy::needless_pass_by_value)]
 
 #[macro_use]
 extern crate rocket;
@@ -279,15 +281,8 @@ async fn login_post(
     )
 }
 
-#[allow(clippy::needless_pass_by_value)]
 #[get("/logout")]
-fn logout_get(
-    cookies: &CookieJar<'_>,
-    //dbh: &State<Surreal<Client>>,
-    //myconfig: &State<MyConfig>,
-    _visitor: Visitor,
-    _unused: LoggedIn,
-) -> Template {
+fn logout_get(cookies: &CookieJar<'_>, visitor: Visitor, logged_in: LoggedIn) -> Template {
     cookies.remove_private("meet-os");
 
     #[allow(clippy::shadow_unrelated)]
@@ -556,16 +551,10 @@ async fn join_group_get(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let group = db::get_group_by_gid(dbh, gid).await.unwrap();
     if group.is_none() {
@@ -610,16 +599,10 @@ async fn leave_group_get(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let group = db::get_group_by_gid(dbh, gid).await.unwrap();
     if group.is_none() {
@@ -665,16 +648,10 @@ async fn rsvp_yes_event_get(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let Some(event) = db::get_event_by_eid(dbh, eid).await.unwrap() else {
         return Template::render(
@@ -733,16 +710,10 @@ async fn rsvp_no_event_get(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let Some(_event) = db::get_event_by_eid(dbh, eid).await.unwrap() else {
         return Template::render(
@@ -777,15 +748,9 @@ async fn show_profile(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let owned_groups = db::get_groups_by_owner_id(dbh, uid).await.unwrap();
@@ -812,15 +777,9 @@ fn edit_profile_get(
     // dbh: &State<Surreal<Client>>,
     // myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     Template::render(
         "edit_profile",
@@ -835,15 +794,9 @@ async fn edit_profile_post(
     //myconfig: &State<MyConfig>,
     input: Form<ProfileForm<'_>>,
     visitor: Visitor,
+    logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let re = Regex::new("^[a-zA-Z0-9]+$").unwrap();
 
@@ -1006,15 +959,9 @@ async fn list_users(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     rocket::info!(
         "cookie value received from user: {}",
@@ -1045,16 +992,10 @@ async fn user(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let user = match db::get_user_by_id(dbh, uid).await.unwrap() {
         None => {
@@ -1099,16 +1040,10 @@ async fn edit_group_get(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
@@ -1138,16 +1073,10 @@ async fn edit_group_post(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let gid = input.gid;
@@ -1179,18 +1108,12 @@ async fn add_event_post(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     input: Form<AddEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: gid: {:?} title: '{:?}'", input.gid, input.title);
 
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let group = db::get_group_by_gid(dbh, input.gid).await.unwrap().unwrap();
@@ -1267,16 +1190,14 @@ async fn add_event_post(
 }
 
 #[get("/add-event?<gid>")]
-async fn add_event_get(dbh: &State<Surreal<Client>>, visitor: Visitor, gid: usize) -> Template {
+async fn add_event_get(
+    dbh: &State<Surreal<Client>>,
+    visitor: Visitor,
+    logged_in: LoggedIn,
+    gid: usize,
+) -> Template {
     rocket::info!("add-event to {gid}");
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
@@ -1306,16 +1227,10 @@ async fn edit_event_get(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
 
@@ -1351,18 +1266,12 @@ async fn edit_event_post(
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     input: Form<EditEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: eid: {:?} title: '{:?}'", input.eid, input.title);
 
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let event = db::get_event_by_eid(dbh, input.eid).await.unwrap().unwrap();
@@ -1445,16 +1354,10 @@ async fn edit_event_post(
 async fn contact_members_get(
     dbh: &State<Surreal<Client>>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
@@ -1484,16 +1387,10 @@ async fn contact_members_post(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    logged_in: LoggedIn,
     input: Form<ContactMembersForm<'_>>,
 ) -> Template {
     let config = get_public_config();
-
-    if !visitor.logged_in {
-        return Template::render(
-            "message",
-            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
-        );
-    };
 
     let uid = visitor.user.clone().unwrap().uid;
     let group = db::get_group_by_gid(dbh, input.gid).await.unwrap().unwrap();

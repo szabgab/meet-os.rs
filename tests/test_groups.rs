@@ -165,13 +165,13 @@ fn create_group_guest() {
             .get(format!("{url}/admin/create-group?uid=1"))
             .send()
             .unwrap();
-        assert_eq!(res.status(), 200);
+        assert_eq!(res.status(), 401);
 
         let html = res.text().unwrap();
-        //assert_eq!(html, "x");
+        // assert_eq!(html, "");
         check_html(&html, "title", "Not logged in");
         check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("It seems you are not logged in"));
+        assert!(html.contains("You are not logged in"));
 
         let res = client.get(format!("{url}/groups")).send().unwrap();
         assert_eq!(res.status(), 200);
@@ -192,11 +192,11 @@ fn create_group_guest() {
             ])
             .send()
             .unwrap();
-        assert_eq!(res.status(), 200);
+        assert_eq!(res.status(), 401);
         let html = res.text().unwrap();
         check_html(&html, "title", "Not logged in");
         check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("It seems you are not logged in"));
+        assert!(html.contains("You are not logged in"));
 
         // // List the groups
         let res = client.get(format!("{url}/groups")).send().unwrap();
