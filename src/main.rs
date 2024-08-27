@@ -38,6 +38,7 @@ use meetings::db;
 use meetings::{get_public_config, sendmail, EmailAddress, Event, MyConfig, User};
 
 use web::Visitor;
+use web::VisitorGuard;
 
 #[derive(FromForm)]
 struct ContactMembersForm<'r> {
@@ -111,12 +112,13 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
 
 #[get("/")]
 async fn index(
-    cookies: &CookieJar<'_>,
+    _cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    _myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
+    rocket::info!("index: {visitor:?}");
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     let events = match db::get_events(dbh).await {
         Ok(val) => val,
