@@ -11,7 +11,7 @@ use surrealdb::Surreal;
 
 use crate::db;
 use crate::notify;
-use crate::web::VisitorGuard;
+use crate::web::Visitor;
 use crate::{get_public_config, MyConfig, User};
 use meetings::Group;
 
@@ -46,7 +46,7 @@ fn admin(
     // cookies: &CookieJar<'_>,
     // dbh: &State<Surreal<Client>>,
     // myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
 ) -> Template {
     let config = get_public_config();
 
@@ -84,7 +84,7 @@ async fn admin_users(
     //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
 ) -> Template {
     let config = get_public_config();
 
@@ -125,7 +125,7 @@ fn search_get(
     // cookies: &CookieJar<'_>,
     // dbh: &State<Surreal<Client>>,
     // myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
 ) -> Template {
     let config = get_public_config();
 
@@ -158,7 +158,7 @@ async fn search_post(
     //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
     input: Form<SearchForm<'_>>,
 ) -> Template {
     rocket::info!("search_post: {:?}", input.query);
@@ -202,7 +202,7 @@ async fn create_group_get(
     //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -237,7 +237,7 @@ async fn create_group_post(
     //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
@@ -312,7 +312,7 @@ async fn audit_get(
     //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     //myconfig: &State<MyConfig>,
-    visitor: VisitorGuard,
+    visitor: Visitor,
 ) -> Template {
     let config = get_public_config();
 

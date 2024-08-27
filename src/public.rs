@@ -2,14 +2,14 @@ use rocket::Route;
 use rocket_dyn_templates::{context, Template};
 
 use crate::get_public_config;
-use crate::web::VisitorGuard;
+use crate::web::Visitor;
 
 pub fn routes() -> Vec<Route> {
     routes![about, privacy, soc,]
 }
 
 #[get("/about")]
-fn about(visitor: VisitorGuard) -> Template {
+fn about(visitor: Visitor) -> Template {
     Template::render(
         "about",
         context! {
@@ -21,7 +21,7 @@ fn about(visitor: VisitorGuard) -> Template {
 }
 
 #[get("/privacy")]
-fn privacy(visitor: VisitorGuard) -> Template {
+fn privacy(visitor: Visitor) -> Template {
     Template::render(
         "privacy",
         context! {
@@ -33,7 +33,7 @@ fn privacy(visitor: VisitorGuard) -> Template {
 }
 
 #[get("/soc")]
-fn soc(visitor: VisitorGuard) -> Template {
+fn soc(visitor: Visitor) -> Template {
     Template::render(
         "soc",
         context! {

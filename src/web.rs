@@ -17,13 +17,13 @@ pub struct CookieUser {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct VisitorGuard {
+pub struct Visitor {
     pub logged_in: bool,
     pub admin: bool,
     pub user: Option<User>,
 }
 
-impl VisitorGuard {
+impl Visitor {
     pub async fn new(cookies: &CookieJar<'_>, dbh: &Surreal<Client>, myconfig: &MyConfig) -> Self {
         let mut me = Self {
             logged_in: false,
@@ -77,7 +77,7 @@ impl VisitorGuard {
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for VisitorGuard {
+impl<'r> FromRequest<'r> for Visitor {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, ()> {
@@ -92,7 +92,7 @@ impl<'r> FromRequest<'r> for VisitorGuard {
         let myconfig = request.rocket().state::<MyConfig>().unwrap();
         println!("myconfig {myconfig:?}");
 
-        Outcome::Success(VisitorGuard::new(cookies, dbh, myconfig).await)
+        Outcome::Success(Visitor::new(cookies, dbh, myconfig).await)
     }
 }
 
