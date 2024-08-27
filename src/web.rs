@@ -81,16 +81,9 @@ impl<'r> FromRequest<'r> for Visitor {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, ()> {
-        println!("from_request in GuardA '{request}'");
-
         let cookies = request.cookies();
-        println!("cookies {cookies:?}");
-
         let dbh = request.rocket().state::<Surreal<Client>>().unwrap();
-        println!("dbh {dbh:?}");
-
         let myconfig = request.rocket().state::<MyConfig>().unwrap();
-        println!("myconfig {myconfig:?}");
 
         Outcome::Success(Visitor::new(cookies, dbh, myconfig).await)
     }
