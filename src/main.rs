@@ -112,9 +112,9 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
 
 #[get("/")]
 async fn index(
-    _cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    _myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
     visitor: VisitorGuard,
 ) -> Template {
     rocket::info!("index: {visitor:?}");
@@ -156,12 +156,12 @@ async fn index(
 
 #[get("/events")]
 async fn events(
-    cookies: &CookieJar<'_>,
+    _cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    _myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     let events = match db::get_events(dbh).await {
         Ok(val) => val,
@@ -186,17 +186,18 @@ async fn events(
 }
 
 #[get("/login")]
-async fn login_get(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+fn login_get(
+    //cookies: &CookieJar<'_>,
+    //dbh: &State<Surreal<Client>>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     Template::render(
         "login",
         context! {
             title: "Login",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
+            visitor,
         },
     )
 }
@@ -206,12 +207,12 @@ async fn login_post(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<LoginForm<'_>>,
 ) -> Template {
     rocket::info!("rocket login: {:?}", input.email);
 
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     let email = input.email.to_lowercase().trim().to_owned();
     if !validator::validate_email(&email) {
@@ -280,14 +281,14 @@ async fn login_post(
     )
 }
 
+#[allow(clippy::needless_pass_by_value)]
 #[get("/logout")]
-async fn logout_get(
+fn logout_get(
     cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //dbh: &State<Surreal<Client>>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
-    // TODO shall we check if the cookie was even there?
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
     if !visitor.logged_in {
         rocket::warn!("Trying to log out while not logged in");
     }
@@ -387,32 +388,33 @@ async fn logout_get(
 // }
 
 #[get("/register")]
-async fn register_get(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+fn register_get(
+    // cookies: &CookieJar<'_>,
+    // dbh: &State<Surreal<Client>>,
+    // myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     Template::render(
         "register",
         context! {
             title: "Register",
             config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
+            visitor,
         },
     )
 }
 
 #[post("/register", data = "<input>")]
 async fn register_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<RegistrationForm<'_>>,
 ) -> Template {
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     // email: lowerase, remove spaces from sides
     // validate format @
@@ -518,13 +520,13 @@ async fn verify(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     process: &str,
     code: &str,
 ) -> Template {
     rocket::info!("process: {process}, code: {code}");
 
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     // TODO take the process into account at the verification
     if let Ok(Some(user)) = db::verify_code(dbh, process, code).await {
@@ -555,13 +557,13 @@ async fn verify(
 
 #[get("/join-group?<gid>")]
 async fn join_group_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -609,13 +611,13 @@ async fn join_group_get(
 
 #[get("/leave-group?<gid>")]
 async fn leave_group_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -664,13 +666,13 @@ async fn leave_group_get(
 
 #[get("/rsvp-yes-event?<eid>")]
 async fn rsvp_yes_event_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -732,13 +734,13 @@ async fn rsvp_yes_event_get(
 
 #[get("/rsvp-no-event?<eid>")]
 async fn rsvp_no_event_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -776,12 +778,12 @@ async fn rsvp_no_event_get(
 
 #[get("/profile")]
 async fn show_profile(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -810,13 +812,13 @@ async fn show_profile(
 }
 
 #[get("/edit-profile")]
-async fn edit_profile_get(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+fn edit_profile_get(
+    // cookies: &CookieJar<'_>,
+    // dbh: &State<Surreal<Client>>,
+    // myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -833,13 +835,13 @@ async fn edit_profile_get(
 
 #[post("/edit-profile", data = "<input>")]
 async fn edit_profile_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
     input: Form<ProfileForm<'_>>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -876,12 +878,12 @@ async fn edit_profile_post(
 
 #[get("/event/<id>")]
 async fn event_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     id: usize,
 ) -> Template {
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
     let event = db::get_event_by_eid(dbh, id).await.unwrap().unwrap();
     let group = db::get_group_by_gid(dbh, event.group_id)
         .await
@@ -909,14 +911,14 @@ async fn event_get(
 
 #[get("/group/<gid>")]
 async fn group_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
     rocket::info!("group_get: {gid}");
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     let group = match db::get_group_by_gid(dbh, gid).await {
         Ok(group) => match group {
@@ -970,12 +972,12 @@ async fn group_get(
 
 #[get("/groups")]
 async fn groups_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     match db::get_groups(dbh).await {
         Ok(groups) => Template::render(
@@ -1005,13 +1007,12 @@ async fn groups_get(
 
 #[get("/users")]
 async fn list_users(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1045,14 +1046,13 @@ async fn list_users(
 
 #[get("/user/<uid>")]
 async fn user(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1100,14 +1100,13 @@ async fn user(
 
 #[get("/edit-group?<gid>")]
 async fn edit_group_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1140,14 +1139,13 @@ async fn edit_group_get(
 
 #[post("/edit-group", data = "<input>")]
 async fn edit_group_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1182,16 +1180,15 @@ async fn edit_group_post(
 
 #[post("/add-event", data = "<input>")]
 async fn add_event_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<AddEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: gid: {:?} title: '{:?}'", input.gid, input.title);
 
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1279,12 +1276,11 @@ async fn add_event_get(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
     rocket::info!("add-event to {gid}");
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1317,14 +1313,13 @@ async fn add_event_get(
 
 #[get("/edit-event?<eid>")]
 async fn edit_event_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1363,16 +1358,15 @@ async fn edit_event_get(
 
 #[post("/edit-event", data = "<input>")]
 async fn edit_event_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<EditEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: eid: {:?} title: '{:?}'", input.eid, input.title);
 
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1463,11 +1457,10 @@ async fn contact_members_get(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -1500,14 +1493,13 @@ async fn contact_members_get(
 
 #[post("/contact-members", data = "<input>")]
 async fn contact_members_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<ContactMembersForm<'_>>,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(

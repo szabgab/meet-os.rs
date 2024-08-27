@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 
 use rocket::form::Form;
-use rocket::http::CookieJar;
 use rocket::Route;
 use rocket::State;
 
@@ -12,7 +11,7 @@ use surrealdb::Surreal;
 
 use crate::db;
 use crate::notify;
-use crate::web::Visitor;
+use crate::web::VisitorGuard;
 use crate::{get_public_config, MyConfig, User};
 use meetings::Group;
 
@@ -43,14 +42,13 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/")]
-async fn admin(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+fn admin(
+    // cookies: &CookieJar<'_>,
+    // dbh: &State<Surreal<Client>>,
+    // myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -83,13 +81,12 @@ async fn admin(
 
 #[get("/users")]
 async fn admin_users(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -124,13 +121,13 @@ async fn admin_users(
 }
 
 #[get("/search")]
-async fn search_get(
-    cookies: &CookieJar<'_>,
-    dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+fn search_get(
+    // cookies: &CookieJar<'_>,
+    // dbh: &State<Surreal<Client>>,
+    // myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -158,15 +155,14 @@ async fn search_get(
 
 #[post("/search", data = "<input>")]
 async fn search_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<SearchForm<'_>>,
 ) -> Template {
     rocket::info!("search_post: {:?}", input.query);
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -203,13 +199,13 @@ async fn search_post(
 
 #[get("/create-group?<uid>")]
 async fn create_group_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -238,15 +234,14 @@ async fn create_group_get(
 
 #[post("/create-group", data = "<input>")]
 async fn create_group_post(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
     let config = get_public_config();
-
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
@@ -314,12 +309,12 @@ async fn create_group_post(
 
 #[get("/audit")]
 async fn audit_get(
-    cookies: &CookieJar<'_>,
+    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
+    //myconfig: &State<MyConfig>,
+    visitor: VisitorGuard,
 ) -> Template {
     let config = get_public_config();
-    let visitor = Visitor::new(cookies, dbh, myconfig).await;
 
     if !visitor.logged_in {
         return Template::render(
