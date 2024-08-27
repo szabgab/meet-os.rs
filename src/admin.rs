@@ -11,7 +11,7 @@ use surrealdb::Surreal;
 
 use crate::db;
 use crate::notify;
-use crate::web::{LoggedIn, Visitor};
+use crate::web::{AdminUser, LoggedIn, Visitor};
 
 use crate::{get_public_config, MyConfig, User};
 use meetings::Group;
@@ -49,20 +49,9 @@ fn admin(
     // myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
 ) -> Template {
     let config = get_public_config();
-
-    rocket::info!(
-        "cookie value received from user: {}",
-        visitor.user.clone().unwrap().email
-    );
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
 
     Template::render(
         "admin",
@@ -81,20 +70,9 @@ async fn admin_users(
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
 ) -> Template {
     let config = get_public_config();
-
-    rocket::info!(
-        "cookie value received from user: {}",
-        visitor.user.clone().unwrap().email
-    );
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
 
     let users = db::get_users(dbh).await.unwrap();
 
@@ -116,17 +94,11 @@ fn search_get(
     // myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
 ) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    };
 
     let users: Vec<User> = vec![];
 
@@ -143,19 +115,13 @@ async fn search_post(
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
     input: Form<SearchForm<'_>>,
 ) -> Template {
     rocket::info!("search_post: {:?}", input.query);
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
 
     let query = input.query.to_lowercase();
 
@@ -181,19 +147,12 @@ async fn create_group_get(
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
-
-    rocket::info!("cookie value received from user: {}", user.email);
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    };
 
     let owner = db::get_user_by_id(dbh, uid).await.unwrap().unwrap();
 
@@ -210,22 +169,11 @@ async fn create_group_post(
     myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
     let config = get_public_config();
-
-    rocket::info!(
-        "cookie value received from user: {}",
-        visitor.user.clone().unwrap().email
-    );
-
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    }
 
     let gid = db::increment(dbh, "group").await.unwrap();
     // TODO verify that the given owner is a valid user-id (FOREIGN KEY should handle this)
@@ -279,18 +227,11 @@ async fn audit_get(
     //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
+    _admin: AdminUser,
 ) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
-
-    rocket::info!("cookie value received from user: {}", user.email);
-    if !visitor.admin {
-        return Template::render(
-            "message",
-            context! {title: "Unauthorized", message: "Unauthorized", config, visitor},
-        );
-    };
 
     let audit = db::get_audit(dbh).await.unwrap();
 

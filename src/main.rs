@@ -1438,6 +1438,20 @@ async fn http_401(request: &Request<'_>) -> Template {
     )
 }
 
+#[catch(403)]
+async fn http_403(request: &Request<'_>) -> Template {
+    let cookies = request.cookies();
+    let dbh = request.rocket().state::<Surreal<Client>>().unwrap();
+    let myconfig = request.rocket().state::<MyConfig>().unwrap();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+    let config = get_public_config();
+    Template::render(
+        "message",
+        context! {title: "Unauthorized", message: format!("Unauthorized"), config, visitor},
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -1480,7 +1494,7 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(AdHoc::config::<MyConfig>())
         .attach(db::fairing())
-        .register("/", catchers![http_401])
+        .register("/", catchers![http_401, http_403])
 }
 
 #[cfg(test)]

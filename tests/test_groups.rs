@@ -120,10 +120,10 @@ fn create_group_unauthorized() {
             .header("Cookie", format!("meet-os={peti_cookie_str}"))
             .send()
             .unwrap();
-        assert_eq!(res.status(), 200);
+        assert_eq!(res.status(), 403);
 
         let html = res.text().unwrap();
-        //assert_eq!(html, "x");
+        // assert_eq!(html, "");
         check_html(&html, "title", "Unauthorized");
         check_html(&html, "h1", "Unauthorized");
 
@@ -139,7 +139,7 @@ fn create_group_unauthorized() {
             .header("Cookie", format!("meet-os={peti_cookie_str}"))
             .send()
             .unwrap();
-        assert_eq!(res.status(), 200);
+        assert_eq!(res.status(), 403);
         check_html(&html, "title", "Unauthorized");
         check_html(&html, "h1", "Unauthorized");
 
