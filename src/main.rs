@@ -1273,9 +1273,7 @@ async fn add_event_post(
 
 #[get("/add-event?<gid>")]
 async fn add_event_get(
-    cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
     visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
@@ -1304,8 +1302,8 @@ async fn add_event_get(
         context! {
             title: format!("Add event to the '{}' group", group.name),
             config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
-            gid: gid,
+            visitor,
+            gid,
             group,
         },
     )
@@ -1454,9 +1452,7 @@ async fn edit_event_post(
 
 #[get("/contact-members?<gid>")]
 async fn contact_members_get(
-    cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
     visitor: VisitorGuard,
     gid: usize,
 ) -> Template {
@@ -1484,8 +1480,8 @@ async fn contact_members_get(
         context! {
             title: format!("Contact members of the '{}' group", group.name),
             config: get_public_config(),
-            visitor: Visitor::new(cookies, dbh, myconfig).await,
-            gid: gid,
+            visitor,
+            gid,
             group,
         },
     )

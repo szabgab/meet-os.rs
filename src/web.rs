@@ -104,31 +104,6 @@ pub struct Visitor {
 }
 
 impl Visitor {
-    pub async fn new(
-        cookies: &CookieJar<'_>,
-        dbh: &State<Surreal<Client>>,
-        myconfig: &State<MyConfig>,
-    ) -> Self {
-        let mut me = Self {
-            logged_in: false,
-            admin: false,
-            user: None,
-        };
-
-        if let Some(cookie_user) = get_logged_in(cookies) {
-            me.logged_in = true;
-            if let Ok(user) = db::get_user_by_email(dbh, &cookie_user.email).await {
-                me.user = user;
-                //rocket::info!("email: {}", user.email);
-                if myconfig.admins.contains(&cookie_user.email.clone()) {
-                    me.admin = true;
-                }
-            }
-        }
-
-        me
-    }
-
     pub async fn new_after_login(
         email: &str,
         dbh: &State<Surreal<Client>>,
