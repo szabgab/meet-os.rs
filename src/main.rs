@@ -497,11 +497,6 @@ async fn register_post(
         "message",
         context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please check your inbox and verify your email address.", to_address.email), config, visitor},
     )
-
-    // Template::render(
-    //     "register",
-    //     context! {title: "Register", config: get_public_config()},
-    // )
 }
 
 // TODO limit the possible values for the process to register and login
@@ -940,17 +935,6 @@ async fn groups_get(
             )
         }
     }
-
-    // if let Ok(groups) = db::get_groups_from_database(dbh).await {
-    //     return Template::render(
-    //         "groups",
-    //         context! {title: "Groups", groups: groups, config: get_public_config(), visitor},
-    //     );
-    // }
-    // Template::render(
-    //     "message",
-    //     context! {title: "Internal error", message: "Internal error", config: get_public_config(), visitor},
-    // )
 }
 
 #[get("/users")]
