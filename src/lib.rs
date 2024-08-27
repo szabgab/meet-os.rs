@@ -44,6 +44,14 @@ pub struct Membership {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+pub struct RSVP {
+    pub eid: usize,
+    pub uid: usize,
+    pub date: DateTime<Utc>,
+    pub status: bool,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Event {
     pub eid: usize,
     pub title: String,

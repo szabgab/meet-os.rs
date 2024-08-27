@@ -586,7 +586,13 @@ async fn join_group_get(
         );
     }
 
-    // TODO if uid is already a member - reject
+    let member = db::get_membership(dbh, gid, uid).await.unwrap();
+    if member.is_some() {
+        return Template::render(
+            "message",
+            context! {title: "You are already a member of this group", message: "You are already a member of this group", config, visitor},
+        );
+    }
 
     db::join_group(dbh, gid, uid).await.unwrap();
     db::audit(dbh, format!("User {uid} joined group {gid}"))
@@ -634,7 +640,13 @@ async fn leave_group_get(
         );
     }
 
-    // TODO if uid is not a member - reject
+    let member = db::get_membership(dbh, gid, uid).await.unwrap();
+    if member.is_none() {
+        return Template::render(
+            "message",
+            context! {title: "You are not a member of this group", message: "You are not a member of this group", config, visitor},
+        );
+    }
 
     db::leave_group(dbh, gid, uid).await.unwrap();
     notify::owner_user_left_group(dbh, myconfig, &user, &group).await;
@@ -645,6 +657,118 @@ async fn leave_group_get(
     Template::render(
         "message",
         context! {title: "Membership", message: format!(r#"User removed from <a href="/group/{gid}">group</a>"#), config, visitor},
+    )
+}
+
+#[get("/rsvp-yes-event?<eid>")]
+async fn rsvp_yes_event_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    eid: usize,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let Some(event) = db::get_event_by_eid(dbh, eid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such event", message: "No such event", config, visitor},
+        );
+    };
+
+    let gid = event.group_id;
+    let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
+        // This should really never happen, right?
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: "No such group", config, visitor},
+        );
+    };
+
+    let user = visitor.user.clone().unwrap();
+    let uid = visitor.user.clone().unwrap().uid;
+
+    if uid == group.owner {
+        return Template::render(
+            "message",
+            context! {title: "You are the owner of this group", message: "You are the owner of this group", config, visitor},
+        );
+    }
+
+    // if user is not a member of the group join it
+    let member = db::get_membership(dbh, gid, uid).await.unwrap();
+    if member.is_none() {
+        db::join_group(dbh, gid, uid).await.unwrap();
+        db::audit(dbh, format!("User {uid} joined group {gid}"))
+            .await
+            .unwrap();
+        notify::owner_user_joined_group(dbh, myconfig, &user, &group).await;
+    }
+
+    let rsvp = db::get_rsvp(dbh, eid, uid).await.unwrap();
+    if rsvp.is_none() {
+        db::new_rsvp(dbh, eid, uid, true).await.unwrap();
+        db::audit(dbh, format!("User {uid} RSVPed to event {eid}"))
+            .await
+            .unwrap();
+        //notify::owner_user_rsvped_to_event(dbh, myconfig, &user, &group, &event).await;
+    }
+
+    Template::render(
+        "message",
+        context! {title: "RSVPed to event", message: format!(r#"User RSVPed to <a href="/event/{eid}">event</a>"#), config, visitor},
+    )
+}
+
+#[get("/rsvp-no-event?<eid>")]
+async fn rsvp_no_event_get(
+    cookies: &CookieJar<'_>,
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    eid: usize,
+) -> Template {
+    let config = get_public_config();
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+
+    if !visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Not logged in", message: format!("It seems you are not logged in"), config, visitor},
+        );
+    };
+
+    let Some(_event) = db::get_event_by_eid(dbh, eid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such event", message: "No such event", config, visitor},
+        );
+    };
+
+    // let user = visitor.user.clone().unwrap();
+    let uid = visitor.user.clone().unwrap().uid;
+
+    let rsvp = db::get_rsvp(dbh, eid, uid).await.unwrap();
+    if rsvp.is_none() {
+        return Template::render(
+            "message",
+            context! {title: "You were not registered to the event", message: format!(r#"You were not registered to the <a href="/event/{eid}">event</a>"#), config, visitor},
+        );
+    }
+    db::update_rsvp(dbh, eid, uid, false).await.unwrap();
+    // TODO audit
+    // TODO notify
+
+    Template::render(
+        "message",
+        context! {title: "Not attending", message: format!(r#"User not attending <a href="/event/{eid}">event</a>"#), config, visitor},
     )
 }
 
@@ -1453,6 +1577,8 @@ fn rocket() -> _ {
                 login_post,
                 register_get,
                 register_post,
+                rsvp_yes_event_get,
+                rsvp_no_event_get,
                 show_profile,
                 user,
                 verify

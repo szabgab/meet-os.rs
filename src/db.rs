@@ -8,7 +8,7 @@ use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
-use crate::{Audit, Counter, Event, Group, Membership, MyConfig, User};
+use crate::{Audit, Counter, Event, Group, Membership, MyConfig, User, RSVP};
 
 /// # Panics
 ///
@@ -43,6 +43,13 @@ pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> 
         .unwrap()
         .check()
         .unwrap();
+
+    dbh.query("DEFINE INDEX rsvp_index ON TABLE rsvp COLUMNS uid, eid UNIQUE")
+        .await
+        .unwrap()
+        .check()
+        .unwrap();
+
     dbh
 }
 
@@ -538,6 +545,64 @@ pub async fn get_membership(
     let entry: Option<Membership> = response.take(0)?;
 
     Ok(entry)
+}
+
+pub async fn get_rsvp(
+    dbh: &Surreal<Client>,
+    eid: usize,
+    uid: usize,
+) -> surrealdb::Result<Option<RSVP>> {
+    let mut response = dbh
+        .query("SELECT * FROM rsvp WHERE eid=$eid AND uid=$uid;")
+        .bind(("eid", eid))
+        .bind(("uid", uid))
+        .await?;
+
+    let entry: Option<RSVP> = response.take(0)?;
+
+    Ok(entry)
+}
+
+pub async fn new_rsvp(
+    dbh: &Surreal<Client>,
+    eid: usize,
+    uid: usize,
+    status: bool,
+) -> surrealdb::Result<()> {
+    rocket::info!("user {} RSVP: {} status: {}", uid, eid, status);
+
+    let date: DateTime<Utc> = Utc::now();
+
+    let rsvp = RSVP {
+        eid,
+        uid,
+        date,
+        status,
+    };
+
+    dbh.create(Resource::from("rsvp")).content(rsvp).await?;
+
+    Ok(())
+}
+
+pub async fn update_rsvp(
+    dbh: &Surreal<Client>,
+    eid: usize,
+    uid: usize,
+    status: bool,
+) -> surrealdb::Result<()> {
+    rocket::info!("user {} RSVP: {} status: {}", uid, eid, status);
+
+    let date: DateTime<Utc> = Utc::now();
+
+    dbh.query("UPDATE rsvp SET status=$status, date=$date WHERE uid=$uid AND eid=$eid")
+        .bind(("status", status))
+        .bind(("uid", uid))
+        .bind(("eid", eid))
+        .bind(("date", date))
+        .await?;
+
+    Ok(())
 }
 
 pub async fn audit(dbh: &Surreal<Client>, text: String) -> surrealdb::Result<()> {
