@@ -37,7 +37,6 @@ use meetings::db;
 
 use meetings::{get_public_config, sendmail, EmailAddress, Event, MyConfig, User};
 
-use web::Visitor;
 use web::VisitorGuard;
 
 #[derive(FromForm)]
@@ -274,7 +273,7 @@ async fn login_post(
     // It seems despite calling add_private, the cookies will still return the old value so
     // for now we have a separate constructor for the Visitor
     #[allow(clippy::shadow_unrelated)]
-    let visitor = Visitor::new_after_login(&email, dbh, myconfig).await;
+    let visitor = VisitorGuard::new_after_login(&email, dbh, myconfig).await;
     Template::render(
         "message",
         context! {title: "Welcome back", message: r#"Welcome back. <a href="/profile">profile</a>"#, config, visitor},
@@ -542,7 +541,7 @@ async fn verify(
 
         // take into account the newly set cookie value
         #[allow(clippy::shadow_unrelated)]
-        let visitor = Visitor::new_after_login(&user.email, dbh, myconfig).await;
+        let visitor = VisitorGuard::new_after_login(&user.email, dbh, myconfig).await;
 
         return Template::render(
             "message",

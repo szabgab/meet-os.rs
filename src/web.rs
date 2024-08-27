@@ -45,27 +45,27 @@ impl VisitorGuard {
         me
     }
 
-    // pub async fn new_after_login(
-    //     email: &str,
-    //     dbh: &State<Surreal<Client>>,
-    //     myconfig: &State<MyConfig>,
-    // ) -> Self {
-    //     let mut me = Self {
-    //         logged_in: true,
-    //         admin: false,
-    //         user: None,
-    //     };
+    pub async fn new_after_login(
+        email: &str,
+        dbh: &State<Surreal<Client>>,
+        myconfig: &State<MyConfig>,
+    ) -> Self {
+        let mut me = Self {
+            logged_in: true,
+            admin: false,
+            user: None,
+        };
 
-    //     if let Ok(user) = db::get_user_by_email(dbh, email).await {
-    //         me.user = user;
-    //         //rocket::info!("email: {}", user.email);
-    //         if myconfig.admins.contains(&email.to_owned()) {
-    //             me.admin = true;
-    //         }
-    //     }
+        if let Ok(user) = db::get_user_by_email(dbh, email).await {
+            me.user = user;
+            //rocket::info!("email: {}", user.email);
+            if myconfig.admins.contains(&email.to_owned()) {
+                me.admin = true;
+            }
+        }
 
-    //     me
-    // }
+        me
+    }
 
     pub fn new_after_logout() -> Self {
         Self {
@@ -93,37 +93,6 @@ impl<'r> FromRequest<'r> for VisitorGuard {
         println!("myconfig {myconfig:?}");
 
         Outcome::Success(VisitorGuard::new(cookies, dbh, myconfig).await)
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Visitor {
-    pub logged_in: bool,
-    pub admin: bool,
-    pub user: Option<User>,
-}
-
-impl Visitor {
-    pub async fn new_after_login(
-        email: &str,
-        dbh: &State<Surreal<Client>>,
-        myconfig: &State<MyConfig>,
-    ) -> Self {
-        let mut me = Self {
-            logged_in: true,
-            admin: false,
-            user: None,
-        };
-
-        if let Ok(user) = db::get_user_by_email(dbh, email).await {
-            me.user = user;
-            //rocket::info!("email: {}", user.email);
-            if myconfig.admins.contains(&email.to_owned()) {
-                me.admin = true;
-            }
-        }
-
-        me
     }
 }
 
