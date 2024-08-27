@@ -67,13 +67,13 @@ impl VisitorGuard {
     //     me
     // }
 
-    // pub fn new_after_logout() -> Self {
-    //     Self {
-    //         logged_in: false,
-    //         admin: false,
-    //         user: None,
-    //     }
-    // }
+    pub fn new_after_logout() -> Self {
+        Self {
+            logged_in: false,
+            admin: false,
+            user: None,
+        }
+    }
 }
 
 #[rocket::async_trait]
@@ -124,14 +124,6 @@ impl Visitor {
         }
 
         me
-    }
-
-    pub fn new_after_logout() -> Self {
-        Self {
-            logged_in: false,
-            admin: false,
-            user: None,
-        }
     }
 }
 

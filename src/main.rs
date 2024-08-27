@@ -296,7 +296,7 @@ fn logout_get(
     cookies.remove_private("meet-os");
 
     #[allow(clippy::shadow_unrelated)]
-    let visitor = Visitor::new_after_logout();
+    let visitor = VisitorGuard::new_after_logout();
 
     Template::render(
         "message",
