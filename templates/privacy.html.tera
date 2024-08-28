@@ -8,29 +8,31 @@
       Your privacy is important to us, but this is a public meeting place so you have to understand and accept that most of the information you share here will be public.
       <p>
 
-      <b>email</b>
+      <h3 class="title is-5">Email</h3>
       When you register we ask for your email address. This information will be kept private. Only the site administrators will have access to it.
 
       <p>
       When you register to one of the groups you also consent to share your email address with the owner of the group and all the current and future administrators of the specific group.
       <p>
 
-      <b>password</b>
+      <h3 class="title is-5">Password</h3>
       That will be kept secret and hashed in the database.
       <p>
 
-      <b>name</b>
+      <h3 class="title is-5">Name</h3>
       It will be seen publicly.
       <p>
       Your name will appear among the members of the site. If you register to a group it will be listed among the members of the group.
       If you register to an event your name will be listed among the registrants of the event.
       <p>
 
-      <b>Other information</b>
-      By default any other information you provide to as will be treated as public.
+      <h3 class="title is-5">Other information</h3>
+      <p>
+      By default any other information you provide to us will be treated as public.
+      </p>
 
-      <h2>Analytics</h2>
-      We use Google Analytics to understand the behaviour of the visitors. We don't collect any personal via Google Analytics.
+      <h2 class="title is-4">Analytics</h2>
+      We use Google Analytics to understand the behaviour of the visitors. We don't collect any personal information via Google Analytics.
     </div>
   </div>
 </section>
