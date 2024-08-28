@@ -83,7 +83,19 @@ fn test_simple() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Invalid GitHub username");
-        assert!(html.contains(r#"The github username `szabgab*` is not valid."#));
+        assert!(html.contains(r#"The GitHub username `szabgab*` is not valid."#));
+
+        // edit profile page invalid gitlab account
+        let res = client
+            .post("/edit-profile")
+            .private_cookie(("meet-os", email))
+            .header(ContentType::Form)
+            .body("name=XX&github=&gitlab=foo*bar&linkedin&about=")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid GitLab username");
+        assert!(html.contains(r#"The GitLab username `foo*bar` is not valid."#));
 
         // TODO test the validation of the other fields as well!
 

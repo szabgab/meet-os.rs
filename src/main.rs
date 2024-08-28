@@ -931,7 +931,7 @@ async fn edit_profile_post(
 ) -> Template {
     let config = get_public_config();
 
-    let re = Regex::new("^[a-zA-Z0-9]+$").unwrap();
+    let re = Regex::new("^[a-zA-Z0-9]*$").unwrap();
 
     let uid = visitor.user.clone().unwrap().uid;
     let name = input.name;
@@ -943,7 +943,14 @@ async fn edit_profile_post(
     if !re.is_match(github) {
         return Template::render(
             "message",
-            context! {title: "Invalid GitHub username", message: format!("The github username `{github}` is not valid."), config, visitor},
+            context! {title: "Invalid GitHub username", message: format!("The GitHub username `{github}` is not valid."), config, visitor},
+        );
+    }
+
+    if !re.is_match(gitlab) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid GitLab username", message: format!("The GitLab username `{gitlab}` is not valid."), config, visitor},
         );
     }
 
