@@ -2,8 +2,8 @@
 
 * First implement whatever is necessary to organize the Rust-Maven online meetings. Also setup groups for Python-Maven, Perl-Maven and the generic Code-Maven.
 * Then extend it to organize the Rust Israel and Python Israel meetings and maybe some other meetings I organize.
-* Then talk to other Rust groups and see if I can win them over one by one.
-* Then talk to Python groups and see if I can win them over one by one.
+* Then talk to other Rust groups and see if any of them would be interested in using the system. They can try it on the dev server and give feedback even before setting up an account on the production server.
+* Then talk to Python groups and see if any of those would be interested.
 * Then extend it to other technology related groups.
 
 
@@ -24,12 +24,14 @@
 ## Permission levels
 * Site Admin
 * Group owner
+* TODO: group admin
+* TODO: event admin
 * User
 * Visitor (not logged in)
 
-Mark registered users as "Site Admin" by adding their names to the `admins` field in the `Rocket.toml` configuration file.
+Mark registered users as **Site Admin** by adding their names to the `admins` field in the `Rocket.toml` configuration file.
 
-The site admin can create a new group and assign a user to be the owner.
+The site admin can create a new group and assign a user to be the **GRoup owner**.
 
 
 A **Visitor** can see the groups and the events. A visitor can register to the site and the login to become a **User**. A Visitor can ask to reset a password.
@@ -45,9 +47,10 @@ A **User** can also list the registered and verified users. A User can join a gr
     * Register user
     * Reset password (forgotten password)
     * Login
+    * Logout
 
 * User
-    * Edit user profile
+    * Edit user profile (name, description)
     * Join group / leave group
     * Join event / leave event
     * logout
@@ -74,15 +77,25 @@ A **User** can also list the registered and verified users. A User can join a gr
 * store in the database
 * send email with a link containing the validation code to user.
 
-* When the user clicks on link, mark the user in the db as validated, remove the code, save validation timestamp.
+* When the user clicks on link:
+* mark the user in the db as validated
+* remove the code
+* save validation timestamp
 * TODO: set an expiration on the code
 
 
 **Reset password process**
-* User fills email, we generate code save the code in the db and send email to user
-* User clicks on the email link with the code and arrives to the site, we check if we have a user with that code and get the user, create form with the uid the code and a place for the new password
-* User fills the new password we verify that the supplied id and code belong together and if the password is good. Then save the password and remove the code from the db.
+* User fills email, we generate validation code; save the code in the db and send email to user.
+* User clicks on the link with the code in the email and arrives to the site, we check if we have a user with that code and get the user, create form with the `uid` the `code` and a place for the new `password`.
+* User fills the new password we verify that the supplied `id` and `code` belong together and if the password is good. Then save the password and remove the code from the db.
 
+**Login**
+* User types in email and password, we compare it to the hashed password in the database.
+* Set a cookie.
+
+**Logout**
+* On click on the logout link.
+* Remove the cookie.
 
 **Create group**
 * Only the Site Admin can create groups.
