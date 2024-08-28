@@ -1,4 +1,4 @@
-use utilities::{login_helper, register_user_helper, run_external};
+use utilities::{check_html, register_user_helper, run_external};
 
 #[test]
 fn admin_list_users() {
@@ -20,8 +20,25 @@ fn admin_list_users() {
 
         let admin_cookie_str =
             register_user_helper(&client, &url, name, email, password, &email_folder);
-        login_helper(&client, &url, email, password);
+        //login_helper(&client, &url, email, password);
 
+        // Admin listing of users
+        let res = client
+            .get(format!("{url}/admin/users"))
+            .header("Cookie", format!("meet-os={admin_cookie_str}"))
+            .send()
+            .unwrap();
+
+        // TODO check that the user was verified
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "List Users by Admin");
+        println!("{html}");
+        //check_html(&html, "title", "Meet-OS");
+        assert!(html.contains("Foo Bar"));
+        assert!(html.contains(name));
+
+        // Regular listing of users
         let res = client
             .get(format!("{url}/users"))
             .header("Cookie", format!("meet-os={admin_cookie_str}"))
@@ -30,7 +47,8 @@ fn admin_list_users() {
 
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
-        //println!("{html}");
+        println!("{html}");
+        check_html(&html, "title", "List Users");
         assert!(html.contains("Foo Bar"));
         assert!(html.contains(name));
     });

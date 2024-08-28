@@ -133,29 +133,25 @@ pub async fn get_user_by_code(
     Ok(entry)
 }
 
-pub async fn verify_email_with_code(
+pub async fn set_user_verified(
     dbh: &Surreal<Client>,
-    process: &str,
-    code: &str,
+    uid: usize,
 ) -> surrealdb::Result<Option<User>> {
-    rocket::info!("verification code: '{code}' process = '{process}'");
-    let verified = true;
-
+    rocket::info!("set_user_verified: '{uid}'");
     let utc: DateTime<Utc> = Utc::now();
     let mut response = dbh
         .query(
             "
-            UPDATE ONLY user
+            UPDATE user
                 SET
                     verified=$verified,
                     code='',
                     verification_date=$date
-                WHERE code=$code AND process=$process;",
+                WHERE uid=$uid;",
         )
-        .bind(("verified", verified))
-        .bind(("code", code))
+        .bind(("verified", true))
         .bind(("date", utc))
-        .bind(("process", process))
+        .bind(("uid", uid))
         .await?;
 
     let entry: Option<User> = response.take(0)?;

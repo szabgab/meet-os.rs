@@ -79,7 +79,7 @@ async fn admin_users(
     Template::render(
         "admin_users",
         context! {
-            title: "List Users",
+            title: "List Users by Admin",
             config ,
             visitor,
             users,

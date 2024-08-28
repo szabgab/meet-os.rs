@@ -654,15 +654,15 @@ async fn verify_email(
 
     let config = get_public_config();
 
-    let Some(user) = db::verify_email_with_code(dbh, "register", code)
-        .await
-        .unwrap()
-    else {
+    let Some(user) = db::get_user_by_code(dbh, "register", code).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
         );
     };
+
+    db::set_user_verified(dbh, user.uid).await.unwrap();
+    db::remove_code(dbh, user.uid).await.unwrap();
 
     rocket::info!("verified code for {}", user.email);
     cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
