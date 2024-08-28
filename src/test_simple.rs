@@ -90,12 +90,23 @@ fn test_simple() {
             .post("/edit-profile")
             .private_cookie(("meet-os", email))
             .header(ContentType::Form)
-            .body("name=XX&github=&gitlab=foo*bar&linkedin&about=")
+            .body("name=XX&github=&gitlab=foo*bar&linkedin=&about=")
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Invalid GitLab username");
         assert!(html.contains(r#"The GitLab username `foo*bar` is not valid."#));
+
+        let res = client
+            .post("/edit-profile")
+            .private_cookie(("meet-os", email))
+            .header(ContentType::Form)
+            .body("name=XX&github=&gitlab=&linkedin=szabgab&about=")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid LinkedIn profile link");
+        assert!(html.contains(r#"The LinkedIn profile link `szabgab` is not valid."#));
 
         // TODO test the validation of the other fields as well!
 

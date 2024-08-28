@@ -932,6 +932,7 @@ async fn edit_profile_post(
     let config = get_public_config();
 
     let re = Regex::new("^[a-zA-Z0-9]*$").unwrap();
+    let re_linkedin = Regex::new("^https://www.linkedin.com/in/[a-zA-Z0-9-]+/?$").unwrap();
 
     let uid = visitor.user.clone().unwrap().uid;
     let name = input.name;
@@ -951,6 +952,13 @@ async fn edit_profile_post(
         return Template::render(
             "message",
             context! {title: "Invalid GitLab username", message: format!("The GitLab username `{gitlab}` is not valid."), config, visitor},
+        );
+    }
+
+    if !linkedin.is_empty() && !re_linkedin.is_match(linkedin) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid LinkedIn profile link", message: format!("The LinkedIn profile link `{linkedin}` is not valid."), config, visitor},
         );
     }
 
