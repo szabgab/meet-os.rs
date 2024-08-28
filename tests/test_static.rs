@@ -66,5 +66,13 @@ fn fixed_pages() {
         assert_eq!(res.status(), 200);
         let html = res.text().unwrap();
         check_html(&html, "title", "Privacy Policy");
+
+        let res = client
+            .get(format!("http://localhost:{port}/faq"))
+            .send()
+            .unwrap();
+        assert_eq!(res.status(), 200);
+        let html = res.text().unwrap();
+        check_html(&html, "title", "FAQ - Frequently Asked Questions");
     });
 }

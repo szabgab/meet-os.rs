@@ -5,7 +5,7 @@ use crate::get_public_config;
 use crate::web::Visitor;
 
 pub fn routes() -> Vec<Route> {
-    routes![about, privacy, soc,]
+    routes![about, privacy, soc, faq]
 }
 
 #[get("/about")]
@@ -38,6 +38,18 @@ fn soc(visitor: Visitor) -> Template {
         "soc",
         context! {
             title: "Standard of Conduct",
+            config: get_public_config(),
+            visitor,
+        },
+    )
+}
+
+#[get("/faq")]
+fn faq(visitor: Visitor) -> Template {
+    Template::render(
+        "faq",
+        context! {
+            title: "FAQ - Frequently Asked Questions",
             config: get_public_config(),
             visitor,
         },
