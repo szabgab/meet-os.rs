@@ -72,6 +72,19 @@ fn test_simple() {
         check_html(&html, "title", "Invalid email address");
         assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
 
+        // register name too long
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&email=long@meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Name is too long");
+        assert!(html.contains(
+            "Name is too long. Max 50 while the current name is 53 long. Please try again."
+        ));
+
         let email = "foo@meet-os.com";
         // edit profile page invalid github account
         let res = client

@@ -13,6 +13,7 @@ pub(crate) mod public;
 pub(crate) mod web;
 
 mod notify;
+const MAX_NAME_LEN: usize = 50;
 
 use chrono::{DateTime, Duration, Utc};
 
@@ -546,6 +547,14 @@ async fn register_post(
     rocket::info!("rocket input: {:?} {:?}", input.email, input.name);
 
     let config = get_public_config();
+
+    let name = input.name.trim();
+    if MAX_NAME_LEN < name.len() {
+        return Template::render(
+            "message",
+            context! {title: "Name is too long", message: format!("Name is too long. Max {MAX_NAME_LEN} while the current name is {} long. Please try again.", name.len()), config, visitor},
+        );
+    }
 
     // email: lowerase, remove spaces from sides
     // validate format @
