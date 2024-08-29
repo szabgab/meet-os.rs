@@ -81,13 +81,19 @@ impl Visitor {
         };
 
         if let Some(cookie_user) = get_logged_in(cookies) {
-            me.logged_in = true;
+            rocket::info!("Email from cookie: {}", &cookie_user.email);
             if let Ok(user) = db::get_user_by_email(dbh, &cookie_user.email).await {
+                me.logged_in = true;
                 me.user = user;
                 //rocket::info!("email: {}", user.email);
                 if myconfig.admins.contains(&cookie_user.email.clone()) {
                     me.admin = true;
                 }
+            } else {
+                rocket::warn!(
+                    "Could not find user with email: {} in the database",
+                    &cookie_user.email
+                );
             }
         }
 
@@ -141,7 +147,7 @@ impl<'r> FromRequest<'r> for Visitor {
 fn get_logged_in(cookies: &CookieJar<'_>) -> Option<CookieUser> {
     if let Some(cookie) = cookies.get_private("meet-os") {
         let email = cookie.value();
-        rocket::info!("cookie value received from user: {email}");
+        rocket::info!("get_logged_in: cookie value received from user: {email}");
         return Some(CookieUser {
             email: email.to_owned(),
         });
