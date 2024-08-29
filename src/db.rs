@@ -295,7 +295,6 @@ pub async fn get_user_by_email(
     email: &str,
 ) -> surrealdb::Result<Option<User>> {
     rocket::info!("get_user_by_email: '{email}'");
-    rocket::info!("has db");
     let mut response = dbh
         .query("SELECT * FROM user WHERE email=$email;")
         .bind(("email", email))
@@ -317,8 +316,6 @@ pub async fn add_login_code_to_user(
     code: &str,
 ) -> surrealdb::Result<Option<User>> {
     rocket::info!("add_login_code_to_user: '{email}', '{process}', '{code}'");
-
-    rocket::info!("has db");
     let mut response = dbh
         .query("UPDATE user SET code=$code, process=$process WHERE email=$email;")
         .bind(("email", email))
