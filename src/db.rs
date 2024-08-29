@@ -43,6 +43,12 @@ pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> 
         .check()
         .unwrap();
 
+    dbh.query("DEFINE INDEX user_code ON TABLE user COLUMNS code UNIQUE")
+        .await
+        .unwrap()
+        .check()
+        .unwrap();
+
     dbh.query("DEFINE INDEX member_ship ON TABLE membership COLUMNS uid, gid UNIQUE")
         .await
         .unwrap()

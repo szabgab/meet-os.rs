@@ -75,28 +75,48 @@ async fn test_db_user() {
     assert_eq!(users[0].name, user_foo.name);
     assert_eq!(users[0], user_foo);
 
-    let res = db::add_user(&dbh, &user_foo).await;
+    let other_user = User {
+        code: String::from("other code"),
+        uid: 2,
+        ..user_foo.clone()
+    };
+    let res = db::add_user(&dbh, &other_user).await;
     assert!(res.is_err());
     let err = res.err().unwrap().to_string();
     assert!(err.contains("There was a problem with the database: Database index `user_email` already contains 'foo@meet-os.com'"));
 
-    let user_peti = User {
-        name: String::from("Peti Bar"),
+    let other_user = User {
+        code: String::from("other code"),
         email: String::from("peti@meet-os.com"),
         ..user_foo.clone()
     };
 
-    let res = db::add_user(&dbh, &user_peti).await;
+    let res = db::add_user(&dbh, &other_user).await;
     assert!(res.is_err());
     let err = res.err().unwrap().to_string();
     assert!(err.contains(
         "There was a problem with the database: Database index `user_uid` already contains 1"
     ));
 
+    let other_user = User {
+        uid: 2,
+        email: String::from("peti@meet-os.com"),
+        ..user_foo.clone()
+    };
+
+    let res = db::add_user(&dbh, &other_user).await;
+    assert!(res.is_err());
+    let err = res.err().unwrap().to_string();
+    //assert_eq!(err, "");
+    assert!(err.contains(
+        "There was a problem with the database: Database index `user_code` already contains 'generated code'"
+    ));
+
     let user_peti = User {
         uid: 2,
         name: String::from("Peti Bar"),
         email: String::from("peti@meet-os.com"),
+        code: String::from("some other code"),
         ..user_foo.clone()
     };
     let res = db::add_user(&dbh, &user_peti).await.unwrap();
@@ -107,6 +127,21 @@ async fn test_db_user() {
     // TODO: should we fix the order? Without that these test need to take into account the lack of order
     // assert_eq!(users[0], user_foo);
     // assert_eq!(users[1], user_peti);
+
+    let user = db::get_user_by_email(&dbh, "foo@meet-os.com")
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(user, user_foo);
+
+    let user = db::get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    assert_eq!(user, user_foo);
+
+    let user = db::get_user_by_code(&dbh, "register", "generated code")
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(user, user_foo);
 
     let utc: DateTime<Utc> = Utc::now();
 
