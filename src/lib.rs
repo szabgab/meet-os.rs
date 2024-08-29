@@ -25,7 +25,7 @@ pub struct User {
     pub about: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Group {
     pub gid: usize,
     pub name: String,

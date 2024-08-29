@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 
 use crate::db;
-use meetings::User;
+use meetings::{Group, User};
 
 #[async_test]
 async fn test_db_get_empty_lists() {
@@ -15,6 +15,9 @@ async fn test_db_get_empty_lists() {
 
     let audits = db::get_audit(&dbh).await.unwrap();
     assert!(audits.is_empty());
+
+    let groups = db::get_groups(&dbh).await.unwrap();
+    assert!(groups.is_empty());
 }
 
 #[async_test]
@@ -80,7 +83,7 @@ async fn test_db_user() {
     let user_peti = User {
         name: String::from("Peti Bar"),
         email: String::from("peti@meet-os.com"),
-        ..user_foo
+        ..user_foo.clone()
     };
 
     let res = db::add_user(&dbh, &user_peti).await;
@@ -89,4 +92,36 @@ async fn test_db_user() {
     assert!(err.contains(
         "There was a problem with the database: Database index `user_uid` already contains 1"
     ));
+
+    let user_peti = User {
+        uid: 2,
+        name: String::from("Peti Bar"),
+        email: String::from("peti@meet-os.com"),
+        ..user_foo.clone()
+    };
+    let res = db::add_user(&dbh, &user_peti).await.unwrap();
+    assert_eq!(res, ());
+
+    let users = db::get_users(&dbh).await.unwrap();
+    assert_eq!(users.len(), 2);
+    // TODO: should we fix the order? Without that these test need to take into account the lack of order
+    // assert_eq!(users[0], user_foo);
+    // assert_eq!(users[1], user_peti);
+
+    let utc: DateTime<Utc> = Utc::now();
+
+    let rust_maven = Group {
+        gid: 1,
+        owner: 2,
+        name: String::from("Rust Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    assert_eq!(res, ());
+
+    let groups = db::get_groups(&dbh).await.unwrap();
+    assert_eq!(groups.len(), 1);
+    assert_eq!(groups[0], rust_maven);
 }
