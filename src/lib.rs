@@ -8,7 +8,7 @@ pub mod db;
 pub mod notifications;
 pub use notifications::*;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct User {
     pub uid: usize,
     pub email: String,

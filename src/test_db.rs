@@ -48,7 +48,7 @@ async fn test_db_user() {
 
     let utc: DateTime<Utc> = Utc::now();
 
-    let user = User {
+    let user_foo = User {
         uid: 1,
         name: String::from("Foo Bar"),
         email: String::from("foo@meet-os.com"),
@@ -64,6 +64,29 @@ async fn test_db_user() {
         about: None,
     };
 
-    let res = db::add_user(&dbh, &user).await.unwrap();
+    let res = db::add_user(&dbh, &user_foo).await.unwrap();
     assert_eq!(res, ());
+
+    let users = db::get_users(&dbh).await.unwrap();
+    assert_eq!(users.len(), 1);
+    assert_eq!(users[0].name, user_foo.name);
+    assert_eq!(users[0], user_foo);
+
+    let res = db::add_user(&dbh, &user_foo).await;
+    assert!(res.is_err());
+    let err = res.err().unwrap().to_string();
+    assert!(err.contains("There was a problem with the database: Database index `user_email` already contains 'foo@meet-os.com'"));
+
+    let user_peti = User {
+        name: String::from("Peti Bar"),
+        email: String::from("peti@meet-os.com"),
+        ..user_foo
+    };
+
+    let res = db::add_user(&dbh, &user_peti).await;
+    assert!(res.is_err());
+    let err = res.err().unwrap().to_string();
+    assert!(err.contains(
+        "There was a problem with the database: Database index `user_uid` already contains 1"
+    ));
 }
