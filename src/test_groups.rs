@@ -2,6 +2,15 @@ use crate::test_lib::{params, register_user_helper, run_inprocess};
 use rocket::http::{ContentType, Status};
 use utilities::check_html;
 
+// GET /create-group show form
+// POST /create-group verify name, add group to database
+// GET /groups  list all the groups from the database
+
+// guest cannot access the /create-group pages
+// regular user cannot access the /create-group pages
+// only admin user can access the /create-group pages
+// everyone can access the /groups page
+
 #[test]
 fn create_group_by_admin() {
     run_inprocess(|email_folder, client| {
@@ -128,6 +137,55 @@ fn create_group_unauthorized() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "x");
+        assert!(!html.contains("/group/1"));
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
+    });
+}
+
+#[test]
+fn create_group_guest() {
+    run_inprocess(|email_folder, client| {
+        // Access the Group creation page without user
+        let res = client.get("/admin/create-group?uid=1").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+
+        let res = client.get("/groups").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "x");
+        assert!(!html.contains("/group/")); // No link to any group
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
+
+        // Create group should fail
+        let res = client
+            .post("/admin/create-group")
+            .body(params!([
+                ("name", "Rust Maven"),
+                ("location", ""),
+                ("description", ""),
+                ("owner", "1"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+
+        // List the groups
+        let res = client.get("/groups").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
         assert!(!html.contains("/group/1"));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
