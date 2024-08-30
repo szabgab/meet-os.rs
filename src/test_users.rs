@@ -57,3 +57,15 @@ fn register_user() {
         check_profile_page_in_process(&client, email, "Foo Bar");
     });
 }
+
+#[test]
+fn verify_with_non_existent_id() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get(format!("/verify-email/1/abc")).dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid id");
+        assert!(html.contains("Invalid id <b>1</b>"));
+    });
+}
