@@ -6,15 +6,18 @@ use meetings::{db, sendmail, EmailAddress, Group, MyConfig, User};
 pub async fn admin_new_user_registered(myconfig: &MyConfig, user: &User) {
     let base_url = &myconfig.base_url;
     let subject = "New Meet-OS registration!";
+    let name = &user.name;
+    let uid = &user.uid;
+    let email = &user.email;
     let text = format!(
         r#"Hi,
 
-        New unverified user: {} {}
+        New unverified user: {name} {email}<p>
+        uid: <a href="{base_url}/user/{uid}">{uid}</a>
     <p>
     Sent from {base_url}
     <p>
-    "#,
-        user.name, user.email
+    "#
     );
 
     let from = EmailAddress {
@@ -38,14 +41,17 @@ pub async fn admin_new_user_registered(myconfig: &MyConfig, user: &User) {
 pub async fn admin_new_user_verified(myconfig: &MyConfig, user: &User) {
     let base_url = &myconfig.base_url;
     let subject = "New Meet-OS user verification!";
+    let name = &user.name;
+    let uid = &user.uid;
+    let email = &user.email;
     let text = format!(
         r#"Hi,
 
-        New verified user: {} {}
+        New verified user: {name} {email}
+        uid: <a href="{base_url}/user/{uid}">{uid}</a>
     <p>
     Sent from {base_url}
-    "#,
-        user.name, user.email
+    "#
     );
 
     let from = EmailAddress {
