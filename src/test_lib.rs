@@ -1,7 +1,20 @@
+#![allow(unused_macros, unused_imports)]
+
 use rocket::http::Status;
 use rocket::local::blocking::Client;
 
 use utilities::check_html;
+
+macro_rules! params {
+    ($params:expr) => {
+        $params
+            .into_iter()
+            .map(|pair| format!("{}={}", pair.0, pair.1))
+            .collect::<Vec<_>>()
+            .join("&")
+    };
+}
+pub(crate) use params;
 
 pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     use rocket::config::Config;

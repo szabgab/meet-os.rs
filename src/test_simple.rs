@@ -1,4 +1,4 @@
-use crate::test_lib::{check_profile_page_in_process, run_inprocess};
+use crate::test_lib::{check_profile_page_in_process, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 use utilities::{check_guest_menu, check_html, check_user_menu, read_code_from_email};
 
@@ -24,10 +24,15 @@ fn test_main_page_empty_db() {
 #[test]
 fn test_register_with_invalid_email_address() {
     run_inprocess(|email_folder, client| {
+        //"name=Foo Bar&email=meet-os.com&password=123456"
         let res = client
             .post("/register")
             .header(ContentType::Form)
-            .body("name=Foo Bar&email=meet-os.com&password=123456")
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", "meet-os.com"),
+                ("password", "123456"),
+            ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
