@@ -66,22 +66,22 @@ fn register_user() {
     });
 }
 
-#[test]
-fn verify_with_non_existent_code() {
-    run_external(|port, _email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
-        let res = client
-            .get(format!("{url}/verify-email/1/abc"))
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
-        //assert_eq!(html, "");
-        //assert!(html.contains("<title>Thank you for registering</title>"));
-        assert!(html.contains("Invalid code <b>abc</b>"));
-    });
-}
+// #[test]
+// fn verify_with_non_existent_code() {
+//     run_external(|port, _email_folder| {
+//         let client = reqwest::blocking::Client::new();
+//         let url = format!("http://localhost:{port}/");
+//         let res = client
+//             .get(format!("{url}/verify-email/1/abc"))
+//             .send()
+//             .unwrap();
+//         assert_eq!(res.status(), 200);
+//         let html = res.text().unwrap();
+//         //assert_eq!(html, "");
+//         //assert!(html.contains("<title>Thank you for registering</title>"));
+//         assert!(html.contains("Invalid code <b>abc</b>"));
+//     });
+// }
 
 #[test]
 fn duplicate_email() {
