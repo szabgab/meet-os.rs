@@ -1,6 +1,6 @@
-use crate::test_lib::run_inprocess;
-use rocket::http::Status;
-use utilities::{check_guest_menu, check_html};
+use crate::test_lib::{check_profile_page_in_process, extract_cookie, params, run_inprocess};
+use rocket::http::{ContentType, Status};
+use utilities::{check_guest_menu, check_html, check_user_menu, read_code_from_email};
 
 #[test]
 fn try_page_without_cookie() {
@@ -15,5 +15,45 @@ fn try_page_without_cookie() {
             assert!(html.contains("You are not logged in"));
             check_guest_menu(&html);
         }
+    });
+}
+
+#[test]
+fn register_user() {
+    run_inprocess(|email_folder, client| {
+        let email = "foo@meet-os.com";
+        let res = client
+            .post(format!("/register"))
+            .header(ContentType::Form)
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", email),
+                ("password", "123456"),
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        //println!("{:#?}", res.headers());
+        assert!(res.headers().get_one("set-cookie").is_none());
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "We sent you an email");
+        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
+        check_guest_menu(&html);
+
+        let (uid, code) = read_code_from_email(&email_folder, "0.txt");
+
+        // Verify the email
+        let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
+        assert_eq!(res.status(), Status::Ok);
+
+        let cookie_str = extract_cookie(&res);
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Thank you for registering");
+        assert!(html.contains("Your email was verified."));
+        check_user_menu(&html);
+
+        // Access the profile with the cookie
+        check_profile_page_in_process(&client, email, "Foo Bar");
     });
 }

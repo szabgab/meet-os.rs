@@ -1,5 +1,7 @@
 #![allow(unused_macros, unused_imports)]
 
+use regex::Regex;
+
 use rocket::http::Status;
 use rocket::local::blocking::Client;
 
@@ -53,4 +55,19 @@ pub fn check_profile_page_in_process(client: &Client, email: &str, h1: &str) {
         check_html(&html, "title", "Profile");
         check_html(&html, "h1", h1);
     }
+}
+
+pub fn extract_cookie(res: &rocket::local::blocking::LocalResponse) -> String {
+    let cookie = res.headers().get_one("set-cookie").unwrap();
+    println!("cookie: {cookie}");
+    assert!(cookie.contains("meet-os="));
+    let re = Regex::new("meet-os=([^;]+);").unwrap();
+    let cookie_str = match re.captures(cookie) {
+        Some(value) => value[1].to_owned(),
+        None => panic!("Code not found cookie"),
+    };
+
+    println!("cookie_str: {cookie_str}");
+
+    cookie_str
 }

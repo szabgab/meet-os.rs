@@ -1,51 +1,7 @@
 use utilities::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page, check_user_menu,
-    extract_cookie, read_code_from_email, register_user_helper, run_external,
+    extract_cookie, register_user_helper, run_external,
 };
-
-#[test]
-fn register_user() {
-    run_external(|port, email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}");
-        let res = client
-            .post(format!("{url}/register"))
-            .form(&[
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
-            ])
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        //println!("{:#?}", res.headers());
-        assert!(res.headers().get("set-cookie").is_none());
-
-        let html = res.text().unwrap();
-        check_html(&html, "title", "We sent you an email");
-        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
-        check_guest_menu(&html);
-
-        let (uid, code) = read_code_from_email(&email_folder, "0.txt");
-
-        // Verify the email
-        let res = client
-            .get(format!("{url}/verify-email/{uid}/{code}"))
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-
-        let cookie_str = extract_cookie(&res);
-
-        let html = res.text().unwrap();
-        check_html(&html, "title", "Thank you for registering");
-        assert!(html.contains("Your email was verified."));
-        check_user_menu(&html);
-
-        // Access the profile with the cookie
-        check_profile_page(&client, &url, &cookie_str, "Foo Bar");
-    });
-}
 
 #[test]
 fn verify_with_non_existent_id() {
