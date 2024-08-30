@@ -72,7 +72,6 @@ jobs:
         RUST_BACKTRACE: 1
       run: |
         cp Rocket.skeleton.toml Rocket.toml
-        cargo test --verbose
-
+        cargo install cargo-tarpaulin
         time cargo tarpaulin --ignore-tests -o Html
 
