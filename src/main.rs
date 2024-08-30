@@ -1681,3 +1681,6 @@ mod test_users;
 
 #[cfg(test)]
 mod test_admin;
+
+#[cfg(test)]
+mod test_public;
