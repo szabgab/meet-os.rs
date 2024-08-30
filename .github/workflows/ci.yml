@@ -57,7 +57,6 @@ jobs:
     - name: Lists tests
       run: cargo test -- --list
 
-
     - name: Run tests
       env:
         RUST_BACKTRACE: 1
@@ -67,4 +66,13 @@ jobs:
 
         #- name: Build release version
         #  run: cargo build --release --verbose
+
+    - name: Test coverage reporting
+      env:
+        RUST_BACKTRACE: 1
+      run: |
+        cp Rocket.skeleton.toml Rocket.toml
+        cargo test --verbose
+
+        time cargo tarpaulin --ignore-tests -o Html
 
