@@ -25,8 +25,10 @@ impl<'r> FromRequest<'r> for LoggedIn {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, ()> {
+        rocket::info!("from_request");
         match Visitor::from_request(request).await {
             Outcome::Success(visitor) => {
+                rocket::info!("from_request visitor: {visitor:?}");
                 if visitor.logged_in {
                     Outcome::Success(LoggedIn)
                 } else {
@@ -106,12 +108,14 @@ impl Visitor {
         myconfig: &State<MyConfig>,
     ) -> Self {
         let mut me = Self {
-            logged_in: true,
+            logged_in: false,
             admin: false,
             user: None,
         };
+        rocket::info!("new_after_login");
 
         if let Ok(user) = db::get_user_by_email(dbh, email).await {
+            me.logged_in = true;
             me.user = user;
             //rocket::info!("email: {}", user.email);
             if myconfig.admins.contains(&email.to_owned()) {
