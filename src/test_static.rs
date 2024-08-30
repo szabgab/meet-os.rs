@@ -1,15 +1,13 @@
-use utilities::{check_html, run_external};
+use crate::test_lib::run_inprocess;
+use rocket::http::Status;
+use utilities::check_html;
 
 #[test]
 fn register_page() {
-    run_external(|port, _email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let res = client
-            .get(format!("http://localhost:{port}/register"))
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/register").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
         check_html(&html, "title", "Register");
         check_html(&html, "h1", "Register");
         assert!(html.contains(
@@ -24,14 +22,10 @@ fn register_page() {
 
 #[test]
 fn login_page() {
-    run_external(|port, _email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let res = client
-            .get(format!("http://localhost:{port}/login"))
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/login").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
         check_html(&html, "title", "Login");
         check_html(&html, "h1", "Login");
         assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
