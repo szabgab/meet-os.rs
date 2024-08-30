@@ -1678,3 +1678,6 @@ mod test_db;
 
 #[cfg(test)]
 mod test_users;
+
+#[cfg(test)]
+mod test_admin;

@@ -1,11 +1,12 @@
 #![allow(unused_macros, unused_imports)]
 
 use regex::Regex;
+use std::path::PathBuf;
 
-use rocket::http::Status;
+use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 
-use utilities::check_html;
+use utilities::{check_html, read_code_from_email};
 
 macro_rules! params {
     ($params:expr) => {
@@ -31,7 +32,8 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
         .merge(("database_namespace", &db_namespace))
         .merge(("database_name", &db_name))
         .merge(("email", "Folder"))
-        .merge(("email_folder", email_folder.to_str().unwrap()));
+        .merge(("email_folder", email_folder.to_str().unwrap()))
+        .merge(("admins", ["admin@meet-os.com"]));
 
     let app = super::rocket().configure(provider);
     let client = Client::tracked(app).unwrap();
@@ -70,4 +72,39 @@ pub fn extract_cookie(res: &rocket::local::blocking::LocalResponse) -> String {
     println!("cookie_str: {cookie_str}");
 
     cookie_str
+}
+
+pub fn register_user_helper(
+    client: &Client,
+    name: &str,
+    email: &str,
+    password: &str,
+    email_folder: &PathBuf,
+) -> String {
+    let res = client
+        .post(format!("/register"))
+        .header(ContentType::Form)
+        .body(params!([
+            ("name", name),
+            ("email", email),
+            ("password", password)
+        ]))
+        .dispatch();
+    assert_eq!(res.status(), Status::Ok);
+
+    let dir = email_folder
+        .read_dir()
+        .expect("read_dir call failed")
+        .flatten()
+        .collect::<Vec<_>>();
+    println!("dir: {}", dir.len());
+
+    // -2 because after the email with the code we also send a notification to the admin.
+    let filename = format!("{}.txt", dir.len() - 2);
+    let (uid, code) = read_code_from_email(email_folder, &filename);
+
+    let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
+    assert_eq!(res.status(), Status::Ok);
+    let cookie_str = extract_cookie(&res);
+    return cookie_str;
 }

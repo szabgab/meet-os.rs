@@ -1,13 +1,12 @@
-use utilities::{check_html, register_user_helper, run_external};
+use crate::test_lib::{register_user_helper, run_inprocess};
+use rocket::http::Status;
+use utilities::check_html;
 
 #[test]
 fn admin_list_users() {
-    run_external(|port, email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
+    run_inprocess(|email_folder, client| {
         let _cookie_str = register_user_helper(
             &client,
-            &url,
             "Foo Bar",
             "foo@meet-os.com",
             "123foo",
@@ -18,35 +17,32 @@ fn admin_list_users() {
         let email = "admin@meet-os.com";
         let password = "123456";
 
-        let admin_cookie_str =
-            register_user_helper(&client, &url, name, email, password, &email_folder);
+        let admin_cookie_str = register_user_helper(&client, name, email, password, &email_folder);
         //login_helper(&client, &url, email, password);
 
         // Admin listing of users
         let res = client
-            .get(format!("{url}/admin/users"))
-            .header("Cookie", format!("meet-os={admin_cookie_str}"))
-            .send()
-            .unwrap();
+            .get("/admin/users")
+            .private_cookie(("meet-os", email))
+            .dispatch();
 
         // TODO check that the user was verified
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
         check_html(&html, "title", "List Users by Admin");
         println!("{html}");
         //check_html(&html, "title", "Meet-OS");
         assert!(html.contains("Foo Bar"));
         assert!(html.contains(name));
 
-        // Regular listing of users
+        // Regular listing of users by admin
         let res = client
-            .get(format!("{url}/users"))
-            .header("Cookie", format!("meet-os={admin_cookie_str}"))
-            .send()
-            .unwrap();
+            .get("/users")
+            .private_cookie(("meet-os", email))
+            .dispatch();
 
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
         println!("{html}");
         check_html(&html, "title", "List Users");
         assert!(html.contains("Foo Bar"));
