@@ -4,8 +4,8 @@ use utilities::{check_guest_menu, check_html, check_user_menu, read_code_from_em
 
 #[test]
 fn test_simple() {
-    run_inprocess(|email_folder| {
-        let client = Client::tracked(super::rocket()).unwrap();
+    run_inprocess(|email_folder, client| {
+        let email = "foo@meet-os.com";
 
         // main page
         let res = client.get("/").dispatch();
@@ -47,7 +47,7 @@ fn test_simple() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(String::from("foo@meet-os.com"), "Foo Bar");
+        check_profile_page_in_process(&client, email, "Foo Bar");
         //check_profile_page_in_process(&client, "foo@meet-os.com", "");
 
         // register with same email should fail
@@ -85,7 +85,6 @@ fn test_simple() {
             "Name is too long. Max 50 while the current name is 53 long. Please try again."
         ));
 
-        let email = "foo@meet-os.com";
         // edit profile page invalid github account
         let res = client
             .post("/edit-profile")
@@ -173,32 +172,31 @@ fn test_simple() {
     });
 }
 
-pub fn run_inprocess(func: fn(std::path::PathBuf)) {
+pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
+    use rocket::config::Config;
+
     let tmp_dir = tempfile::tempdir().unwrap();
     println!("tmp_dir: {:?}", tmp_dir);
     let email_folder = tmp_dir.path().join("emails");
-
-    let rocket_toml = std::fs::read_to_string("Rocket.skeleton.toml").unwrap();
     let db_name = format!("test-name-{}", rand::random::<f64>());
     let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
-    let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
-    let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
-    let rocket_toml = rocket_toml.replace("Sendgrid | Folder", "Folder");
-    let rocket_toml = rocket_toml.replace("/path/to/email_folder", email_folder.to_str().unwrap());
 
-    let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
-    std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
+    let provider = Config::figment()
+        .merge(("database_namespace", &db_namespace))
+        .merge(("database_name", &db_name))
+        .merge(("email", "Folder"))
+        .merge(("email_folder", email_folder.to_str().unwrap()));
 
-    std::env::set_var("ROCKET_CONFIG", rocket_toml_path);
+    let app = super::rocket().configure(provider);
+    let client = Client::tracked(app).unwrap();
 
-    func(email_folder);
+    func(email_folder, client);
 }
 
-pub fn check_profile_page_in_process(email: String, h1: &str) {
-    let client = Client::tracked(super::rocket()).unwrap();
+pub fn check_profile_page_in_process(client: &Client, email: &str, h1: &str) {
     let res = client
         .get("/profile")
-        .private_cookie(("meet-os", email))
+        .private_cookie(("meet-os", email.to_owned()))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
