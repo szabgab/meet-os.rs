@@ -1690,3 +1690,6 @@ mod test_static;
 
 #[cfg(test)]
 mod test_groups;
+
+#[cfg(test)]
+mod test_complex;
