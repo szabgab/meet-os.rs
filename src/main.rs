@@ -1687,3 +1687,6 @@ mod test_public;
 
 #[cfg(test)]
 mod test_static;
+
+#[cfg(test)]
+mod test_groups;
