@@ -84,9 +84,12 @@ impl Visitor {
 
         if let Some(cookie_user) = get_logged_in(cookies) {
             rocket::info!("Email from cookie: {}", &cookie_user.email);
-            if let Ok(user) = db::get_user_by_email(dbh, &cookie_user.email).await {
+            if let Some(user) = db::get_user_by_email(dbh, &cookie_user.email)
+                .await
+                .unwrap()
+            {
                 me.logged_in = true;
-                me.user = user;
+                me.user = Some(user);
                 //rocket::info!("email: {}", user.email);
                 if myconfig.admins.contains(&cookie_user.email.clone()) {
                     me.admin = true;
