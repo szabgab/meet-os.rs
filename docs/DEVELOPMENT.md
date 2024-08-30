@@ -5,7 +5,7 @@
 
 ```
 docker volume create my-surreal-db
-docker run --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+docker run -v$(pwd):/external --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
 ```
 
 * Note: At the end of the development session you might want to stop the docker container.
@@ -121,17 +121,19 @@ cargo test admin
 * dump / export
 
 ```
-docker exec -it surreal /surreal export -e http://localhost:8000 --ns meet-os-ns --db meet-os-ns > out.txt
+docker exec -it surreal /surreal export -e http://localhost:8000 --ns meet-os-ns --db meet-os-db > out.txt
 ```
 
 * restore / import
 
+```
+docker exec surreal /surreal import -e http://localhost:8000 --namespace meet-os-ns --database meet-os-db /external/out.txt
+```
 
 ## CLI
 
 ```
 docker exec -it surreal /surreal sql -e http://localhost:8000 --ns meet-os-ns --db meet-os-ns --pretty
 ```
-
 
 
