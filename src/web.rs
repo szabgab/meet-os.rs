@@ -117,9 +117,9 @@ impl Visitor {
         };
         rocket::info!("new_after_login");
 
-        if let Ok(user) = db::get_user_by_email(dbh, email).await {
+        if let Some(user) = db::get_user_by_email(dbh, email).await.unwrap() {
             me.logged_in = true;
-            me.user = user;
+            me.user = Some(user);
             //rocket::info!("email: {}", user.email);
             if myconfig.admins.contains(&email.to_owned()) {
                 me.admin = true;
