@@ -91,3 +91,39 @@ fn verify_with_bad_code() {
         assert!(html.contains("Invalid code <b>abc</b>"));
     });
 }
+
+#[test]
+fn duplicate_email() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post(format!("/register"))
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        //println!("{:#?}", res.headers());
+        assert!(res.headers().get_one("set-cookie").is_none());
+        let html = res.into_string().unwrap();
+        check_guest_menu(&html);
+        check_html(&html, "title", "We sent you an email");
+        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
+
+        let res = client
+            .post(format!("/register"))
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        //println!("{:#?}", res.headers());
+        assert!(res.headers().get_one("set-cookie").is_none());
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Registration failed");
+        check_guest_menu(&html);
+    });
+}

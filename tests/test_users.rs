@@ -4,46 +4,6 @@ use utilities::{
 };
 
 #[test]
-fn duplicate_email() {
-    run_external(|port, _email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
-        let res = client
-            .post(format!("{url}/register"))
-            .form(&[
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
-            ])
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        //println!("{:#?}", res.headers());
-        assert!(res.headers().get("set-cookie").is_none());
-        let html = res.text().unwrap();
-        check_guest_menu(&html);
-        check_html(&html, "title", "We sent you an email");
-        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
-
-        let res = client
-            .post(format!("{url}/register"))
-            .form(&[
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
-            ])
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        //println!("{:#?}", res.headers());
-        assert!(res.headers().get("set-cookie").is_none());
-        let html = res.text().unwrap();
-        check_html(&html, "title", "Registration failed");
-        check_guest_menu(&html);
-    });
-}
-
-#[test]
 fn login_regular_user() {
     run_external(|port, email_folder| {
         let client = reqwest::blocking::Client::new();
