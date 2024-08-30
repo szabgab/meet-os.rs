@@ -67,11 +67,11 @@ jobs:
         #- name: Build release version
         #  run: cargo build --release --verbose
 
-    - name: Test coverage reporting
-      env:
-        RUST_BACKTRACE: 1
-      run: |
-        cp Rocket.skeleton.toml Rocket.toml
-        cargo install cargo-tarpaulin
-        time cargo tarpaulin --ignore-tests -o Html
+        #    - name: Test coverage reporting
+        #      env:
+        #        RUST_BACKTRACE: 1
+        #      run: |
+        #        cp Rocket.skeleton.toml Rocket.toml
+        #        cargo install cargo-tarpaulin
+        #        time cargo tarpaulin --ignore-tests -o Html
 
