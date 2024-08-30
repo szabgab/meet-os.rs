@@ -3,11 +3,8 @@ use rocket::local::blocking::Client;
 use utilities::{check_guest_menu, check_html, check_user_menu, read_code_from_email};
 
 #[test]
-fn test_simple() {
+fn test_main_page_empty_db() {
     run_inprocess(|email_folder, client| {
-        let email = "foo@meet-os.com";
-
-        // main page
         let res = client.get("/").dispatch();
         assert_eq!(res.status(), Status::Ok);
         assert_eq!(
@@ -21,6 +18,45 @@ fn test_simple() {
         assert!(!html.contains("<h2>Events</h2>"));
         assert!(!html.contains("<h2>Groups</h2>"));
         check_guest_menu(&html);
+    });
+}
+
+#[test]
+fn test_register_with_invalid_email_address() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=Foo Bar&email=meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid email address");
+        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+    });
+}
+
+#[test]
+fn test_register_with_too_long_username() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&email=long@meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Name is too long");
+        assert!(html.contains(
+            "Name is too long. Max 50 while the current name is 53 long. Please try again."
+        ));
+    });
+}
+
+#[test]
+fn test_simple() {
+    run_inprocess(|email_folder, client| {
+        let email = "foo@meet-os.com";
 
         // register user
         let res = client
@@ -60,30 +96,6 @@ fn test_simple() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Registration failed");
         assert!(html.contains("Could not register <b>foo@meet-os.com</b>"));
-
-        // register with invalid email address
-        let res = client
-            .post("/register")
-            .header(ContentType::Form)
-            .body("name=Foo Bar&email=meet-os.com&password=123456")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid email address");
-        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
-
-        // register name too long
-        let res = client
-            .post("/register")
-            .header(ContentType::Form)
-            .body("name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&email=long@meet-os.com&password=123456")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Name is too long");
-        assert!(html.contains(
-            "Name is too long. Max 50 while the current name is 53 long. Please try again."
-        ));
 
         // edit profile page invalid github account
         let res = client
