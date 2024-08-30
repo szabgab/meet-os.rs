@@ -144,8 +144,8 @@ async fn test_db_user() {
         .unwrap();
     assert_eq!(user, user_foo);
 
+    // Add group
     let utc: DateTime<Utc> = Utc::now();
-
     let rust_maven = Group {
         gid: 1,
         owner: 2,
@@ -160,4 +160,15 @@ async fn test_db_user() {
     let groups = db::get_groups(&dbh).await.unwrap();
     assert_eq!(groups.len(), 1);
     assert_eq!(groups[0], rust_maven);
+
+    // Try to add another group with the same gid
+    let other_group = Group {
+        ..rust_maven.clone()
+    };
+    let res = db::add_group(&dbh, &other_group).await;
+    assert!(res.is_err(), "Should not be able to use the same gid twice");
+    let err = res.err().unwrap().to_string();
+    assert!(err.contains(
+        "There was a problem with the database: Database index `group_gid` already contains 1"
+    ));
 }
