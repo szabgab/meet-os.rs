@@ -624,7 +624,7 @@ async fn register_post(
         r#"Hi,
     <p>
     Someone used your email to register on the Meet-OS web site.
-    If it was you, please <a href="{base_url}/verify-email/{code}">click on this link</a> to verify your email address.
+    If it was you, please <a href="{base_url}/verify-email/{uid}/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything. We'll discard your registration if it is not validated.
@@ -651,24 +651,32 @@ async fn register_post(
 }
 
 // TODO limit the possible values for the process to register and login
-#[get("/verify-email/<code>")]
+#[get("/verify-email/<uid>/<code>")]
 async fn verify_email(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    uid: usize,
     code: &str,
 ) -> Template {
-    rocket::info!("verify-email using code: {code}");
+    rocket::info!("verify-email of uid={uid} using code: {code}");
 
     let config = get_public_config();
 
-    let Some(user) = db::get_user_by_code(dbh, "register", code).await.unwrap() else {
+    let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "Invalid id", message: format!("Invalid id <b>{uid}</b>"), config, visitor},
+        );
+    };
+
+    if code != user.code {
         return Template::render(
             "message",
             context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
         );
-    };
+    }
 
     db::set_user_verified(dbh, user.uid).await.unwrap();
     db::remove_code(dbh, user.uid).await.unwrap();

@@ -145,10 +145,10 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
 
      // -2 because after the email with the code we also send a notification to the admin.
     let filename = format!("{}.txt", dir.len()-2);
-    let code = read_code_from_email(email_folder, &filename);
+    let (uid, code) = read_code_from_email(email_folder, &filename);
 
     let res = client
-    .get(format!("{url}/verify-email/{code}"))
+    .get(format!("{url}/verify-email/{uid}/{code}"))
     .send()
     .unwrap();
     assert_eq!(res.status(), 200);
@@ -169,20 +169,23 @@ pub fn login_helper(client: &reqwest::blocking::Client, url: &str, email: &str, 
 }
 
 
-pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -> String {
+pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -> (usize, String) {
     let email_file = email_folder.join(filename);
     let email_content = std::fs::read_to_string(email_file).unwrap();
-    // https://meet-os.com/verify-email/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-    let re = Regex::new("http://localhost:[0-9]+/verify-email/([a-z0-9-]+)").unwrap();
+    // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let re = Regex::new("http://localhost:[0-9]+/verify-email/([0-9]+)/([a-z0-9-]+)").unwrap();
 
     //println!("email content: {email_content}");
-    let code = match re.captures(&email_content) {
-        Some(value) => value[1].to_owned(),
+    let (uid, code) = match re.captures(&email_content) {
+        Some(value) => (
+            value[1].parse::<usize>().unwrap(),
+            value[2].to_owned()
+        ),
         None => panic!("Code not find in email: {email_content}"),
     };
-    println!("code: {code}");
+    println!("extract uid: {uid} code: {code} from email");
 
-    code
+    (uid, code)
 }
 
 pub fn extract_cookie(res: &reqwest::blocking::Response) -> String {

@@ -45,11 +45,11 @@ fn register_user() {
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
         check_guest_menu(&html);
 
-        let code = read_code_from_email(&email_folder, "0.txt");
+        let (uid, code) = read_code_from_email(&email_folder, "0.txt");
 
         // Verify the email
         let res = client
-            .get(format!("{url}/verify-email/{code}"))
+            .get(format!("{url}/verify-email/{uid}/{code}"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
@@ -72,7 +72,7 @@ fn verify_with_non_existent_code() {
         let client = reqwest::blocking::Client::new();
         let url = format!("http://localhost:{port}/");
         let res = client
-            .get(format!("{url}/verify-email/abc"))
+            .get(format!("{url}/verify-email/1/abc"))
             .send()
             .unwrap();
         assert_eq!(res.status(), 200);
