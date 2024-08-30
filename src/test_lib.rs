@@ -1,4 +1,7 @@
+use rocket::http::Status;
 use rocket::local::blocking::Client;
+
+use utilities::check_html;
 
 pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     use rocket::config::Config;
@@ -19,4 +22,22 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     let client = Client::tracked(app).unwrap();
 
     func(email_folder, client);
+}
+
+pub fn check_profile_page_in_process(client: &Client, email: &str, h1: &str) {
+    let res = client
+        .get("/profile")
+        .private_cookie(("meet-os", email.to_owned()))
+        .dispatch();
+
+    assert_eq!(res.status(), Status::Ok);
+    let html = res.into_string().unwrap();
+
+    if h1.is_empty() {
+        check_html(&html, "title", "Not logged in");
+        assert!(html.contains("It seems you are not logged in"));
+    } else {
+        check_html(&html, "title", "Profile");
+        check_html(&html, "h1", h1);
+    }
 }
