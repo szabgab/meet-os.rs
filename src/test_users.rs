@@ -75,6 +75,7 @@ fn verify_with_bad_code() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post(format!("/register"))
+            .header(ContentType::Form)
             .body(params!([
                 ("name", "Foo Bar"),
                 ("email", "foo@meet-os.com"),
@@ -97,6 +98,7 @@ fn duplicate_email() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post(format!("/register"))
+            .header(ContentType::Form)
             .body(params!([
                 ("name", "Foo Bar"),
                 ("email", "foo@meet-os.com"),
@@ -113,6 +115,7 @@ fn duplicate_email() {
 
         let res = client
             .post(format!("/register"))
+            .header(ContentType::Form)
             .body(params!([
                 ("name", "Foo Bar"),
                 ("email", "foo@meet-os.com"),
