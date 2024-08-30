@@ -69,3 +69,25 @@ fn verify_with_non_existent_id() {
         assert!(html.contains("Invalid id <b>1</b>"));
     });
 }
+
+#[test]
+fn verify_with_bad_code() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post(format!("/register"))
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", "foo@meet-os.com"),
+                ("password", "123456"),
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+
+        let res = client.get(format!("/verify-email/1/abc")).dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid code");
+        assert!(html.contains("Invalid code <b>abc</b>"));
+    });
+}

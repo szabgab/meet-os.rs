@@ -4,35 +4,6 @@ use utilities::{
 };
 
 #[test]
-fn verify_with_bad_code() {
-    run_external(|port, _email_folder| {
-        let client = reqwest::blocking::Client::new();
-        let url = format!("http://localhost:{port}/");
-
-        let res = client
-            .post(format!("{url}/register"))
-            .form(&[
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
-            ])
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-
-        let res = client
-            .get(format!("{url}/verify-email/1/abc"))
-            .send()
-            .unwrap();
-        assert_eq!(res.status(), 200);
-        let html = res.text().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Invalid code");
-        assert!(html.contains("Invalid code <b>abc</b>"));
-    });
-}
-
-#[test]
 fn duplicate_email() {
     run_external(|port, _email_folder| {
         let client = reqwest::blocking::Client::new();
