@@ -1,3 +1,4 @@
+use crate::test_lib::run_inprocess;
 use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 use utilities::{check_guest_menu, check_html, check_user_menu, read_code_from_email};
@@ -182,27 +183,6 @@ fn test_simple() {
         // TODO resend code?
         // TODO reset password?
     });
-}
-
-pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
-    use rocket::config::Config;
-
-    let tmp_dir = tempfile::tempdir().unwrap();
-    println!("tmp_dir: {:?}", tmp_dir);
-    let email_folder = tmp_dir.path().join("emails");
-    let db_name = format!("test-name-{}", rand::random::<f64>());
-    let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
-
-    let provider = Config::figment()
-        .merge(("database_namespace", &db_namespace))
-        .merge(("database_name", &db_name))
-        .merge(("email", "Folder"))
-        .merge(("email_folder", email_folder.to_str().unwrap()));
-
-    let app = super::rocket().configure(provider);
-    let client = Client::tracked(app).unwrap();
-
-    func(email_folder, client);
 }
 
 pub fn check_profile_page_in_process(client: &Client, email: &str, h1: &str) {

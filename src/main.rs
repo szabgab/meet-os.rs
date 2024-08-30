@@ -1665,7 +1665,13 @@ fn rocket() -> _ {
 }
 
 #[cfg(test)]
+mod test_lib;
+
+#[cfg(test)]
 mod test_simple;
 
 #[cfg(test)]
 mod test_db;
+
+#[cfg(test)]
+mod test_users;
