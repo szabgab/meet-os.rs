@@ -87,3 +87,49 @@ fn create_group_by_admin() {
         check_html(&html, "h1", "Groups");
     });
 }
+
+#[test]
+fn create_group_unauthorized() {
+    run_inprocess(|email_folder, client| {
+        let email = "peti@meet-os.com";
+        register_user_helper(&client, "Peti Bar", email, "petibar", &email_folder);
+
+        // Access the Group creation page with unauthorized user
+        let res = client
+            .get("/admin/create-group?uid=1")
+            .private_cookie(("meet-os", email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Forbidden);
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Unauthorized");
+        check_html(&html, "h1", "Unauthorized");
+
+        // Create group should fail
+        let res = client
+            .post("/admin/create-group")
+            .body(params!([
+                ("name", "Rust Maven"),
+                ("location", "Virtual"),
+                ("description", "nope"),
+                ("owner", "1"),
+            ]))
+            .private_cookie(("meet-os", email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Forbidden);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Unauthorized");
+        check_html(&html, "h1", "Unauthorized");
+
+        // List the groups
+        let res = client.get("/groups").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "x");
+        assert!(!html.contains("/group/1"));
+        check_html(&html, "title", "Groups");
+        check_html(&html, "h1", "Groups");
+    });
+}
