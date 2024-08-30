@@ -358,6 +358,7 @@ async fn reset_password_post(
 
     let process = "reset";
     let code = Uuid::new_v4();
+    let uid = user.uid;
 
     match db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str()).await {
         Ok(_result) => (),
@@ -377,7 +378,7 @@ async fn reset_password_post(
         r#"Hi,
     <p>
     Someone asked to reset the password on the Meet-OS web site connected to this email address.
-    If it was you, please <a href="{base_url}/save-password/{code}">click on this link</a> to set your new password.
+    If it was you, please <a href="{base_url}/save-password/{uid}/{code}">click on this link</a> to set your new password.
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything...
@@ -403,25 +404,31 @@ async fn reset_password_post(
     )
 }
 
-#[get("/save-password/<code>")]
+#[get("/save-password/<uid>/<code>")]
 async fn save_password_get(
     cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
+    uid: usize,
     code: &str,
 ) -> Template {
-    rocket::info!("save-password code: {code}");
+    rocket::info!("save-password for uid={uid} with code: {code}");
     let config = get_public_config();
 
-    let Some(user) = db::get_user_by_code(dbh, "reset", code).await.unwrap() else {
+    let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "Invalid id", message: format!("Invalid id <b>{uid}</b>"), config, visitor},
+        );
+    };
+
+    if user.code != code {
         return Template::render(
             "message",
             context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
         );
-    };
-
-    let uid = user.uid;
+    }
 
     Template::render(
         "save_password",
