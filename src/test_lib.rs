@@ -108,3 +108,23 @@ pub fn register_user_helper(
     let cookie_str = extract_cookie(&res);
     return cookie_str;
 }
+
+pub fn setup_many(client: &Client, email_folder: &PathBuf) {
+    register_user_helper(
+        &client,
+        "Foo Bar",
+        "foo@meet-os.com",
+        "123foo",
+        &email_folder,
+    );
+
+    let name = "Site Manager";
+    let email = "admin@meet-os.com";
+    let password = "123456";
+
+    register_user_helper(&client, name, email, password, &email_folder);
+
+    // Make sure the client is not logged in after the setup
+    let res = client.get(format!("/logout")).dispatch();
+    assert_eq!(res.status(), Status::Ok);
+}

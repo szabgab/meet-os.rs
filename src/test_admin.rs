@@ -1,5 +1,5 @@
-use crate::test_lib::{register_user_helper, run_inprocess};
-use rocket::http::Status;
+use crate::test_lib::{params, register_user_helper, run_inprocess, setup_many};
+use rocket::http::{ContentType, Status};
 use utilities::check_html;
 
 #[test]
@@ -49,3 +49,68 @@ fn admin_list_users() {
         assert!(html.contains(name));
     });
 }
+
+#[test]
+fn admin_page_as_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/admin").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+    })
+}
+
+// /admin_page_as_user
+// /admin_page_as_admin
+
+#[test]
+fn admin_users_page_as_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/admin/users").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+    })
+}
+
+// /admin_users_page_as_user
+// /admin_users_page_as_admin
+
+#[test]
+fn admin_search_page_as_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/admin/search").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+    })
+}
+
+// /admin_search_page_as_user
+
+#[test]
+fn admin_search_page_as_admin() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .post(format!("/login"))
+            .header(ContentType::Form)
+            .body(params!([
+                ("email", "admin@meet-os.com"),
+                ("password", "123456")
+            ]))
+            .dispatch();
+
+        let res = client.get("/admin/search").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Search");
+        assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
+    })
+}
+
+// search POST
