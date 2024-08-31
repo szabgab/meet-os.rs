@@ -43,14 +43,7 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/")]
-fn admin(
-    // cookies: &CookieJar<'_>,
-    // dbh: &State<Surreal<Client>>,
-    // myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
-) -> Template {
+fn admin(visitor: Visitor, _logged_in: LoggedIn, _admin: AdminUser) -> Template {
     let config = get_public_config();
 
     Template::render(
@@ -65,9 +58,7 @@ fn admin(
 
 #[get("/users")]
 async fn admin_users(
-    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
     _admin: AdminUser,
@@ -88,14 +79,7 @@ async fn admin_users(
 }
 
 #[get("/search")]
-fn search_get(
-    // cookies: &CookieJar<'_>,
-    // dbh: &State<Surreal<Client>>,
-    // myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
-) -> Template {
+fn search_get(visitor: Visitor, _logged_in: LoggedIn, _admin: AdminUser) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
@@ -110,9 +94,7 @@ fn search_get(
 
 #[post("/search", data = "<input>")]
 async fn search_post(
-    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
     _admin: AdminUser,
@@ -142,9 +124,7 @@ async fn search_post(
 
 #[get("/create-group?<uid>")]
 async fn create_group_get(
-    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
     _admin: AdminUser,
@@ -164,7 +144,6 @@ async fn create_group_get(
 
 #[post("/create-group", data = "<input>")]
 async fn create_group_post(
-    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
@@ -222,9 +201,7 @@ async fn create_group_post(
 
 #[get("/audit")]
 async fn audit_get(
-    //cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    //myconfig: &State<MyConfig>,
     visitor: Visitor,
     _logged_in: LoggedIn,
     _admin: AdminUser,
