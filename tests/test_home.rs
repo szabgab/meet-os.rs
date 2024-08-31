@@ -2,6 +2,21 @@ use utilities::{check_guest_menu, check_html, run_external};
 
 #[test]
 fn check_empty_home() {
+    // We only keep this test to showcase the external testing we used for a while.
+    // tarpaulin - does not like it so we only run it when the user sets RUN_EXTERNAL=1
+    // e.g. in the CI
+    match std::env::var("RUN_EXTERNAL") {
+        Ok(run) => {
+            if run == "" {
+                println!("RUN_EXTERNAL='{run}' environment variable is not set. Skipping.");
+                return;
+            }
+        }
+        Err(_) => {
+            println!("RUN_EXTERNAL environment variable is not set. Skipping.");
+            return;
+        }
+    }
     run_external(|port, _email_folder| {
         let url = format!("http://localhost:{port}");
         let res = reqwest::blocking::get(format!("{url}/")).unwrap();
