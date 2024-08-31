@@ -959,10 +959,10 @@ async fn edit_profile_post(
     let re_linkedin = Regex::new("^https://www.linkedin.com/in/[a-zA-Z0-9-]+/?$").unwrap();
 
     let uid = visitor.user.clone().unwrap().uid;
-    let name = input.name;
-    let github = input.github;
-    let gitlab = input.gitlab;
-    let linkedin = input.linkedin;
+    let name = input.name.trim();
+    let github = input.github.trim();
+    let gitlab = input.gitlab.trim();
+    let linkedin = input.linkedin.trim();
     let about = input.about;
 
     if !re.is_match(github) {

@@ -128,13 +128,13 @@ fn test_simple() {
             .post("/edit-profile")
             .private_cookie(("meet-os", email))
             .header(ContentType::Form)
-            .body("name=Luis XI&github=szabgab&gitlab=szabgab&linkedin=https://www.linkedin.com/in/szabgab/&about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n")
+            .body("name= Lord 😎 Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  &about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n")
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Profile updated");
-        assert!(html.contains(r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Luis XI</a>"#));
+        assert!(html.contains(r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord 😎 Voldemort</a>"#));
 
         // Check updated profile
         let res = client
@@ -145,8 +145,9 @@ fn test_simple() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Profile");
-        assert!(html.contains(r#"<div><a href="https://github.com/szabgab">GitHub</a></div>"#));
-        assert!(html.contains(r#"<div><a href="https://gitlab.com/szabgab">GitLab</a></div>"#));
+        assert!(html.contains(r#"<h1 class="title is-3">Lord 😎 Voldemort</h1>"#));
+        assert!(html.contains(r#"<div><a href="https://github.com/alfa">GitHub</a></div>"#));
+        assert!(html.contains(r#"<div><a href="https://gitlab.com/beta">GitLab</a></div>"#));
 
         // TODO: do we need to escape the characters when we submit them in the test or is this really what should be expected?
         assert!(html.contains(r#"<div><a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;szabgab&#x2F;">LinkedIn</a></div>"#));
