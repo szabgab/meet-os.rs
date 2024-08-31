@@ -77,3 +77,8 @@ jobs:
         rm -rf tests
         time cargo tarpaulin --ignore-tests -o Html
 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: test-coverage-report
+        path: tarpaulin-report.html
+
