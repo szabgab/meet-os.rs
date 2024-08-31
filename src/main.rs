@@ -1693,3 +1693,6 @@ mod test_groups;
 
 #[cfg(test)]
 mod test_complex;
+
+#[cfg(test)]
+mod test_reset_password;
