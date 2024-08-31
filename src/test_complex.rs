@@ -15,7 +15,7 @@ fn test_complex() {
         let admin_name = "Admin";
         let admin_email = "admin@meet-os.com";
         let admin_password = "123456";
-        let admin_cookie_str = register_user_helper(
+        register_user_helper(
             &client,
             admin_name,
             admin_email,
@@ -26,7 +26,7 @@ fn test_complex() {
         let owner_name = "Owner";
         let owner_email = "owner@meet-os.com";
         let owner_password = "123456";
-        let owner_cookie_str = register_user_helper(
+        register_user_helper(
             &client,
             owner_name,
             &owner_email,

@@ -7,7 +7,7 @@ fn reset_password() {
     run_inprocess(|email_folder, client| {
         let name = "Foo Bar";
         let email = "foo@meet-os.com";
-        let _cookie_str = register_user_helper(&client, name, email, "123456", &email_folder);
+        register_user_helper(&client, name, email, "123456", &email_folder);
 
         let res = client.get("/profile").dispatch();
         assert_eq!(

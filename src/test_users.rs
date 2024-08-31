@@ -235,8 +235,7 @@ fn login_admin_user() {
 // fn login() {
 //    run_inprocess(|email_folder, client| {
 
-//         let _cookie_str = register_user_helper(&client, "Foo Bar", "foo@meet-os.com", "123456");
-//         //println!("cookie: {cookie_str}");
+//         let register_user_helper(&client, "Foo Bar", "foo@meet-os.com", "123456");
 //         //check_profile_page_in_process(&client, &url, &cookie_str, "Peti Bar");
 
 //         let res = client
@@ -375,7 +374,7 @@ fn login_with_unregistered_email() {
 #[test]
 fn login_with_bad_password() {
     run_inprocess(|email_folder, client| {
-        let _cookie_str = register_user_helper(
+        register_user_helper(
             &client,
             "Foo Bar",
             "foo@meet-os.com",

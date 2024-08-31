@@ -5,7 +5,7 @@ use utilities::check_html;
 #[test]
 fn admin_list_users() {
     run_inprocess(|email_folder, client| {
-        let _cookie_str = register_user_helper(
+        register_user_helper(
             &client,
             "Foo Bar",
             "foo@meet-os.com",
