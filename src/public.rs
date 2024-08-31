@@ -5,7 +5,7 @@ use crate::get_public_config;
 use crate::web::Visitor;
 
 pub fn routes() -> Vec<Route> {
-    routes![about, privacy, soc, faq]
+    routes![about, privacy, soc, faq, markdown]
 }
 
 #[get("/about")]
@@ -50,6 +50,18 @@ fn faq(visitor: Visitor) -> Template {
         "faq",
         context! {
             title: "FAQ - Frequently Asked Questions",
+            config: get_public_config(),
+            visitor,
+        },
+    )
+}
+
+#[get("/markdown")]
+fn markdown(visitor: Visitor) -> Template {
+    Template::render(
+        "markdown",
+        context! {
+            title: "Markdown at Meet-OS",
             config: get_public_config(),
             visitor,
         },

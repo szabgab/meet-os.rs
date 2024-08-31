@@ -9,7 +9,7 @@
             <input type="hidden" name="gid" value="{{gid}}">
             <div>Name: <input name="name" id="name" type="text" value="{{group.name}}"></div>
             <div>Location: <input name="location" id="location" type="text" value="{{group.location}}"></div>
-            <div>Description: <textarea name="description" id="description">{{group.description}}</textarea></div>
+            <div>Description (<a href="/markdown">Markdown</a>): <textarea name="description" id="description">{{group.description}}</textarea></div>
             <input type="submit" value="Save">
         </form>
     </div>

@@ -11,7 +11,7 @@
             <div>Title: <input name="title" id="title" type="text" value="{{event.title}}"></div>
             <div>Date: <input placeholder="YYYY-MM-DD HH::MM" name="date" id="date" type="text" original-value="{{event.date}}"> <span id="timezone"></span></div>
             <div>Location: <input name="location" id="location" type="text" value="{{event.location}}"></div>
-            <div>Description: <textarea name="description" id="description">{{event.description}}</textarea></div>
+            <div>Description (<a href="/markdown">Markdown</a>): <textarea name="description" id="description">{{event.description}}</textarea></div>
             <input type="submit" value="Update">
         </form>
 

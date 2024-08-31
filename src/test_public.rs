@@ -24,5 +24,10 @@ fn public_pages() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "FAQ - Frequently Asked Questions");
+
+        let res = client.get("/markdown").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Markdown at Meet-OS");
     });
 }
