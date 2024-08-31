@@ -1,4 +1,4 @@
-use crate::test_lib::{params, register_user_helper, run_inprocess, setup_many};
+use crate::test_lib::{login_helper, params, register_user_helper, run_inprocess, setup_many};
 use rocket::http::{ContentType, Status};
 use utilities::check_html;
 
@@ -61,7 +61,20 @@ fn admin_page_as_guest() {
     })
 }
 
-// /admin_page_as_user
+#[test]
+fn admin_page_as_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        login_helper(&client, "foo@meet-os.com", "123foo");
+
+        let res = client.get("/admin").dispatch();
+        assert_eq!(res.status(), Status::Forbidden);
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Unauthorized");
+    })
+}
+
 // /admin_page_as_admin
 
 #[test]
@@ -79,7 +92,7 @@ fn admin_users_page_as_guest() {
 // /admin_users_page_as_admin
 
 #[test]
-fn admin_search_page_as_guest() {
+fn admin_search_get_as_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/admin/search").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
@@ -88,10 +101,10 @@ fn admin_search_page_as_guest() {
     })
 }
 
-// /admin_search_page_as_user
+// /admin_search_get_as_user
 
 #[test]
-fn admin_search_page_as_admin() {
+fn admin_search_get_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
