@@ -254,7 +254,6 @@ fn login_admin_user() {
 //         // TODO: get the user from the database and check if there is a code and if the process is "login"
 
 //         // get the email and extract the code from the link
-//         let email_folder = std::env::var("EMAIL_FOLDER").unwrap();
 //         let email_file = format!("{email_folder}/0.txt");
 //         let email = std::fs::read_to_string(email_file).unwrap();
 //         // https://meet-os.com/verify/login/c0514ec6-c51e-4376-ae8e-df82ef79bcef
