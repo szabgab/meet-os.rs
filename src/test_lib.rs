@@ -128,3 +128,12 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     let res = client.get(format!("/logout")).dispatch();
     assert_eq!(res.status(), Status::Ok);
 }
+
+pub fn login_helper(client: &Client, email: &str, password: &str) {
+    let res = client
+        .post("/login")
+        .header(ContentType::Form)
+        .body(params!([("email", email), ("password", password)]))
+        .dispatch();
+    assert_eq!(res.status(), Status::Ok);
+}

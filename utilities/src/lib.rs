@@ -156,18 +156,6 @@ pub fn register_user_helper(client: &reqwest::blocking::Client, url: &str, name:
     return cookie_str;
 }
 
-pub fn login_helper(client: &reqwest::blocking::Client, url: &str, email: &str, password: &str) -> String {
-    let res = client
-    .post(format!("{url}/login"))
-    .form(&[("email", email), ("password", password)])
-    .send()
-    .unwrap();
-    assert_eq!(res.status(), 200);
-
-    let cookie_str = extract_cookie(&res);
-    cookie_str
-}
-
 
 pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -> (usize, String) {
     let email_file = email_folder.join(filename);
