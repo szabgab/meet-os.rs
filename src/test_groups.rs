@@ -1,4 +1,4 @@
-use crate::test_lib::{check_html, params, register_user_helper, run_inprocess};
+use crate::test_lib::{check_html, params, register_user_helper, run_inprocess, setup_many};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form
@@ -13,23 +13,8 @@ use rocket::http::{ContentType, Status};
 #[test]
 fn create_group_by_admin() {
     run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
         let admin_email = "admin@meet-os.com";
-        let admin_cookie_str = register_user_helper(
-            &client,
-            "Site Manager",
-            admin_email,
-            "123Secret",
-            &email_folder,
-        );
-        println!("admin_cookie_str: {admin_cookie_str}");
-        let peti_cookie_str = register_user_helper(
-            &client,
-            "Peti Bar",
-            "peti@meet-os.com",
-            "123peti",
-            &email_folder,
-        );
-        println!("peti_cookie_str: {peti_cookie_str}");
 
         // Access the Group creation page with authorized user
         let res = client
