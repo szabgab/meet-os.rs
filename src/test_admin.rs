@@ -1,4 +1,4 @@
-use crate::test_lib::{login_helper, params, register_user_helper, run_inprocess, setup_many};
+use crate::test_lib::{login_helper, params, run_inprocess, setup_many};
 use rocket::http::{ContentType, Status};
 use utilities::check_html;
 
@@ -191,5 +191,30 @@ fn admin_search_post_as_admin() {
         assert!(html.contains(r#"<b>Total: 1</b>"#));
         assert!(html.contains(r#"<td><a href="/user/4">Site Manager</a></td>"#));
         assert!(html.contains(r#"<td>admin@meet-os.com</td>"#));
+    })
+}
+
+#[test]
+fn admin_audit_as_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/admin/audit").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+    })
+}
+
+#[test]
+fn admin_audit_as_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        login_helper(&client, "foo@meet-os.com", "123foo");
+
+        let res = client.get("/admin/audit").dispatch();
+        assert_eq!(res.status(), Status::Forbidden);
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Unauthorized");
     })
 }
