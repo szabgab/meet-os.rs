@@ -75,7 +75,23 @@ fn admin_page_as_user() {
     })
 }
 
-// /admin_page_as_admin
+#[test]
+fn admin_page_as_admin() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        login_helper(&client, "admin@meet-os.com", "123456");
+
+        let res = client.get("/admin").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Admin");
+        check_html(&html, "h1", "Admin");
+        assert!(html.contains(r#"<div><a href="/admin/search">Search</a></div>"#));
+        assert!(html.contains(r#"<div><a href="/admin/users">List users</a></div>"#));
+        assert!(html.contains(r#"<div><a href="/admin/audit">Audit</a></div>"#));
+    })
+}
 
 #[test]
 fn admin_users_page_as_guest() {
