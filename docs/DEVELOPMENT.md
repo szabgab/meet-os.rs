@@ -83,7 +83,7 @@ google_analytics: G-SOME-CODE
 Run
 
 ```
-cargo watch -x "run --bin meetings"
+cargo watch -x run
 ```
 
 This will download all the dependencies, compile the code and start the server.
