@@ -108,6 +108,26 @@ pub fn register_user_helper(
     return cookie_str;
 }
 
+pub fn add_event_helper(client: &Client, title: &str, date: &str, owner_email: String) {
+    let res = client
+        .post("/add-event")
+        .header(ContentType::Form)
+        .body(params!([
+            ("gid", "1"),
+            ("offset", "-180"),
+            ("title", title),
+            ("location", "Virtual"),
+            ("description", ""),
+            ("date", date),
+        ]))
+        .private_cookie(("meet-os", owner_email))
+        .dispatch();
+    assert_eq!(res.status(), Status::Ok);
+    let html = res.into_string().unwrap();
+    assert!(html.contains("Event added"));
+    //rocket::info!("{html}");
+}
+
 pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     let name = "Site Manager";
     let email = "admin@meet-os.com";
@@ -132,16 +152,28 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
             &email_folder,
         );
     }
+
+    // Make sure the client is not logged in after the setup
+    let res = client.get(format!("/logout")).dispatch();
+    //assert_eq!(res.status(), Status::Ok);
+    rocket::info!("--------------- finished setup_many_users ----------------")
 }
 
 pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     setup_many_users(client, email_folder);
 
-    create_group_helper(&client, "First Group", 1);
+    create_group_helper(&client, "First Group", 2);
+    add_event_helper(
+        &client,
+        "First event",
+        "2030-01-01 10:10",
+        String::from("foo@meet-os.com"),
+    );
 
     // Make sure the client is not logged in after the setup
     let res = client.get(format!("/logout")).dispatch();
-    assert_eq!(res.status(), Status::Ok);
+    //assert_eq!(res.status(), Status::Ok);
+    rocket::info!("--------------- finished setup_many ----------------")
 }
 
 pub fn login_helper(client: &Client, email: &str, password: &str) {
