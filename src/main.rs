@@ -397,16 +397,7 @@ async fn save_password_post(
     let process = "register";
 
     let salt = SaltString::generate(&mut OsRng);
-    let hashed_password = match Pbkdf2.hash_password(password, &salt) {
-        Ok(val) => val.to_string(),
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, visitor},
-            );
-        }
-    };
+    let hashed_password = Pbkdf2.hash_password(password, &salt).unwrap().to_string();
 
     db::save_password(dbh, uid, &hashed_password).await.unwrap();
     db::remove_code(dbh, uid).await.unwrap();
@@ -496,16 +487,7 @@ async fn register_post(
     let process = "register";
     let code = Uuid::new_v4();
     let salt = SaltString::generate(&mut OsRng);
-    let hashed_password = match Pbkdf2.hash_password(password, &salt) {
-        Ok(val) => val.to_string(),
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, visitor},
-            );
-        }
-    };
+    let hashed_password = Pbkdf2.hash_password(password, &salt).unwrap().to_string();
 
     let uid = db::increment(dbh, "user").await.unwrap();
     let utc: DateTime<Utc> = Utc::now();
@@ -927,23 +909,11 @@ async fn group_get(dbh: &State<Surreal<Client>>, visitor: Visitor, gid: usize) -
     rocket::info!("group_get: {gid}");
     let config = get_public_config();
 
-    let group = match db::get_group_by_gid(dbh, gid).await {
-        Ok(group) => match group {
-            Some(group) => group,
-            None => {
-                return Template::render(
-                    "message",
-                    context! {title: "No such group", message: "No such group", config, visitor},
-                )
-            } // TODO 404
-        },
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config, visitor},
-            );
-        }
+    let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: "No such group", config, visitor},
+        );
     };
 
     let membership = if visitor.logged_in {
@@ -981,19 +951,11 @@ async fn group_get(dbh: &State<Surreal<Client>>, visitor: Visitor, gid: usize) -
 async fn groups_get(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template {
     let config = get_public_config();
 
-    match db::get_groups(dbh).await {
-        Ok(groups) => Template::render(
-            "groups",
-            context! {title: "Groups", groups: groups, config, visitor},
-        ),
-        Err(err) => {
-            rocket::error!("Error {err}");
-            Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config, visitor},
-            )
-        }
-    }
+    let groups = db::get_groups(dbh).await.unwrap();
+    Template::render(
+        "groups",
+        context! {title: "Groups", groups: groups, config, visitor},
+    )
 }
 
 #[get("/users")]
