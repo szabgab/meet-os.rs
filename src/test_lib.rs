@@ -118,6 +118,16 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
         &email_folder,
     );
 
+    for ix in 1..3 {
+        register_user_helper(
+            &client,
+            format!("Foo {ix}").as_str(),
+            format!("foo{ix}@meet-os.com").as_str(),
+            format!("password{ix}").as_str(),
+            &email_folder,
+        );
+    }
+
     let name = "Site Manager";
     let email = "admin@meet-os.com";
     let password = "123456";
