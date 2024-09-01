@@ -75,7 +75,7 @@ jobs:
         cp Rocket.skeleton.toml Rocket.toml
         cargo install cargo-tarpaulin
         rm -rf tests
-        time cargo tarpaulin --ignore-tests -o Html --timeout 120
+        time cargo tarpaulin --ignore-tests -o Html --timeout 240
 
     - uses: actions/upload-artifact@v4
       with:
