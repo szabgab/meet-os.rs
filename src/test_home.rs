@@ -15,8 +15,8 @@ fn main_page_empty_db() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Meet-OS");
         check_html(&html, "h1", "Welcome to the Meet-OS meeting server");
-        assert!(!html.contains("<h2>Events</h2>"));
-        assert!(!html.contains("<h2>Groups</h2>"));
+        assert!(!html.contains(r#"<h2 class="title is-4">Events</h2>"#));
+        assert!(!html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
         check_guest_menu(&html);
     });
 }
@@ -37,8 +37,8 @@ fn main_page_with_data() {
         check_html(&html, "title", "Meet-OS");
         check_html(&html, "h1", "Welcome to the Meet-OS meeting server");
         //assert_eq!(html, "");
-        assert!(html.contains("<h2>Events</h2>"));
-        assert!(html.contains("<h2>Groups</h2>"));
+        assert!(html.contains(r#"<h2 class="title is-4">Events</h2>"#));
+        assert!(html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
         check_guest_menu(&html);
 
         assert!(html.contains(r#"<li><a href="/event/1">First event</a></li>"#));

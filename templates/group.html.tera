@@ -47,7 +47,7 @@
           <a href="/login">Login</a>
         {% endif %}
 
-        <h2>Events</h2>
+        <h2 class="title is-4">Events</h2>
         {% if events %}
           
           <ul>
@@ -60,7 +60,7 @@
         {% endif %}
 
 
-        <h2>Members</h2>
+        <h2 class="title is-4">Members</h2>
         {% if members %}
           <table>
             {% for member in members %}

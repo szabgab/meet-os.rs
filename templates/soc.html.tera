@@ -5,19 +5,19 @@
     <div class="content">
        <h1 class="title is-3">Standard of Conduct</h1>
 
-      <h2>Background</h2>
+      <h2 class="title is-4">Background</h2>
 
       A minimum requirement of every person participating on the web site and in events is to adher to the rule of law. We could emphasize a few of them here, but that would not add value.
       The Soc is to further define and limit(!) the accepted behaviour and speech.
        
-      <h2>Expected Behavior</h2>
+      <h2 class="title is-4">Expected Behavior</h2>
       <ul>
         <li>Be considerate, respectful, and collaborative.</li>
         <li>Refrain from demeaning, discriminatory or harassing behavior and speech.</li>
         <li>Be mindful of your fellow participants.</li>
       </ul>
 
-      <h2>Unacceptable Behavior</h2>
+      <h2 class="title is-4">Unacceptable Behavior</h2>
       <ul>
         <li>Intimidating, harassing, abusive, discriminatory, derogatory, or demeaning conduct by any participant.</li>
         <li>Offensive comments related to gender, gender identity and expression, sexual orientation, race, religion, country of origin, country of residence, or disability (including presentation slides).</li>

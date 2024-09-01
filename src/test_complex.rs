@@ -11,8 +11,8 @@ fn test_complex() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        assert!(!html.contains("<h2>Events</h2>"));
-        assert!(!html.contains("<h2>Groups</h2>"));
+        assert!(!html.contains(r#"<h2 class="title is-4">Events</h2>"#));
+        assert!(!html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
 
         let admin_name = "Admin";
         let admin_email = "admin@meet-os.com";
@@ -95,8 +95,8 @@ fn test_complex() {
         let res = client.get("/").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        assert!(html.contains("<h2>Events</h2>"));
-        assert!(html.contains("<h2>Groups</h2>"));
+        assert!(html.contains(r#"<h2 class="title is-4">Events</h2>"#));
+        assert!(html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
         assert!(html.contains(format!(r#"<a href="/group/1">{group_name}</a>"#).as_str()));
         assert!(html.contains(format!(r#"<a href="/event/1">{first_event_title}</a>"#).as_str()));
 
@@ -162,8 +162,8 @@ fn test_complex() {
         let res = client.get("/").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        assert!(html.contains("<h2>Events</h2>"));
-        assert!(html.contains("<h2>Groups</h2>"));
+        assert!(html.contains(r#"<h2 class="title is-4">Events</h2>"#));
+        assert!(html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
         assert!(html.contains(format!(r#"<a href="/group/1">{group_name}</a>"#).as_str()));
         assert!(html.contains(format!(r#"<a href="/event/1">{first_event_title}</a>"#).as_str()));
         assert!(html.contains(format!(r#"<a href="/event/2">{second_event_title}</a>"#).as_str()));
