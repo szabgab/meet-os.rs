@@ -133,6 +133,8 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
         );
     }
 
+    create_group_helper(&client, "First Group", 1);
+
     // Make sure the client is not logged in after the setup
     let res = client.get(format!("/logout")).dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -240,4 +242,21 @@ pub fn read_code_from_email_any(
     println!("extract uid: {uid} code: {code} from email");
 
     (uid, code)
+}
+
+pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
+    let admin_email = "admin@meet-os.com";
+    let res = client
+        .post("/admin/create-group")
+        .header(ContentType::Form)
+        .body(params!([
+            ("name", name),
+            ("location", ""),
+            ("description", "",),
+            ("owner", &owner.to_string()),
+        ]))
+        .private_cookie(("meet-os", admin_email))
+        .dispatch();
+
+    assert_eq!(res.status(), Status::Ok);
 }

@@ -18,7 +18,7 @@ fn create_group_by_admin() {
 
         // Access the Group creation page with authorized user
         let res = client
-            .get("/admin/create-group?uid=1")
+            .get("/admin/create-group?uid=2")
             .private_cookie(("meet-os", admin_email))
             .dispatch();
 
@@ -52,7 +52,7 @@ fn create_group_by_admin() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "x");
-        assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/2">Rust Maven</a></li>"#));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
 
@@ -63,7 +63,7 @@ fn create_group_by_admin() {
                 ("name", "Python Maven"),
                 ("location", "Other"),
                 ("description", "Text with [link](https://code-maven.com/)"),
-                ("owner", "1"),
+                ("owner", "2"),
             ]))
             .private_cookie(("meet-os", admin_email))
             .dispatch();
@@ -74,8 +74,8 @@ fn create_group_by_admin() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "x");
-        assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
-        assert!(html.contains(r#"<li><a href="/group/2">Python Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/2">Rust Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/3">Python Maven</a></li>"#));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
     });
