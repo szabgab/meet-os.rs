@@ -212,16 +212,7 @@ async fn login_post(
 
     let password = input.password.trim().as_bytes();
 
-    let parsed_hash = match PasswordHash::new(&user.password) {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config, visitor},
-            );
-        }
-    };
+    let parsed_hash = PasswordHash::new(&user.password).unwrap();
 
     if Pbkdf2.verify_password(password, &parsed_hash).is_err() {
         return Template::render(
@@ -282,40 +273,21 @@ async fn reset_password_post(
 
     let email = input.email.to_lowercase().trim().to_owned();
 
-    let user: User = match db::get_user_by_email(dbh, &email).await {
-        Ok(user) => match user {
-            Some(user) => user,
-            None => {
-                // TODO: we should probably limit the number of such request from the same visitor so a bot won't be able to try to guess email addresses
-                return Template::render(
-                    "message",
-                    context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
-                );
-            }
-        },
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
-            );
-        }
+    let Some(user) = db::get_user_by_email(dbh, &email).await.unwrap() else {
+        // TODO: we should probably limit the number of such request from the same visitor so a bot won't be able to try to guess email addresses
+        return Template::render(
+            "message",
+            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
+        );
     };
 
     let process = "reset";
     let code = Uuid::new_v4();
     let uid = user.uid;
 
-    match db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str()).await {
-        Ok(_result) => (),
-        Err(err) => {
-            rocket::info!("Error while trying to add user {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Oups", config, visitor,},
-            );
-        }
-    };
+    db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str())
+        .await
+        .unwrap();
 
     let base_url = &myconfig.base_url;
 
