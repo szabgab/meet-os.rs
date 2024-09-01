@@ -211,4 +211,47 @@ fn admin_search_post_as_user() {
     })
 }
 
-//fn admin_search_post_as_admin() {
+#[test]
+fn admin_search_post_as_admin() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .post(format!("/login"))
+            .header(ContentType::Form)
+            .body(params!([
+                ("email", "admin@meet-os.com"),
+                ("password", "123456")
+            ]))
+            .dispatch();
+
+        //no params
+        let res = client
+            .post("/admin/search")
+            .header(ContentType::Form)
+            .dispatch();
+        assert_eq!(res.status(), Status::UnprocessableEntity);
+
+        // only query
+        let res = client
+            .post("/admin/search")
+            .header(ContentType::Form)
+            .body(params!([("query", "admin"),]))
+            .dispatch();
+        assert_eq!(res.status(), Status::UnprocessableEntity);
+
+        let res = client
+            .post("/admin/search")
+            .header(ContentType::Form)
+            .body(params!([("query", "admin"), ("table", "user")]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Search");
+        assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
+        assert!(html.contains(r#"<b>Total: 1</b>"#));
+        assert!(html.contains(r#"<td><a href="/user/4">Site Manager</a></td>"#));
+        assert!(html.contains(r#"<td>admin@meet-os.com</td>"#));
+    })
+}
