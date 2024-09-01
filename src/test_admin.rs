@@ -182,4 +182,33 @@ fn admin_search_get_as_admin() {
     })
 }
 
-// search POST
+#[test]
+fn admin_search_post_as_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/admin/search")
+            .header(ContentType::Form)
+            .dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+    })
+}
+
+#[test]
+fn admin_search_post_as_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        login_helper(&client, "foo@meet-os.com", "123foo");
+
+        let res = client
+            .post("/admin/search")
+            .header(ContentType::Form)
+            .dispatch();
+        assert_eq!(res.status(), Status::Forbidden);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Unauthorized");
+    })
+}
+
+//fn admin_search_post_as_admin() {
