@@ -1,6 +1,5 @@
-use crate::test_lib::{login_helper, params, run_inprocess, setup_many};
+use crate::test_lib::{check_html, login_helper, params, run_inprocess, setup_many};
 use rocket::http::{ContentType, Status};
-use utilities::check_html;
 
 #[test]
 fn admin_page_as_guest() {

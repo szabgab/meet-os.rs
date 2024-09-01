@@ -1,6 +1,5 @@
-use crate::test_lib::{params, register_user_helper, run_inprocess};
+use crate::test_lib::{check_html, params, register_user_helper, run_inprocess};
 use rocket::http::{ContentType, Status};
-use utilities::check_html;
 
 // GET /create-group show form
 // POST /create-group verify name, add group to database

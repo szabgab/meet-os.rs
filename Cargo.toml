@@ -43,10 +43,7 @@ name = "cli"
 path = "src/cli.rs"
 
 
-workspace = { members = ["utilities"] }
-
 [dev-dependencies]
-utilities = { path = "utilities" }
 tempfile = "3.12.0"
 rand = "0.8.5"
 fork = "0.1"

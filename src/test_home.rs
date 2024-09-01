@@ -1,6 +1,5 @@
-use crate::test_lib::run_inprocess;
+use crate::test_lib::{check_guest_menu, check_html, run_inprocess};
 use rocket::http::Status;
-use utilities::{check_guest_menu, check_html};
 
 #[test]
 fn test_main_page_empty_db() {

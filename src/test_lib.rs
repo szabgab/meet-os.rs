@@ -5,8 +5,7 @@ use std::path::PathBuf;
 
 use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
-
-use utilities::{check_html, read_code_from_email};
+use scraper::{Html, Selector};
 
 macro_rules! params {
     ($params:expr) => {
@@ -146,4 +145,99 @@ pub fn login_helper(client: &Client, email: &str, password: &str) {
         .body(params!([("email", email), ("password", password)]))
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
+}
+
+pub fn check_guest_menu(html: &str) {
+    assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+
+    assert!(html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
+    assert!(html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
+
+    assert!(!html.contains(r#"<a href="/profile" class="navbar-item">Profile"#));
+    assert!(!html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+}
+
+fn check_logged_in_menu(html: &str) {
+    assert!(!html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
+    assert!(!html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
+
+    assert!(html.contains(r#"<a href="/profile" class="navbar-item">Profile"#));
+    assert!(html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+}
+
+pub fn check_admin_menu(html: &str) {
+    check_logged_in_menu(html);
+    assert!(html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+}
+
+pub fn check_user_menu(html: &str) {
+    check_logged_in_menu(html);
+    assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+}
+
+pub fn check_html(html: &str, tag: &str, text: &str) {
+    let document = Html::parse_document(html);
+    let selector = Selector::parse(tag).unwrap();
+    assert_eq!(
+        document.select(&selector).next().unwrap().inner_html(),
+        text
+    );
+}
+
+// check_html_list(
+//     &html,
+//     "li",
+//     vec![
+//         r#"<a href="/event/1">Web development with Rocket</a>"#,
+//         r#"<a href="/group/1">Rust Maven</a>"#,
+//     ],
+// );
+
+// pub fn check_html_list(html: &str, tag: &str, text: Vec<&str>) {
+//     let document = Html::parse_document(html);
+//     let selector = Selector::parse(tag).unwrap();
+
+//     let element = document.select(&selector).next().unwrap();
+//     assert_eq!(element.inner_html(), text[0]);
+//     for ix in 1..text.len() {
+//         let element = document.select(&selector).nth(ix).unwrap();
+//         assert_eq!(element.inner_html(), text[ix]);
+//     }
+// }
+
+pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -> (usize, String) {
+    let email_file = email_folder.join(filename);
+    let email_content = std::fs::read_to_string(email_file).unwrap();
+    // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let re = Regex::new("http://localhost:[0-9]+/verify-email/([0-9]+)/([a-z0-9-]+)").unwrap();
+
+    //println!("email content: {email_content}");
+    let (uid, code) = match re.captures(&email_content) {
+        Some(value) => (value[1].parse::<usize>().unwrap(), value[2].to_owned()),
+        None => panic!("Code not find in email: {email_content}"),
+    };
+    println!("extract uid: {uid} code: {code} from email");
+
+    (uid, code)
+}
+
+pub fn read_code_from_email_any(
+    email_folder: &std::path::PathBuf,
+    filename: &str,
+    prefix: &str,
+) -> (usize, String) {
+    let email_file = email_folder.join(filename);
+    let email_content = std::fs::read_to_string(email_file).unwrap();
+    // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let regex_string = format!("http://localhost:[0-9]+/{prefix}/([0-9]+)/([a-z0-9-]+)");
+    let re = Regex::new(&regex_string).unwrap();
+
+    //println!("email content: {email_content}");
+    let (uid, code) = match re.captures(&email_content) {
+        Some(value) => (value[1].parse::<usize>().unwrap(), value[2].to_owned()),
+        None => panic!("Code not find in email: {email_content}"),
+    };
+    println!("extract uid: {uid} code: {code} from email");
+
+    (uid, code)
 }

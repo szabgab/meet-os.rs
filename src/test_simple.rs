@@ -1,6 +1,8 @@
-use crate::test_lib::{check_profile_page_in_process, params, run_inprocess};
+use crate::test_lib::{
+    check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
+    read_code_from_email, run_inprocess,
+};
 use rocket::http::{ContentType, Status};
-use utilities::{check_guest_menu, check_html, check_user_menu, read_code_from_email};
 
 #[test]
 fn test_register_with_invalid_email_address() {
