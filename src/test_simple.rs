@@ -61,7 +61,7 @@ fn test_simple() {
         check_guest_menu(&html);
 
         // validate the email
-        let (uid, code) = read_code_from_email(&email_folder, "0.txt");
+        let (uid, code) = read_code_from_email(&email_folder, "0.txt", "verify-email");
         let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
         assert_eq!(res.status(), Status::Ok);
 

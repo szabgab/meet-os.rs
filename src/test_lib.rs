@@ -131,23 +131,7 @@ pub fn check_html(html: &str, tag: &str, text: &str) {
 //     }
 // }
 
-pub fn read_code_from_email(email_folder: &std::path::PathBuf, filename: &str) -> (usize, String) {
-    let email_file = email_folder.join(filename);
-    let email_content = std::fs::read_to_string(email_file).unwrap();
-    // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-    let re = Regex::new("http://localhost:[0-9]+/verify-email/([0-9]+)/([a-z0-9-]+)").unwrap();
-
-    //println!("email content: {email_content}");
-    let (uid, code) = match re.captures(&email_content) {
-        Some(value) => (value[1].parse::<usize>().unwrap(), value[2].to_owned()),
-        None => panic!("Code not find in email: {email_content}"),
-    };
-    println!("extract uid: {uid} code: {code} from email");
-
-    (uid, code)
-}
-
-pub fn read_code_from_email_any(
+pub fn read_code_from_email(
     email_folder: &std::path::PathBuf,
     filename: &str,
     prefix: &str,

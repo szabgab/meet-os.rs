@@ -62,7 +62,7 @@ pub fn register_user_helper(
 
     // -2 because after the email with the code we also send a notification to the admin.
     let filename = format!("{}.txt", dir.len() - 2);
-    let (uid, code) = read_code_from_email(email_folder, &filename);
+    let (uid, code) = read_code_from_email(email_folder, &filename, "verify-email");
 
     let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);

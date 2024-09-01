@@ -1,7 +1,7 @@
 use crate::test_helpers::register_user_helper;
 use crate::test_lib::{
     check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
-    read_code_from_email_any, run_inprocess,
+    read_code_from_email, run_inprocess,
 };
 
 use rocket::http::{ContentType, Status};
@@ -60,7 +60,7 @@ fn reset_password() {
         assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please click on the link to reset your password."));
 
         // get code from email
-        let (uid, code) = read_code_from_email_any(&email_folder, "3.txt", "save-password");
+        let (uid, code) = read_code_from_email(&email_folder, "3.txt", "save-password");
 
         let res = client
             .get(format!("/save-password/{uid}/{code}"))
