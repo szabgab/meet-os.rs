@@ -108,7 +108,7 @@ pub fn register_user_helper(
     return cookie_str;
 }
 
-pub fn setup_many(client: &Client, email_folder: &PathBuf) {
+pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     let name = "Site Manager";
     let email = "admin@meet-os.com";
     let password = "123456";
@@ -132,6 +132,10 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
             &email_folder,
         );
     }
+}
+
+pub fn setup_many(client: &Client, email_folder: &PathBuf) {
+    setup_many_users(client, email_folder);
 
     create_group_helper(&client, "First Group", 1);
 

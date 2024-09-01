@@ -1,4 +1,4 @@
-use crate::test_lib::{check_html, params, register_user_helper, run_inprocess, setup_many};
+use crate::test_lib::{check_html, params, register_user_helper, run_inprocess, setup_many_users};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form
@@ -13,7 +13,7 @@ use rocket::http::{ContentType, Status};
 #[test]
 fn create_group_by_admin() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_many_users(&client, &email_folder);
         let admin_email = "admin@meet-os.com";
 
         // Access the Group creation page with authorized user
@@ -52,7 +52,7 @@ fn create_group_by_admin() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "x");
-        assert!(html.contains(r#"<li><a href="/group/2">Rust Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
 
@@ -74,8 +74,8 @@ fn create_group_by_admin() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "x");
-        assert!(html.contains(r#"<li><a href="/group/2">Rust Maven</a></li>"#));
-        assert!(html.contains(r#"<li><a href="/group/3">Python Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/2">Python Maven</a></li>"#));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
     });
