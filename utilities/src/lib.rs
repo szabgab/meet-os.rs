@@ -1,18 +1,6 @@
-use fork::{fork, Fork};
-use nix::sys::signal;
-use nix::unistd::Pid;
-use std::{net::TcpListener, path::PathBuf};
-use std::os::unix::process::CommandExt;
-use std::process::Command;
+use std::path::PathBuf;
 use scraper::{Html, Selector};
 use regex::Regex;
-
-fn compile() {
-    let _result = Command::new("cargo")
-        .args(["build"])
-        .output()
-        .expect("command failed to start");
-}
 
 
 pub fn check_guest_menu(html: &str) {
@@ -61,51 +49,6 @@ pub fn check_html_list(html: &str, tag: &str, text: Vec<&str>) {
     for ix in 1..text.len() {
         let element = document.select(&selector).nth(ix).unwrap();
         assert_eq!(element.inner_html(), text[ix]);
-    }
-}
-
-pub fn run_external(func: fn(&str, std::path::PathBuf)) {
-    let tmp_dir = tempfile::tempdir().unwrap();
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let port = listener.local_addr().unwrap().port().to_string();
-    drop(listener);
-    println!("port: {port}");
-    println!("tmp_dir: {:?}", tmp_dir);
-    let email_folder = tmp_dir.path().join("emails");
-
-    let rocket_toml = std::fs::read_to_string("Rocket.skeleton.toml").unwrap();
-    let db_name = format!("test-name-{}", rand::random::<f64>());
-    let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
-    let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
-    let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
-    let rocket_toml = rocket_toml.replace("Sendgrid | Folder", "Folder");
-    let rocket_toml = rocket_toml.replace("/path/to/email_folder", email_folder.to_str().unwrap());
-    let rocket_toml = rocket_toml.replace("8001",&port);
-    println!("{rocket_toml}");
-
-    let rocket_toml_path = tmp_dir.path().join("Rocket.toml");
-    std::fs::write(&rocket_toml_path, rocket_toml).unwrap();
-
-    compile();
-
-    match fork() {
-        Ok(Fork::Parent(child)) => {
-            println!("Child PID: {}", child);
-            std::thread::sleep(std::time::Duration::from_secs(1));
-
-            func(&port, email_folder);
-
-            signal::kill(Pid::from_raw(child), signal::Signal::SIGTERM).unwrap();
-
-            println!("end of tests, shutting down the server")
-        }
-        Ok(Fork::Child) => {
-            println!("Starting the web server in the child process");
-            let _result = Command::new("./target/debug/meetings")
-                .env("ROCKET_CONFIG", rocket_toml_path)
-                .exec();
-        }
-        Err(_) => println!("Fork failed"),
     }
 }
 

@@ -49,6 +49,9 @@ workspace = { members = ["utilities"] }
 utilities = { path = "utilities" }
 tempfile = "3.12.0"
 rand = "0.8.5"
+fork = "0.1"
+nix = { version = "0.27", features = ["signal"] }
+scraper = "0.18"
 
 [lints.clippy]
 pedantic = { priority = -1, level = "deny" }
