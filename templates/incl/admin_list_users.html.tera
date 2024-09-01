@@ -1,3 +1,4 @@
+    <b>Total: {{users | length}}</b>
         <table>
           <tr>
             <td>User</td>

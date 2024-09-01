@@ -132,6 +132,7 @@ fn admin_users_page_as_admin() {
         check_html(&html, "h1", "List Users by Admin");
         assert!(html.contains(r#"<a href="/user/3">Foo 2</a>"#));
         assert!(html.contains(r#"<td><a href="/user/4">Site Manager</a></td>"#));
+        assert!(html.contains(r#"<b>Total: 4</b>"#));
     })
 }
 
