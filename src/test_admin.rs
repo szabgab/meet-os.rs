@@ -164,14 +164,7 @@ fn admin_search_get_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let res = client
-            .post(format!("/login"))
-            .header(ContentType::Form)
-            .body(params!([
-                ("email", "admin@meet-os.com"),
-                ("password", "123456")
-            ]))
-            .dispatch();
+        login_helper(&client, "admin@meet-os.com", "123456");
 
         let res = client.get("/admin/search").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -216,14 +209,7 @@ fn admin_search_post_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let res = client
-            .post(format!("/login"))
-            .header(ContentType::Form)
-            .body(params!([
-                ("email", "admin@meet-os.com"),
-                ("password", "123456")
-            ]))
-            .dispatch();
+        login_helper(&client, "admin@meet-os.com", "123456");
 
         //no params
         let res = client
