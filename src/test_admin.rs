@@ -146,7 +146,18 @@ fn admin_search_get_as_guest() {
     })
 }
 
-// /admin_search_get_as_user
+#[test]
+fn admin_search_get_as_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        login_helper(&client, "foo@meet-os.com", "123foo");
+
+        let res = client.get("/admin/search").dispatch();
+        assert_eq!(res.status(), Status::Forbidden);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Unauthorized");
+    })
+}
 
 #[test]
 fn admin_search_get_as_admin() {
