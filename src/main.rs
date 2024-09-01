@@ -147,16 +147,7 @@ async fn index(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template {
 async fn events(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template {
     let config = get_public_config();
 
-    let events = match db::get_events(dbh).await {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config, visitor},
-            );
-        }
-    };
+    let events = db::get_events(dbh).await.unwrap();
 
     Template::render(
         "events",
@@ -203,18 +194,7 @@ async fn login_post(
         );
     }
 
-    let user = match db::get_user_by_email(dbh, &email).await {
-        Ok(user) => user,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
-            );
-        }
-    };
-
-    let Some(user) = user else {
+    let Some(user) = db::get_user_by_email(dbh, &email).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config,visitor},
