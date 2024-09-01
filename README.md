@@ -12,3 +12,7 @@ Written in [Rust](https://www.rust-lang.org/) using the [Rocket web framework](h
 ## Community
 
 There is a [Zulip stream](https://osdc.zulipchat.com/#narrow/stream/422181-meet-os) for discussions.
+
+## Badges
+
+[![Coverage Status](https://coveralls.io/repos/github/szabgab/meet-os.rs/badge.svg?branch=main)](https://coveralls.io/github/szabgab/meet-os.rs?branch=main)
