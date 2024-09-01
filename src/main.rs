@@ -128,27 +128,8 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
 async fn index(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template {
     let config = get_public_config();
 
-    let events = match db::get_events(dbh).await {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config, visitor},
-            );
-        }
-    };
-
-    let groups = match db::get_groups(dbh).await {
-        Ok(val) => val,
-        Err(err) => {
-            rocket::error!("Error: {err}");
-            return Template::render(
-                "message",
-                context! {title: "Internal error", message: "Internal error", config, visitor},
-            );
-        }
-    };
+    let events = db::get_events(dbh).await.unwrap();
+    let groups = db::get_groups(dbh).await.unwrap();
 
     Template::render(
         "index",
@@ -1547,6 +1528,20 @@ async fn http_403(request: &Request<'_>) -> Template {
     )
 }
 
+#[catch(500)]
+async fn http_500(request: &Request<'_>) -> Template {
+    let cookies = request.cookies();
+    let dbh = request.rocket().state::<Surreal<Client>>().unwrap();
+    let myconfig = request.rocket().state::<MyConfig>().unwrap();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+    let config = get_public_config();
+    Template::render(
+        "message",
+        context! {title: "Internal error", message: "Internal error", config, visitor},
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -1593,7 +1588,7 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(AdHoc::config::<MyConfig>())
         .attach(db::fairing())
-        .register("/", catchers![http_401, http_403])
+        .register("/", catchers![http_401, http_403, http_500])
 }
 
 #[cfg(test)]
