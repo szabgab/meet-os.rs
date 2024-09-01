@@ -81,8 +81,8 @@ fn admin_users_page_as_admin() {
         //assert_eq!(html, "");
         check_html(&html, "title", "List Users by Admin");
         check_html(&html, "h1", "List Users by Admin");
-        assert!(html.contains(r#"<a href="/user/3">Foo 2</a>"#));
-        assert!(html.contains(r#"<td><a href="/user/4">Site Manager</a></td>"#));
+        assert!(html.contains(r#"<a href="/user/4">Foo 2</a>"#));
+        assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
         assert!(html.contains(r#"<b>Total: 4</b>"#));
     })
 }
@@ -188,7 +188,7 @@ fn admin_search_post_as_admin() {
         check_html(&html, "title", "Search");
         assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
         assert!(html.contains(r#"<b>Total: 1</b>"#));
-        assert!(html.contains(r#"<td><a href="/user/4">Site Manager</a></td>"#));
+        assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
         assert!(html.contains(r#"<td>admin@meet-os.com</td>"#));
     })
 }
