@@ -1,4 +1,6 @@
-use crate::test_lib::{params, register_user_helper, run_inprocess};
+use crate::test_helpers::register_user_helper;
+use crate::test_lib::{params, run_inprocess};
+
 use rocket::http::{ContentType, Status};
 
 #[test]

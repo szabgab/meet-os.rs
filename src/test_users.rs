@@ -1,6 +1,7 @@
+use crate::test_helpers::register_user_helper;
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
-    extract_cookie, params, read_code_from_email, register_user_helper, run_inprocess,
+    extract_cookie, params, read_code_from_email, run_inprocess,
 };
 use rocket::http::{ContentType, Status};
 

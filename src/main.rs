@@ -1509,6 +1509,9 @@ fn rocket() -> _ {
 mod test_lib;
 
 #[cfg(test)]
+mod test_helpers;
+
+#[cfg(test)]
 mod test_home;
 
 #[cfg(test)]

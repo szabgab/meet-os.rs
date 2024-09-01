@@ -1,4 +1,5 @@
-use crate::test_lib::{check_html, params, register_user_helper, run_inprocess, setup_many_users};
+use crate::test_helpers::{register_user_helper, setup_many_users};
+use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form

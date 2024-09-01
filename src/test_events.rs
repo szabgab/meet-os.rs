@@ -1,4 +1,5 @@
-use crate::test_lib::{check_html, run_inprocess, setup_many};
+use crate::test_helpers::setup_many;
+use crate::test_lib::{check_html, run_inprocess};
 use rocket::http::Status;
 
 // Create event
