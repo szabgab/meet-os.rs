@@ -218,3 +218,19 @@ fn admin_audit_as_user() {
         check_html(&html, "title", "Unauthorized");
     })
 }
+
+#[test]
+fn admin_audit_as_admin() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        login_helper(&client, "admin@meet-os.com", "123456");
+
+        let res = client.get("/admin/audit").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Audit");
+        check_html(&html, "h1", "Audit");
+        // TODO call some method that create entries and then check entries
+    })
+}
