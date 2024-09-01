@@ -42,6 +42,11 @@ fn main_page_with_data() {
         check_guest_menu(&html);
 
         assert!(html.contains(r#"<li><a href="/event/1">First event</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/event/2">Second event</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/event/3">Third event</a></li>"#));
+
         assert!(html.contains(r#"<li><a href="/group/1">First Group</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/2">Second Group</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/group/3">Third Group</a></li>"#));
     });
 }

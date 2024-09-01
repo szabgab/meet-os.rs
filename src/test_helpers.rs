@@ -70,12 +70,12 @@ pub fn register_user_helper(
     return cookie_str;
 }
 
-pub fn add_event_helper(client: &Client, title: &str, date: &str, owner_email: String) {
+pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, owner_email: String) {
     let res = client
         .post("/add-event")
         .header(ContentType::Form)
         .body(params!([
-            ("gid", "1"),
+            ("gid", gid),
             ("offset", "-180"),
             ("title", title),
             ("location", "Virtual"),
@@ -125,10 +125,29 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     setup_many_users(client, email_folder);
 
     create_group_helper(&client, "First Group", 2);
+    create_group_helper(&client, "Second Group", 2);
+    create_group_helper(&client, "Third Group", 3);
     add_event_helper(
         &client,
         "First event",
         "2030-01-01 10:10",
+        "1",
+        String::from("foo@meet-os.com"),
+    );
+
+    add_event_helper(
+        &client,
+        "Second event",
+        "2030-01-02 10:10",
+        "1",
+        String::from("foo@meet-os.com"),
+    );
+
+    add_event_helper(
+        &client,
+        "Third event",
+        "2030-01-03 10:10",
+        "2",
         String::from("foo@meet-os.com"),
     );
 
