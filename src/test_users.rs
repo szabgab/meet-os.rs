@@ -436,3 +436,20 @@ fn login_with_unverified_email() {
         check_guest_menu(&html);
     });
 }
+
+#[test]
+fn login_with_invalid_email() {
+    run_inprocess(|email_folder, client| {
+        // no actual user needed in the system for this to work
+        let res = client
+            .post("/login")
+            .header(ContentType::Form)
+            .body(params!([("email", "meet-os.com"), ("password", "123456")]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid email address");
+        check_html(&html, "h1", "Invalid email address");
+    });
+}
