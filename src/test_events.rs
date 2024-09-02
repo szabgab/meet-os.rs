@@ -186,7 +186,7 @@ fn leave_not_existing_event() {
         setup_many(&client, &email_folder);
 
         let res = client
-            .get("/rsvp-yes-event?eid=10")
+            .get("/rsvp-no-event?eid=10")
             .private_cookie(("meet-os", "foo1@meet-os.com"))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -194,5 +194,33 @@ fn leave_not_existing_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "No such event");
         check_html(&html, "h1", "No such event");
+    })
+}
+
+#[test]
+fn join_event_guest() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client.get("/rsvp-yes-event?eid=1").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+    })
+}
+
+#[test]
+fn leave_event_guest() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client.get("/rsvp-no-event?eid=1").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
     })
 }
