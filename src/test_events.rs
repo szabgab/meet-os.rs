@@ -179,3 +179,20 @@ fn join_not_existing_event() {
         check_html(&html, "h1", "No such event");
     })
 }
+
+#[test]
+fn leave_not_existing_event() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/rsvp-yes-event?eid=10")
+            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "No such event");
+        check_html(&html, "h1", "No such event");
+    })
+}
