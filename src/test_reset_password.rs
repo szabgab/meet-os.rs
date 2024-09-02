@@ -1,4 +1,4 @@
-use crate::test_helpers::register_user_helper;
+use crate::test_helpers::{register_user_helper, setup_many};
 use crate::test_lib::{
     check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
     read_code_from_email, run_inprocess,
@@ -111,5 +111,30 @@ fn reset_password() {
         // Try again with the same code
         // Try with id that does not exist
         // Try invalid password
+    });
+}
+
+#[test]
+fn save_password_invalid_uid() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get(format!("/save-password/42/abc")).dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid id");
+        assert!(html.contains("Invalid id <b>42</b>"));
+    });
+}
+
+#[test]
+fn save_password_invalid_code() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        let res = client.get(format!("/save-password/2/abc")).dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid code");
+        assert!(html.contains("Invalid code <b>abc</b>"));
     });
 }
