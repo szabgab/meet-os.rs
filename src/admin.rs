@@ -178,25 +178,15 @@ async fn create_group_post(
 
     let owner = db::get_user_by_id(dbh, input.owner).await.unwrap().unwrap();
 
-    match db::add_group(dbh, &group).await {
-        Ok(_result) => {
-            notify::owner_group_was_created(dbh, myconfig, &owner, &group).await;
-            db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
-                .await
-                .unwrap();
-            Template::render(
-                "message",
-                context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},
-            )
-        }
-        Err(err) => {
-            rocket::info!("Error while trying to add group {err}");
-            Template::render(
-                "message",
-                context! {title: "Failed", message: format!("Could not add <b>{}</b>.", group.name), config, visitor},
-            )
-        }
-    }
+    db::add_group(dbh, &group).await.unwrap();
+    notify::owner_group_was_created(dbh, myconfig, &owner, &group).await;
+    db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
+        .await
+        .unwrap();
+    Template::render(
+        "message",
+        context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},
+    )
 }
 
 #[get("/audit")]
