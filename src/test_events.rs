@@ -158,9 +158,8 @@ fn join_event() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "RSVPed to event");
-        check_html(&html, "h1", "RSVPed to event");
-        assert!(html.contains(r#"User RSVPed to <a href="/event/1">event</a>"#));
+        check_html(&html, "title", "You were already RSVPed");
+        check_html(&html, "h1", "You were already RSVPed");
     })
 }
 

@@ -737,18 +737,23 @@ async fn rsvp_yes_event_get(
         notify::owner_user_joined_group(dbh, myconfig, &user, &group).await;
     }
 
-    let rsvp = db::get_rsvp(dbh, eid, uid).await.unwrap();
-    if rsvp.is_none() {
+    if let Some(rsvp) = db::get_rsvp(dbh, eid, uid).await.unwrap() {
+        if rsvp.status {
+            return Template::render(
+                "message",
+                context! {title: "You were already RSVPed", message: format!(r#"You were already RSVPed"#), config, visitor},
+            );
+        }
+        db::update_rsvp(dbh, eid, uid, true).await.unwrap();
+        db::audit(dbh, format!("User {uid} RSVPed again to event {eid}"))
+            .await
+            .unwrap();
+    } else {
         db::new_rsvp(dbh, eid, uid, true).await.unwrap();
         db::audit(dbh, format!("User {uid} RSVPed to event {eid}"))
             .await
             .unwrap();
         //notify::owner_user_rsvped_to_event(dbh, myconfig, &user, &group, &event).await;
-    } else {
-        db::update_rsvp(dbh, eid, uid, true).await.unwrap();
-        db::audit(dbh, format!("User {uid} RSVPed again to event {eid}"))
-            .await
-            .unwrap();
     }
 
     Template::render(
