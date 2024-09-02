@@ -145,7 +145,7 @@ pub async fn get_user_by_code(
     let entry: Option<User> = response.take(0)?;
 
     if let Some(entry) = entry.as_ref() {
-        rocket::info!("Foud user {}, {}", entry.name, entry.email);
+        rocket::info!("Found user {}, {}", entry.name, entry.email);
     }
 
     Ok(entry)
@@ -302,7 +302,7 @@ pub async fn get_user_by_id(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Res
     let entry: Option<User> = response.take(0)?;
 
     if let Some(entry) = entry.as_ref() {
-        rocket::info!("Foud user {}, {}", entry.name, entry.email);
+        rocket::info!("Found user {}, {}", entry.name, entry.email);
     }
 
     Ok(entry)
@@ -619,6 +619,30 @@ pub async fn get_membership(
     let entry: Option<Membership> = response.take(0)?;
 
     Ok(entry)
+}
+
+/// # Panics
+///
+/// Panics when there is an error.
+pub async fn get_all_rsvps_for_event(
+    dbh: &Surreal<Client>,
+    eid: usize,
+) -> surrealdb::Result<Vec<(RSVP, User)>> {
+    let mut response = dbh
+        .query("SELECT * FROM rsvp WHERE eid=$eid;")
+        .bind(("eid", eid))
+        .await?;
+
+    let entries: Vec<RSVP> = response.take(0)?;
+
+    let mut people = vec![];
+    for entry in entries {
+        // We assume that each uid will have a user
+        let user = get_user_by_id(dbh, entry.uid).await.unwrap().unwrap();
+        people.push((entry, user));
+    }
+
+    Ok(people)
 }
 
 pub async fn get_rsvp(

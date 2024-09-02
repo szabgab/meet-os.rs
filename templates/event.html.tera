@@ -3,6 +3,8 @@
 
 <section class="section">
   <div class="container">
+    <h1 class="title is-3">{{event.title}}</h1>
+
     {% if visitor.logged_in %}
       {% if visitor.user.uid == group.owner %}
           {% if editable %}
@@ -39,6 +41,29 @@
             <p class="is-size-6">
                 Organized by <a href="/group/{{ group.gid }}">{{ group.name }}</a>.
             </p>
+            {% if editable %}
+              {% if rsvped %}
+                <a href="/rsvp-no-event?eid={{event.eid}}">
+                    <button class="button is-link">
+                        Unregister from the event
+                    </button>
+                </a>
+              {% else %}
+                <a href="/rsvp-yes-event?eid={{event.eid}}">
+                    <button class="button is-link">
+                        RSVP to the event
+                    </button>
+                </a>
+              {% endif %}
+            {% endif %}
+
+            <h2 class="title is-4">Participating</h2>
+            <ul>
+            {% for person in people %}
+              {% if person.0.status %}
+                 <li>{{ person.1.name }}</li>
+              {% endif %}
+            {% endfor %}
           </div>
         </section>
       </div>

@@ -744,6 +744,11 @@ async fn rsvp_yes_event_get(
             .await
             .unwrap();
         //notify::owner_user_rsvped_to_event(dbh, myconfig, &user, &group, &event).await;
+    } else {
+        db::update_rsvp(dbh, eid, uid, true).await.unwrap();
+        db::audit(dbh, format!("User {uid} RSVPed again to event {eid}"))
+            .await
+            .unwrap();
     }
 
     Template::render(
@@ -779,6 +784,10 @@ async fn rsvp_no_event_get(
         );
     }
     db::update_rsvp(dbh, eid, uid, false).await.unwrap();
+    db::audit(dbh, format!("User {uid} left the event {eid}"))
+        .await
+        .unwrap();
+
     // TODO audit
     // TODO notify
 
@@ -875,11 +884,11 @@ async fn edit_profile_post(
     )
 }
 
-#[get("/event/<id>")]
-async fn event_get(dbh: &State<Surreal<Client>>, visitor: Visitor, id: usize) -> Template {
+#[get("/event/<eid>")]
+async fn event_get(dbh: &State<Surreal<Client>>, visitor: Visitor, eid: usize) -> Template {
     let config = get_public_config();
 
-    let event = db::get_event_by_eid(dbh, id).await.unwrap().unwrap();
+    let event = db::get_event_by_eid(dbh, eid).await.unwrap().unwrap();
     let group = db::get_group_by_gid(dbh, event.group_id)
         .await
         .unwrap()
@@ -889,6 +898,19 @@ async fn event_get(dbh: &State<Surreal<Client>>, visitor: Visitor, id: usize) ->
 
     let utc: DateTime<Utc> = Utc::now();
     let editable = utc < event.date;
+
+    // has current user RSVP ed?
+    let rsvped = if visitor.logged_in {
+        let uid = visitor.clone().user.unwrap().uid;
+        match db::get_rsvp(dbh, eid, uid).await.unwrap() {
+            None => false,
+            Some(rsvp) => rsvp.status,
+        }
+    } else {
+        false
+    };
+
+    let people = db::get_all_rsvps_for_event(dbh, eid).await.unwrap();
 
     Template::render(
         "event",
@@ -900,6 +922,8 @@ async fn event_get(dbh: &State<Surreal<Client>>, visitor: Visitor, id: usize) ->
             config,
             visitor,
             editable,
+            rsvped,
+            people,
         },
     )
 }
