@@ -374,7 +374,7 @@ async fn save_password_post(
     let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
         return Template::render(
             "message",
-            context! {title: "Invalid userid", message: format!("Invalid userid {uid}."), config, visitor},
+            context! {title: "Invalid userid", message: format!("Invalid userid <b>{uid}</b>."), config, visitor},
         );
     };
 
@@ -382,7 +382,7 @@ async fn save_password_post(
         rocket::warn!("Invalid code {code} for uid {uid}");
         return Template::render(
             "message",
-            context! {title: "Invalid code", message: format!("Invalid code."), config, visitor},
+            context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>."), config, visitor},
         );
     }
 

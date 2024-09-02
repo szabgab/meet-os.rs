@@ -7,7 +7,7 @@ use crate::test_lib::{
 use rocket::http::{ContentType, Status};
 
 #[test]
-fn reset_password() {
+fn reset_password_full() {
     run_inprocess(|email_folder, client| {
         let name = "Foo Bar";
         let email = "foo@meet-os.com";
@@ -75,8 +75,25 @@ fn reset_password() {
         let expected = format!(r#"<input name="code" id="code" type="hidden" value="{code}">"#);
         assert!(html.contains(&expected));
 
-        let new_password = String::from("new password");
+        // Cannot save invalid password (too short)
+        let res = client
+            .post("/save-password")
+            .header(ContentType::Form)
+            .body(params!([
+                ("uid", uid.to_string()),
+                ("code", code.clone()),
+                ("password", String::from("abc"))
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_guest_menu(&html);
+        check_html(&html, "title", "Invalid password");
+        check_html(&html, "h1", "Invalid password");
+        assert!(html.contains("The password must be at least 6 characters long."));
 
+        let new_password = String::from("new password");
         let res = client
             .post("/save-password")
             .header(ContentType::Form)
@@ -115,9 +132,9 @@ fn reset_password() {
 }
 
 #[test]
-fn save_password_invalid_uid() {
+fn save_password_get_invalid_uid() {
     run_inprocess(|email_folder, client| {
-        let res = client.get(format!("/save-password/42/abc")).dispatch();
+        let res = client.get("/save-password/42/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
@@ -127,14 +144,57 @@ fn save_password_invalid_uid() {
 }
 
 #[test]
-fn save_password_invalid_code() {
+fn save_password_get_invalid_code() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
-        let res = client.get(format!("/save-password/2/abc")).dispatch();
+        let res = client.get("/save-password/2/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
         check_html(&html, "title", "Invalid code");
+        assert!(html.contains("Invalid code <b>abc</b>"));
+    });
+}
+
+#[test]
+fn save_password_post_invalid_uid() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/save-password")
+            .header(ContentType::Form)
+            .body(params!([
+                ("uid", "42"),
+                ("code", "abc"),
+                ("password", "new_password")
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid userid");
+        check_html(&html, "h1", "Invalid userid");
+        assert!(html.contains("Invalid userid <b>42</b>"));
+    });
+}
+
+#[test]
+fn save_password_post_invalid_code() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        let res = client
+            .post("/save-password")
+            .header(ContentType::Form)
+            .body(params!([
+                ("uid", "2"),
+                ("code", "abc"),
+                ("password", "new_password")
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid code");
+        check_html(&html, "h1", "Invalid code");
         assert!(html.contains("Invalid code <b>abc</b>"));
     });
 }
