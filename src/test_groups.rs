@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_user_helper, setup_many_users};
+use crate::test_helpers::{register_user_helper, setup_many, setup_many_users};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -207,6 +207,35 @@ fn join_not_existing_group_as_user() {
         check_html(&html, "title", "No such group");
         check_html(&html, "h1", "No such group");
         assert!(html.contains("There is not group with id <b>20</b>"));
+    })
+}
+
+#[test]
+fn join_group_as_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/join-group?gid=1")
+            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Membership");
+        check_html(&html, "h1", "Membership");
+        assert!(html.contains(r#"User added to <a href="/group/1">group</a>"#));
+
+        // check if user is listed on the group page
+        let res = client.get("/group/1").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "First Group");
+        check_html(&html, "h1", "First Group");
+        assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
+        assert!(html.contains(r#"<a href="/user/3">Foo 1</a>"#));
     })
 }
 
