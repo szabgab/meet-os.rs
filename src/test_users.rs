@@ -453,3 +453,28 @@ fn login_with_invalid_email() {
         check_html(&html, "h1", "Invalid email address");
     });
 }
+
+#[test]
+fn register_with_short_password() {
+    run_inprocess(|email_folder, client| {
+        let email = "foo@meet-os.com";
+        let res = client
+            .post(format!("/register"))
+            .header(ContentType::Form)
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", email),
+                ("password", "123"),
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        assert!(res.headers().get_one("set-cookie").is_none());
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid password");
+        check_html(&html, "h1", "Invalid password");
+        //assert_eq!(html, "");
+        assert!(html.contains("The password must be at least 6 characters long."));
+        check_guest_menu(&html);
+    });
+}
