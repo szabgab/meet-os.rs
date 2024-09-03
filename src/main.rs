@@ -610,7 +610,7 @@ async fn join_group_get(
     if group.is_none() {
         return Template::render(
             "message",
-            context! {title: "No such group", message: "No such group", config, visitor},
+            context! {title: "No such group", message: format!("There is not group with id <b>{gid}</b>"), config, visitor},
         );
     }
     let group = group.unwrap();

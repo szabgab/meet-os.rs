@@ -180,7 +180,7 @@ fn create_group_guest() {
 #[test]
 fn join_group_guest() {
     run_inprocess(|email_folder, client| {
-        let res = client.get("/join-group?uid=1").dispatch();
+        let res = client.get("/join-group?gid=1").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
         let html = res.into_string().unwrap();
 
@@ -192,9 +192,28 @@ fn join_group_guest() {
 }
 
 #[test]
+fn join_not_existing_group_as_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+
+        let res = client
+            .get("/join-group?gid=20")
+            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "No such group");
+        check_html(&html, "h1", "No such group");
+        assert!(html.contains("There is not group with id <b>20</b>"));
+    })
+}
+
+#[test]
 fn leave_group_guest() {
     run_inprocess(|email_folder, client| {
-        let res = client.get("/leave-group?uid=1").dispatch();
+        let res = client.get("/leave-group?gid=1").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
         let html = res.into_string().unwrap();
 
