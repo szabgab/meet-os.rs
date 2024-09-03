@@ -982,17 +982,8 @@ async fn groups_get(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template 
 }
 
 #[get("/users")]
-async fn list_users(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
-) -> Template {
+async fn list_users(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template {
     let config = get_public_config();
-
-    rocket::info!(
-        "cookie value received from user: {}",
-        visitor.user.clone().unwrap().email
-    );
 
     // TODO filtering  could be moved to the database call
     let all_users = db::get_users(dbh).await.unwrap();

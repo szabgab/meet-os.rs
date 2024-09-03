@@ -530,3 +530,19 @@ fn register_get_guest() {
 }
 
 // register_get_user should fail
+//
+//
+#[test]
+fn list_users_empty_db_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/users").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "List Users");
+        check_html(&html, "h1", "List Users");
+        assert!(html.contains(r#"No users"#));
+    });
+}

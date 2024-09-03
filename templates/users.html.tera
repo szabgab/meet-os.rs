@@ -4,11 +4,15 @@
   <div class="container">
     <div class="content">
        <h1 class="title is-3">{{title}}</h1>
+       {% if users %}
         <ul>
-        {% for user in users %}
-            <li><a href="/user/{{ user.uid }}">{{ user.name }}</a></li>
-        {% endfor %}
+          {% for user in users %}
+              <li><a href="/user/{{ user.uid }}">{{ user.name }}</a></li>
+          {% endfor %}
         </ul>
+        {% else %}
+          No users
+        {% endif %}
     </div>
   </div>
 </section>
