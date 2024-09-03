@@ -709,13 +709,7 @@ async fn rsvp_yes_event_get(
     };
 
     let gid = event.group_id;
-    let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
-        // This should really never happen, right?
-        return Template::render(
-            "message",
-            context! {title: "No such group", message: "No such group", config, visitor},
-        );
-    };
+    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
 
     let user = visitor.user.clone().unwrap();
     let uid = visitor.user.clone().unwrap().uid;
