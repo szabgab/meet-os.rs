@@ -628,7 +628,7 @@ async fn join_group_get(
     if member.is_some() {
         return Template::render(
             "message",
-            context! {title: "You are already a member of this group", message: "You are already a member of this group", config, visitor},
+            context! {title: "You are already a member of this group", message: format!(r#"You are already a member of the <a href="/group/{gid}">{}</a> group"#, group.name), config, visitor},
         );
     }
 

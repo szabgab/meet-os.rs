@@ -236,6 +236,45 @@ fn join_group_as_user() {
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
         assert!(html.contains(r#"<a href="/user/3">Foo 1</a>"#));
+
+        // try to join the same group again - should fail
+        let res = client
+            .get("/join-group?gid=1")
+            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "You are already a member of this group");
+        check_html(&html, "h1", "You are already a member of this group");
+        assert!(html.contains(
+            r#"You are already a member of the <a href="/group/1">First Group</a> group"#
+        ));
+
+        // leave group
+        let res = client
+            .get("/leave-group?gid=1")
+            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Membership");
+        check_html(&html, "h1", "Membership");
+        assert!(html.contains(r#"User removed from <a href="/group/1">group</a>"#));
+
+        // See that user is NOT listed on the group page any more
+        let res = client.get("/group/1").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "First Group");
+        check_html(&html, "h1", "First Group");
+        assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
+        assert!(!html.contains("Foo 1"));
+        assert!(!html.contains("/user/3"));
     })
 }
 
