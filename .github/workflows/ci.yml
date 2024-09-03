@@ -68,23 +68,23 @@ jobs:
         #- name: Build release version
         #  run: cargo build --release --verbose
 
-    - name: Test coverage reporting (default ptrace)
-      env:
-        RUST_BACKTRACE: 1
-      run: |
-        cp Rocket.skeleton.toml Rocket.toml
-        cargo install cargo-tarpaulin
-        rm -rf tests
-        time cargo tarpaulin --ignore-tests -o Html -o Lcov --timeout 240
-
-    - uses: actions/upload-artifact@v4
-      with:
-        name: test-coverage-report-with-ptrace
-        path: tarpaulin-report.html
-
-    - name: Clean Tarpaulin files
-      run: |
-        rm -f tarpaulin-report.html lcov.info
+        #    - name: Test coverage reporting (default ptrace)
+        #      env:
+        #        RUST_BACKTRACE: 1
+        #      run: |
+        #        cp Rocket.skeleton.toml Rocket.toml
+        #        cargo install cargo-tarpaulin
+        #        rm -rf tests
+        #        time cargo tarpaulin --ignore-tests -o Html -o Lcov --timeout 240
+        #
+        #    - uses: actions/upload-artifact@v4
+        #      with:
+        #        name: test-coverage-report-with-ptrace
+        #        path: tarpaulin-report.html
+        #
+        #    - name: Clean Tarpaulin files
+        #      run: |
+        #        rm -f tarpaulin-report.html lcov.info
 
     - name: Test coverage reporting
       env:
