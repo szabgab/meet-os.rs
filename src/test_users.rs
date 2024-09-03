@@ -568,3 +568,38 @@ fn list_users_many_users_guest() {
         assert!(html.contains(r#"<li><a href="/user/1">Site Manager</a></li>"#));
     });
 }
+
+#[test]
+fn user_id_that_does_not_exist() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/user/42").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "User not found");
+        check_html(&html, "h1", "User not found");
+        assert!(html.contains(r#"There is no user with id <b>42</b>."#));
+    });
+}
+
+#[test]
+fn user_page() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+
+        let res = client.get("/user/2").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Foo Bar");
+        check_html(&html, "h1", "Foo Bar");
+        assert!(html.contains(r#"<td>Name:</td><td>Foo Bar</td>"#));
+        assert!(html.contains(r#"<td>No GitHub provided.</td"#));
+        assert!(html.contains(r#"<td>No GitLab provided.</td"#));
+        assert!(html.contains(r#"<td>No LinkedIn provided.</td>"#));
+    });
+}

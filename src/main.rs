@@ -1004,19 +1004,14 @@ async fn list_users(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template 
 }
 
 #[get("/user/<uid>")]
-async fn user(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
-    uid: usize,
-) -> Template {
+async fn user(dbh: &State<Surreal<Client>>, visitor: Visitor, uid: usize) -> Template {
     let config = get_public_config();
 
     let user = match db::get_user_by_id(dbh, uid).await.unwrap() {
         None => {
             return Template::render(
                 "message",
-                context! {title: "User not found", message: format!("This user does not exist"), config, visitor},
+                context! {title: "User not found", message: format!("There is no user with id <b>{uid}</b>."), config, visitor},
             )
         }
         Some(user) => user,
