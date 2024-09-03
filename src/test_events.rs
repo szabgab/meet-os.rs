@@ -224,3 +224,23 @@ fn leave_event_guest() {
         check_html(&html, "h1", "Not logged in");
     })
 }
+
+#[test]
+fn join_event_by_group_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/rsvp-yes-event?eid=1")
+            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "You are the owner of this group");
+        check_html(&html, "h1", "You are the owner of this group");
+
+        assert!(html.contains("You cannot join an event in a group you own."));
+    });
+}

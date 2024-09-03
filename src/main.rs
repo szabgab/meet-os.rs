@@ -717,7 +717,7 @@ async fn rsvp_yes_event_get(
     if uid == group.owner {
         return Template::render(
             "message",
-            context! {title: "You are the owner of this group", message: "You are the owner of this group", config, visitor},
+            context! {title: "You are the owner of this group", message: "You cannot join an event in a group you own.", config, visitor},
         );
     }
 
