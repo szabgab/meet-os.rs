@@ -507,10 +507,26 @@ fn edit_profile_get_user() {
 
         //assert_eq!(html, "");
         check_html(&html, "title", "Edit Profile");
-        //check_html(&html, "h1", "Edit Profile");
-        check_html(&html, "h1", "Register"); // TODO change this!
+        check_html(&html, "h1", "Edit Profile");
         assert!(html.contains(r#"<form method="POST" action="/edit-profile">"#));
     });
 }
 
 // edit_profile_get_unverified_user should fail
+
+#[test]
+fn register_get_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/register").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Register");
+        check_html(&html, "h1", "Register");
+        assert!(html.contains(r#"<form method="POST" action="/register">"#));
+    });
+}
+
+// register_get_user should fail
