@@ -169,7 +169,7 @@ fn login_regular_user() {
         // logout
         let res = client
             .get("/logout")
-            .private_cookie(("meed-os", foo_mail))
+            .private_cookie(("meet-os", foo_mail))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -214,7 +214,7 @@ fn login_admin_user() {
 
         let res = client
             .get("/logout")
-            .private_cookie(("meed-os", email))
+            .private_cookie(("meet-os", email))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
