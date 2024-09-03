@@ -9,3 +9,4 @@
 # tarpaulin files
 build_rs_cov.profraw
 tarpaulin-report.html
+lcov.info
