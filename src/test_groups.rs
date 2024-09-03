@@ -176,3 +176,31 @@ fn create_group_guest() {
         check_html(&html, "h1", "Groups");
     });
 }
+
+#[test]
+fn join_group_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/join-group?uid=1").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+    })
+}
+
+#[test]
+fn leave_group_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/leave-group?uid=1").dispatch();
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+    })
+}
