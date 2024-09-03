@@ -620,7 +620,7 @@ async fn join_group_get(
     if uid == group.owner {
         return Template::render(
             "message",
-            context! {title: "You are the owner of this group", message: "You are the owner of this group", config, visitor},
+            context! {title: "You are the owner of this group", message: "You cannot join a group you own.", config, visitor},
         );
     }
 
@@ -657,7 +657,7 @@ async fn leave_group_get(
     if group.is_none() {
         return Template::render(
             "message",
-            context! {title: "No such group", message: "No such group", config, visitor},
+            context! {title: "No such group", message: format!("The group ID <b>{gid}</b> does not exist."), config, visitor},
         );
     }
     let group = group.unwrap();
@@ -667,7 +667,7 @@ async fn leave_group_get(
     if uid == group.owner {
         return Template::render(
             "message",
-            context! {title: "You are the owner of this group", message: "You are the owner of this group", config, visitor},
+            context! {title: "You are the owner of this group", message: "You cannot leave a group you own.", config, visitor},
         );
     }
 
@@ -675,7 +675,7 @@ async fn leave_group_get(
     if member.is_none() {
         return Template::render(
             "message",
-            context! {title: "You are not a member of this group", message: "You are not a member of this group", config, visitor},
+            context! {title: "You are not a member of this group", message: "You cannot leave a group where you are not a member.", config, visitor},
         );
     }
 

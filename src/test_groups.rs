@@ -279,6 +279,25 @@ fn join_group_as_user() {
 }
 
 #[test]
+fn join_group_as_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/join-group?gid=1")
+            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "You are the owner of this group");
+        check_html(&html, "h1", "You are the owner of this group");
+        assert!(html.contains(r#"You cannot join a group you own."#));
+    });
+}
+
+#[test]
 fn leave_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/leave-group?gid=1").dispatch();
@@ -290,4 +309,61 @@ fn leave_group_guest() {
         check_html(&html, "h1", "Not logged in");
         assert!(html.contains("You are not logged in"));
     })
+}
+
+#[test]
+fn leave_not_existing_group() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/leave-group?gid=20")
+            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "No such group");
+        check_html(&html, "h1", "No such group");
+        assert!(html.contains("The group ID <b>20</b> does not exist."));
+    })
+}
+
+#[test]
+fn leave_group_as_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/leave-group?gid=1")
+            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "You are the owner of this group");
+        check_html(&html, "h1", "You are the owner of this group");
+        assert!(html.contains(r#"You cannot leave a group you own."#));
+    });
+}
+
+#[test]
+fn leave_group_user_does_not_belong_to() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/leave-group?gid=1")
+            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "You are not a member of this group");
+        check_html(&html, "h1", "You are not a member of this group");
+        assert!(html.contains(r#"You cannot leave a group where you are not a member."#));
+    });
 }
