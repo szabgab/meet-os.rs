@@ -43,7 +43,14 @@ pub async fn sendmail(
             writeln!(&mut file, "{}", &text).unwrap();
         }
         EmailMethod::Sendgrid => {
-            sendgrid(&myconfig.sendgrid_api_key, from, to, subject, text).await;
+            sendgrid(
+                myconfig.sendgrid_api_key.as_ref().unwrap(),
+                from,
+                to,
+                subject,
+                text,
+            )
+            .await;
         }
     }
 }

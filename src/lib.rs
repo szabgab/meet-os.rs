@@ -97,8 +97,7 @@ pub struct MyConfig {
 
     pub email: EmailMethod,
 
-    #[serde(default = "get_empty_string")]
-    pub sendgrid_api_key: String,
+    pub sendgrid_api_key: Option<String>,
     pub email_folder: Option<String>,
 
     pub admins: Vec<String>,
@@ -108,10 +107,6 @@ pub struct MyConfig {
 
     pub database_namespace: String,
     pub database_name: String,
-}
-
-fn get_empty_string() -> String {
-    String::new()
 }
 
 /// # Panics
