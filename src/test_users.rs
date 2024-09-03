@@ -546,3 +546,25 @@ fn list_users_empty_db_guest() {
         assert!(html.contains(r#"No users"#));
     });
 }
+
+#[test]
+fn list_users_many_users_guest() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+
+        let res = client.get("/users").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        // assert_eq!(html, "");
+        check_html(&html, "title", "List Users");
+        check_html(&html, "h1", "List Users");
+        assert!(!html.contains(r#"No users"#));
+
+        assert!(html.contains(r#"<li><a href="/user/2">Foo Bar</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/user/3">Foo 1</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/user/4">Foo 2</a></li>"#));
+        assert!(html.contains(r#"<li><a href="/user/1">Site Manager</a></li>"#));
+    });
+}
