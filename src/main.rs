@@ -1374,7 +1374,12 @@ async fn contact_members_get(
     let config = get_public_config();
 
     let uid = visitor.user.clone().unwrap().uid;
-    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+    let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: format!("Group <b>{gid}</b> does not exist"), config, visitor},
+        );
+    };
 
     if group.owner != uid {
         return Template::render(
@@ -1566,3 +1571,6 @@ mod test_reset_password;
 
 #[cfg(test)]
 mod test_events;
+
+#[cfg(test)]
+mod test_contact_members;
