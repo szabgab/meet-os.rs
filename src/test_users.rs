@@ -1,4 +1,4 @@
-use crate::test_helpers::register_user_helper;
+use crate::test_helpers::{register_user_helper, setup_many_users};
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
     extract_cookie, params, read_code_from_email, run_inprocess,
@@ -478,3 +478,39 @@ fn register_with_short_password() {
         check_guest_menu(&html);
     });
 }
+
+#[test]
+fn edit_profile_get_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/edit-profile").dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+
+        check_html(&html, "title", "Not logged in");
+    });
+}
+
+#[test]
+fn edit_profile_get_user() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+        let foo_mail = "foo@meet-os.com";
+
+        let res = client
+            .get("/edit-profile")
+            .private_cookie(("meet-os", foo_mail))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Edit Profile");
+        //check_html(&html, "h1", "Edit Profile");
+        check_html(&html, "h1", "Register"); // TODO change this!
+        assert!(html.contains(r#"<form method="POST" action="/edit-profile">"#));
+    });
+}
+
+// edit_profile_get_unverified_user should fail
