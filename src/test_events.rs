@@ -1,6 +1,6 @@
-use crate::test_helpers::setup_many;
-use crate::test_lib::{check_html, run_inprocess};
-use rocket::http::Status;
+use crate::test_helpers::{setup_many, setup_many_users};
+use crate::test_lib::{check_html, params, run_inprocess};
+use rocket::http::{ContentType, Status};
 
 // Create event
 // Edit event
@@ -242,5 +242,72 @@ fn join_event_by_group_owner() {
         check_html(&html, "h1", "You are the owner of this group");
 
         assert!(html.contains("You cannot join an event in a group you own."));
+    });
+}
+
+#[test]
+fn edit_event_post_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+    });
+}
+
+#[test]
+fn edit_event_post_user_missing_data() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::UnprocessableEntity);
+
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+    });
+}
+
+#[test]
+fn edit_event_post_user_no_such_event() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .body(params!([
+                ("title", "New title"),
+                ("date", "2030-10-10 08:00"),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("offset", "-180"),
+                ("eid", "1"),
+            ]))
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "No such event");
+        check_html(&html, "h1", "No such event");
+
+        assert!(html.contains("The event id <b>1</b> does not exist."));
     });
 }

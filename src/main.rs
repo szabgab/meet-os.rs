@@ -1274,7 +1274,12 @@ async fn edit_event_post(
     let config = get_public_config();
 
     let uid = visitor.user.clone().unwrap().uid;
-    let event = db::get_event_by_eid(dbh, input.eid).await.unwrap().unwrap();
+    let Some(event) = db::get_event_by_eid(dbh, input.eid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such event", message: format!("The event id <b>{}</b> does not exist.", input.eid), config, visitor},
+        );
+    };
 
     let group = db::get_group_by_gid(dbh, event.group_id)
         .await
