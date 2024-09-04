@@ -237,6 +237,23 @@ fn join_group_as_user() {
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
         assert!(html.contains(r#"<a href="/user/3">Foo 1</a>"#));
 
+        let foo1_email = "foo1@meet-os.com";
+
+        // visit the group page as a member of the group
+        let res = client
+            .get("/group/1")
+            .private_cookie(("meet-os", foo1_email))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "First Group");
+        check_html(&html, "h1", "First Group");
+        assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
+        assert!(html.contains(r#"<a href="/user/3">Foo 1</a>"#));
+        assert!(html.contains(r#"You are a member."#));
+        assert!(html.contains(r#"<a href="/leave-group?gid=1"><button class="button is-link">leave group</button></a>"#));
+
         // try to join the same group again - should fail
         let res = client
             .get("/join-group?gid=1")
