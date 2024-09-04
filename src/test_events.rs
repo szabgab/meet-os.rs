@@ -10,6 +10,24 @@ use rocket::http::{ContentType, Status};
 // Leave event
 
 #[test]
+fn leave_event_before_joining_it() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client
+            .get("/rsvp-no-event?eid=1")
+            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "You were not registered to the event");
+        check_html(&html, "h1", "You were not registered to the event");
+        assert!(html.contains(r#"You were not registered to the <a href="/event/1">event</a>"#));
+    });
+}
+
+#[test]
 fn join_event() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
