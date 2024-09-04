@@ -438,6 +438,34 @@ fn edit_group_get_user_is_not_the_owner() {
 }
 
 #[test]
+fn edit_group_get_by_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+        let res = client
+            .get("/edit-group?gid=1")
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Edit Group");
+        check_html(&html, "h1", "Edit Group");
+        assert!(html.contains(r#"<form method="POST" action="/edit-group">"#));
+        assert!(html.contains(r#"<input type="hidden" name="gid" value="1">"#));
+        assert!(
+            html.contains(r#"Name: <input name="name" id="name" type="text" value="First Group">"#)
+        );
+        assert!(html
+            .contains(r#"Location: <input name="location" id="location" type="text" value="">"#));
+        assert!(html.contains(r#"Description (<a href="/markdown">Markdown</a>): <textarea name="description" id="description"></textarea>"#));
+        assert!(html.contains(r#"<input type="submit" value="Save">"#));
+    });
+}
+
+#[test]
 fn visit_group_that_does_not_exist() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
