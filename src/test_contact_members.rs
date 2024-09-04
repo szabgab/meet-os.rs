@@ -172,3 +172,57 @@ fn contact_members_post_user_with_all() {
         // TODO check who was this message sent to
     });
 }
+
+#[test]
+fn contact_members_post_user_subject_too_short() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        let foo_mail = "foo@meet-os.com";
+
+        let res = client
+            .post("/contact-members")
+            .private_cookie(("meet-os", foo_mail))
+            .body(params!([
+                ("gid", "1"),
+                ("subject", "Test"),
+                ("content", "Test content"),
+            ]))
+            .header(ContentType::Form)
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        check_html(&html, "title", "Too short a subject");
+        check_html(&html, "h1", "Too short a subject");
+        assert!(html.contains(r#"Minimal subject length 5 Current subject len: 4"#));
+        //assert_eq!(html, "");
+    });
+}
+
+#[test]
+fn contact_members_post_user_who_is_not_the_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+        let foo1_mail = "foo1@meet-os.com";
+
+        let res = client
+            .post("/contact-members")
+            .private_cookie(("meet-os", foo1_mail))
+            .body(params!([
+                ("gid", "1"),
+                ("subject", "Test subject line"),
+                ("content", "Test content"),
+            ]))
+            .header(ContentType::Form)
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+
+        check_html(&html, "title", "Not the owner");
+        check_html(&html, "h1", "Not the owner");
+        assert!(html.contains(r#"You are not the owner of group <b>1</b>"#));
+        //assert_eq!(html, "");
+    });
+}
