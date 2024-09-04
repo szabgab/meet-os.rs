@@ -1256,7 +1256,7 @@ async fn edit_event_get(
     if group.owner != uid {
         return Template::render(
             "message",
-            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+            context! {title: "Not the owner", message: format!("You are not the owner of group <b>{}</b>", event.group_id), config, visitor},
         );
     }
 

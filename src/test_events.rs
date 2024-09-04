@@ -455,6 +455,26 @@ fn get_edit_event_as_user_no_eid() {
 }
 
 #[test]
+fn get_edit_event_as_user_but_not_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo1_email = "foo1@meet-os.com";
+
+        let res = client
+            .get("/edit-event?eid=1")
+            .private_cookie(("meet-os", foo1_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not the owner");
+        check_html(&html, "h1", "Not the owner");
+        assert!(html.contains("You are not the owner of group <b>1</b>"));
+    });
+}
+#[test]
 fn get_edit_event_as_owner_with_eid() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
