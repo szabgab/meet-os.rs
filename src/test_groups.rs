@@ -496,3 +496,42 @@ fn edit_group_post_guest() {
         assert!(html.contains("You are not logged in"));
     });
 }
+
+#[test]
+fn edit_group_post_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+        let res = client
+            .post("/edit-group")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", foo_email))
+            .body(params!([
+                ("gid", "1"),
+                ("name", "Updated name"),
+                ("location", "Local"),
+                ("description", "Some group"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Group updated");
+        check_html(&html, "h1", "Group updated");
+        assert!(html.contains(r#"Check out the <a href="/group/1">group</a>"#));
+
+        // check if the group was updated
+        let res = client.get("/group/1").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Updated name");
+        check_html(&html, "h1", "Updated name");
+        assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
+        assert!(html.contains(r#"No members in this group."#));
+        assert!(html.contains(r#"<p>Some group</p>"#));
+        assert!(html.contains(r#"<b>Location</b>: Local"#));
+    });
+}
