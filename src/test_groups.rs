@@ -367,3 +367,55 @@ fn leave_group_user_does_not_belong_to() {
         assert!(html.contains(r#"You cannot leave a group where you are not a member."#));
     });
 }
+
+#[test]
+fn edit_group_get_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/edit-group").dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+    });
+}
+
+#[test]
+fn edit_group_get_user_no_such_group() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+        let foo_email = "foo@meet-os.com";
+        let res = client
+            .get("/edit-group?gid=1")
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "No such group");
+        check_html(&html, "h1", "No such group");
+        assert!(html.contains("Group <b>1</b> does not exist"));
+    });
+}
+
+#[test]
+fn edit_group_get_user_is_not_the_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo1_email = "foo1@meet-os.com";
+        let res = client
+            .get("/edit-group?gid=1")
+            .private_cookie(("meet-os", foo1_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not the owner");
+        check_html(&html, "h1", "Not the owner");
+        assert!(html.contains("You are not the owner of the group <b>1</b>"));
+    });
+}

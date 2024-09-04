@@ -1054,12 +1054,17 @@ async fn edit_group_get(
     let config = get_public_config();
 
     let uid = visitor.user.clone().unwrap().uid;
-    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+    let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: format!("Group <b>{gid}</b> does not exist"), config, visitor},
+        );
+    };
 
     if group.owner != uid {
         return Template::render(
             "message",
-            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+            context! {title: "Not the owner", message: format!("You are not the owner of the group <b>{gid}</b>"), config, visitor},
         );
     }
 
