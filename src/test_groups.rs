@@ -480,3 +480,16 @@ fn visit_group_that_does_not_exist() {
         assert!(html.contains("The group <b>42</b> does not exist."));
     });
 }
+
+#[test]
+fn edit_group_post_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.post("/edit-group").dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        assert!(html.contains("You are not logged in"));
+    });
+}
