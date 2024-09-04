@@ -453,3 +453,34 @@ fn get_edit_event_as_user_no_eid() {
         check_html(&html, "title", "404 Not Found");
     });
 }
+
+#[test]
+fn get_edit_event_as_owner_with_eid() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+
+        let res = client
+            .get("/edit-event?eid=1")
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Edit event in the 'First Group' group");
+        check_html(&html, "h1", "Edit event in the 'First Group' group");
+        assert!(html.contains(r#"<form method="POST" action="/edit-event" id="edit-event">"#));
+        assert!(html.contains(r#"<input type="hidden" name="eid" value="1">"#));
+        assert!(html.contains(r#"<input type="hidden" name="offset" id="offset">"#));
+        assert!(html
+            .contains(r#"Title: <input name="title" id="title" type="text" value="First event">"#));
+        assert!(html.contains(r#"Date: <input placeholder="YYYY-MM-DD HH::MM" name="date" id="date" type="text" original-value="2030-01-01T07:10:00Z">"#));
+        assert!(html.contains(
+            r#"Location: <input name="location" id="location" type="text" value="Virtual">"#
+        ));
+        assert!(html.contains(r#"Description (<a href="/markdown">Markdown</a>): <textarea name="description" id="description"></textarea>"#));
+    });
+}
