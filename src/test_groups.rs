@@ -496,6 +496,27 @@ fn edit_group_post_guest() {
         assert!(html.contains("You are not logged in"));
     });
 }
+#[test]
+fn edit_group_post_user_missing_gid() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+        let foo_email = "foo@meet-os.com";
+        let res = client
+            .post("/edit-group")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::UnprocessableEntity);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "422 Unprocessable Entity");
+        check_html(&html, "h1", "422: Unprocessable Entity");
+        assert!(html.contains(
+            "The request was well-formed but was unable to be followed due to semantic errors."
+        ));
+    });
+}
 
 #[test]
 fn edit_group_post_owner() {
