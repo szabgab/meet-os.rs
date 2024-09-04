@@ -34,7 +34,7 @@ fn contact_members_get_user_without_gid() {
 
         //assert_eq!(html, "");
         check_html(&html, "title", "404 Not Found");
-        check_html(&html, "h1", "404: Not Found");
+        check_html(&html, "h1", "404 Not Found");
     });
 }
 

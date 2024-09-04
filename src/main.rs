@@ -1456,6 +1456,20 @@ async fn http_403(request: &Request<'_>) -> Template {
     )
 }
 
+#[catch(404)]
+async fn http_404(request: &Request<'_>) -> Template {
+    let cookies = request.cookies();
+    let dbh = request.rocket().state::<Surreal<Client>>().unwrap();
+    let myconfig = request.rocket().state::<MyConfig>().unwrap();
+
+    let visitor = Visitor::new(cookies, dbh, myconfig).await;
+    let config = get_public_config();
+    Template::render(
+        "message",
+        context! {title: "404 Not Found", message: "404 Not Found", config, visitor},
+    )
+}
+
 #[catch(500)]
 async fn http_500(request: &Request<'_>) -> Template {
     let cookies = request.cookies();
@@ -1516,7 +1530,7 @@ fn rocket() -> _ {
         .attach(Template::fairing())
         .attach(AdHoc::config::<MyConfig>())
         .attach(db::fairing())
-        .register("/", catchers![http_401, http_403, http_500])
+        .register("/", catchers![http_401, http_403, http_404, http_500])
 }
 
 #[cfg(test)]
