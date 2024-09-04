@@ -311,3 +311,34 @@ fn edit_event_post_user_no_such_event() {
         assert!(html.contains("The event id <b>1</b> does not exist."));
     });
 }
+
+#[test]
+fn add_event_get_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/add-event").dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+        // assert_eq!(html, "");
+    });
+}
+
+#[test]
+fn add_event_get_user_missing_gid() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+        let foo_email = "foo@meet-os.com";
+
+        let res = client
+            .get("/add-event")
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::NotFound);
+
+        //let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+    });
+}
