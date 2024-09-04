@@ -1091,7 +1091,12 @@ async fn edit_group_post(
 
     let uid = visitor.user.clone().unwrap().uid;
     let gid = input.gid;
-    let group = db::get_group_by_gid(dbh, gid).await.unwrap().unwrap();
+    let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
+        return Template::render(
+            "message",
+            context! {title: "No such group", message: format!("Group <b>{gid}</b> does not exist"), config, visitor},
+        );
+    };
 
     if group.owner != uid {
         return Template::render(

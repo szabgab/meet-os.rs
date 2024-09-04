@@ -519,6 +519,33 @@ fn edit_group_post_user_missing_gid() {
 }
 
 #[test]
+fn edit_group_post_user_no_such_group() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+        let res = client
+            .post("/edit-group")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", foo_email))
+            .body(params!([
+                ("gid", "1"),
+                ("name", "Update"),
+                ("location", "Virtual"),
+                ("description", "",),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "No such group");
+        check_html(&html, "h1", "No such group");
+        assert!(html.contains("Group <b>1</b> does not exist"));
+    });
+}
+
+#[test]
 fn edit_group_post_owner() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
