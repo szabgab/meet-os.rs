@@ -338,7 +338,55 @@ fn add_event_get_user_missing_gid() {
 
         assert_eq!(res.status(), Status::NotFound);
 
-        //let html = res.into_string().unwrap();
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "404 Not Found");
+        check_html(&html, "h1", "404 Not Found");
         // assert_eq!(html, "");
+    });
+}
+
+#[test]
+fn add_event_get_user_not_the_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo1_email = "foo1@meet-os.com";
+
+        let res = client
+            .get("/add-event?gid=1")
+            .private_cookie(("meet-os", foo1_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not the owner");
+        check_html(&html, "h1", "Not the owner");
+        assert!(html.contains("You are not the owner of group <b>1</b>"));
+    });
+}
+
+#[test]
+fn add_event_get_user_is_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let foo_email = "foo@meet-os.com";
+
+        let res = client
+            .get("/add-event?gid=1")
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Add event to the 'First Group' group");
+        check_html(&html, "h1", "Add event to the 'First Group' group");
+        assert!(html.contains(r#"<form method="POST" action="/add-event" id="add-event">"#));
+        assert!(html.contains(r#"<input type="hidden" name="gid" value="1">"#));
+        assert!(html.contains(r#"<input type="hidden" name="offset" id="offset">"#));
     });
 }
