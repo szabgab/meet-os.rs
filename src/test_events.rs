@@ -408,3 +408,18 @@ fn add_event_get_user_is_owner() {
         assert!(html.contains(r#"<input type="hidden" name="offset" id="offset">"#));
     });
 }
+
+#[test]
+fn visit_event_as_guest() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client.get("/event/1").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "First event");
+        check_html(&html, "h1", "First event");
+        // TODO check that there are no participants in this event
+    });
+}
