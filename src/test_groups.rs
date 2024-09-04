@@ -484,7 +484,10 @@ fn visit_group_that_does_not_exist() {
 #[test]
 fn edit_group_post_guest() {
     run_inprocess(|email_folder, client| {
-        let res = client.post("/edit-group").dispatch();
+        let res = client
+            .post("/edit-group")
+            .header(ContentType::Form)
+            .dispatch();
 
         assert_eq!(res.status(), Status::Unauthorized);
         let html = res.into_string().unwrap();
