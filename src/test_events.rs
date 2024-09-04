@@ -423,3 +423,15 @@ fn visit_event_as_guest() {
         // TODO check that there are no participants in this event
     });
 }
+
+#[test]
+fn get_edit_event_as_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client.get("/edit-event").dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+    });
+}
