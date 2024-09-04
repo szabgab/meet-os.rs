@@ -435,3 +435,21 @@ fn get_edit_event_as_guest() {
         check_html(&html, "title", "Not logged in");
     });
 }
+
+#[test]
+fn get_edit_event_as_user_no_eid() {
+    run_inprocess(|email_folder, client| {
+        setup_many_users(&client, &email_folder);
+        let foo_email = "foo@meet-os.com";
+
+        let res = client
+            .get("/edit-event")
+            .private_cookie(("meet-os", foo_email))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::NotFound);
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "404 Not Found");
+    });
+}
