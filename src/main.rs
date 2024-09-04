@@ -935,7 +935,7 @@ async fn group_get(dbh: &State<Surreal<Client>>, visitor: Visitor, gid: usize) -
     let Some(group) = db::get_group_by_gid(dbh, gid).await.unwrap() else {
         return Template::render(
             "message",
-            context! {title: "No such group", message: "No such group", config, visitor},
+            context! {title: "No such group", message: format!("The group <b>{gid}</b> does not exist."), config, visitor},
         );
     };
 

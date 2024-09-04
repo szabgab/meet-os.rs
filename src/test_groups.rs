@@ -419,3 +419,19 @@ fn edit_group_get_user_is_not_the_owner() {
         assert!(html.contains("You are not the owner of the group <b>1</b>"));
     });
 }
+
+#[test]
+fn visit_group_that_does_not_exist() {
+    run_inprocess(|email_folder, client| {
+        setup_many(&client, &email_folder);
+
+        let res = client.get("/group/42").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "No such group");
+        check_html(&html, "h1", "No such group");
+        assert!(html.contains("The group <b>42</b> does not exist."));
+    });
+}
