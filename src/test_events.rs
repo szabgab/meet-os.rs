@@ -1,4 +1,7 @@
-use crate::test_helpers::{setup_for_events, setup_owner, OWNER_EMAIL, USER_EMAIL};
+use crate::test_helpers::{
+    create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
+    OWNER_EMAIL, USER_EMAIL,
+};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -327,7 +330,7 @@ fn edit_event_post_user_no_such_event() {
 }
 
 #[test]
-fn add_event_get_guest() {
+fn get_add_event_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/add-event").dispatch();
 
@@ -340,7 +343,7 @@ fn add_event_get_guest() {
 }
 
 #[test]
-fn add_event_get_user_missing_gid() {
+fn get_add_event_user_missing_gid() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -359,7 +362,7 @@ fn add_event_get_user_missing_gid() {
 }
 
 #[test]
-fn add_event_get_user_not_the_owner() {
+fn get_add_event_user_not_the_owner() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
 
@@ -379,7 +382,7 @@ fn add_event_get_user_not_the_owner() {
 }
 
 #[test]
-fn add_event_get_user_is_owner() {
+fn get_add_event_user_is_owner() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
 
@@ -401,7 +404,55 @@ fn add_event_get_user_is_owner() {
 }
 
 #[test]
-fn visit_event_as_guest() {
+fn post_add_event_guest() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Unauthorized);
+
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Not logged in");
+    });
+}
+
+#[test]
+fn post_add_event_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
+        create_group_helper(&client, "My group", 2);
+        logout(&client);
+
+        let res = client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .body(params!([
+                ("title", "Event title"),
+                ("date", "2030-10-10 08:00"),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("offset", "-180"),
+                ("gid", "1"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Event added");
+        check_html(&html, "h1", "Event added");
+        assert!(html.contains(r#"Event added: <a href="/event/1">Event title</a>"#));
+    });
+}
+
+#[test]
+fn get_event_as_guest() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
 
