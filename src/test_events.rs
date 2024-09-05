@@ -359,6 +359,36 @@ fn post_edit_event_user_not_the_owner() {
 }
 
 #[test]
+fn post_edit_event_owner_title_too_short() {
+    run_inprocess(|email_folder, client| {
+        setup_for_events(&client, &email_folder);
+
+        // update
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .body(params!([
+                ("title", "The"),
+                ("date", "2030-10-10 08:00"),
+                ("location", "In a pub"),
+                ("description", "This is the explanation"),
+                ("offset", "-180"),
+                ("eid", "1"),
+            ]))
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Too short a title");
+        check_html(&html, "h1", "Too short a title");
+        assert!(html.contains(r#"Minimal title length 10 Current title len: 3"#));
+    });
+}
+
+#[test]
 fn post_edit_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
@@ -397,7 +427,7 @@ fn post_edit_event_owner() {
         check_html(&html, "h1", "Event udapted");
         assert!(html.contains(r#"Event updated: <a href="/event/1">The new title</a>"#));
 
-        // check the event page before the update
+        // check the event page after the update
         let res = client.get("/event/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
 
