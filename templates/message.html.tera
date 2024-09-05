@@ -4,7 +4,7 @@
   <div class="container">
     <div class="content">
        <h1 class="title is-3">{{title}}</h1>
-      {{message | safe}}
+      <span id="message">{{message | safe}}</span>
     
     </div>
   </div>
