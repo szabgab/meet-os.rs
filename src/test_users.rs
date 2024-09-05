@@ -136,8 +136,7 @@ fn duplicate_email() {
 #[test]
 fn login_regular_user() {
     run_inprocess(|email_folder, client| {
-        let _cookie_str =
-            register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123456", &email_folder);
+        register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123456", &email_folder);
 
         check_profile_page_in_process(&client, &FOO_EMAIL, "Foo Bar");
 
@@ -192,7 +191,7 @@ fn login_admin_user() {
         let email = "admin@meet-os.com";
         let password = "123456";
 
-        let _cookie_str = register_and_verify_user(&client, name, email, password, &email_folder);
+        register_and_verify_user(&client, name, email, password, &email_folder);
 
         let res = client
             .post("/login")
