@@ -352,11 +352,9 @@ fn post_edit_event_user_no_such_event() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "No such event");
         check_html(&html, "h1", "No such event");
-
-        assert!(html.contains("The event id <b>1</b> does not exist."));
+        check_html(&html, "#message", "The event id <b>1</b> does not exist.");
     });
 }
 
@@ -385,7 +383,11 @@ fn post_edit_event_user_not_the_owner() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
-        assert!(html.contains(r#"You are not the owner of group <b>1</b>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"You are not the owner of group <b>1</b>"#,
+        );
     });
 }
 
@@ -412,10 +414,13 @@ fn post_edit_event_owner_title_too_short() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Too short a title");
         check_html(&html, "h1", "Too short a title");
-        assert!(html.contains(r#"Minimal title length 10 Current title len: 3"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Minimal title length 10 Current title len: 3"#,
+        );
     });
 }
 
@@ -442,10 +447,13 @@ fn post_edit_event_owner_invalid_date() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Invalid date");
         check_html(&html, "h1", "Invalid date");
-        assert!(html.contains(r#"Invalid date '2030-13-10 08:00' offset '-180'"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Invalid date '2030-13-10 08:00' offset '-180'"#,
+        );
     });
 }
 
@@ -472,10 +480,13 @@ fn post_edit_event_owner_date_in_the_past() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Can't schedule event to the past");
         check_html(&html, "h1", "Can't schedule event to the past");
-        assert!(html.contains(r#"Can't schedule event to the past '2020-10-10 05:00:00 UTC'"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Can't schedule event to the past '2020-10-10 05:00:00 UTC'"#,
+        );
     });
 }
 
@@ -513,10 +524,13 @@ fn post_edit_event_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Event udapted");
         check_html(&html, "h1", "Event udapted");
-        assert!(html.contains(r#"Event updated: <a href="/event/1">The new title</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Event updated: <a href="/event/1">The new title</a>"#,
+        );
 
         // check the event page after the update
         let res = client.get("/event/1").dispatch();
@@ -561,7 +575,7 @@ fn get_add_event_user_missing_gid() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "404 Not Found");
         check_html(&html, "h1", "404 Not Found");
-        // assert_eq!(html, "");
+        check_html(&html, "#message", "404 Not Found");
     });
 }
 
@@ -578,10 +592,9 @@ fn get_add_event_user_not_the_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
-        assert!(html.contains("You are not the owner of group <b>1</b>"));
+        check_html(&html, "#message", "You are not the owner of group <b>1</b>");
     });
 }
 
@@ -604,6 +617,7 @@ fn get_add_event_user_is_owner() {
         assert!(html.contains(r#"<form method="POST" action="/add-event" id="add-event">"#));
         assert!(html.contains(r#"<input type="hidden" name="gid" value="1">"#));
         assert!(html.contains(r#"<input type="hidden" name="offset" id="offset">"#));
+        // TODO the rest of the form
     });
 }
 
@@ -619,6 +633,8 @@ fn post_add_event_guest() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        check_html(&html, "#message", "You are not logged in");
     });
 }
 
@@ -648,10 +664,13 @@ fn post_add_event_user_not_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
-        assert!(html.contains(r#"You are not the owner of group <b>1</b>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"You are not the owner of group <b>1</b>"#,
+        );
     });
 }
 
@@ -681,10 +700,13 @@ fn post_add_event_owner_title_too_short() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "Too short a title");
         check_html(&html, "h1", "Too short a title");
-        assert!(html.contains(r#"Minimal title length 10 Current title len: 2"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Minimal title length 10 Current title len: 2"#,
+        );
     });
 }
 
@@ -714,10 +736,13 @@ fn post_add_event_owner_invalid_date() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "Invalid date");
         check_html(&html, "h1", "Invalid date");
-        assert!(html.contains(r#"Invalid date '2030-02-30 08:00' offset '-180'"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Invalid date '2030-02-30 08:00' offset '-180'"#,
+        );
     });
 }
 
@@ -747,10 +772,13 @@ fn post_add_event_owner_event_in_the_past() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Can't schedule event to the past");
         check_html(&html, "h1", "Can't schedule event to the past");
-        assert!(html.contains(r#"Can't schedule event to the past '2020-02-10 05:00:00 UTC'"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Can't schedule event to the past '2020-02-10 05:00:00 UTC'"#,
+        );
     });
 }
 
@@ -780,10 +808,13 @@ fn post_add_event_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "Event added");
         check_html(&html, "h1", "Event added");
-        assert!(html.contains(r#"Event added: <a href="/event/1">Event title</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Event added: <a href="/event/1">Event title</a>"#,
+        );
     });
 }
 
@@ -811,6 +842,8 @@ fn get_edit_event_as_guest() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        check_html(&html, "#message", "You are not logged in");
     });
 }
 
@@ -828,6 +861,8 @@ fn get_edit_event_as_user_no_eid() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "404 Not Found");
+        check_html(&html, "h1", "404 Not Found");
+        check_html(&html, "#message", "404 Not Found");
     });
 }
 
@@ -843,10 +878,9 @@ fn get_edit_event_as_user_but_not_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
-        assert!(html.contains("You are not the owner of group <b>1</b>"));
+        check_html(&html, "#message", "You are not the owner of group <b>1</b>");
     });
 }
 #[test]
