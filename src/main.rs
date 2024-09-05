@@ -1020,7 +1020,7 @@ async fn user(dbh: &State<Surreal<Client>>, visitor: Visitor, uid: usize) -> Tem
     if !user.verified {
         return Template::render(
             "message",
-            context! {title: "Unverified user", message: format!("This user has not verified his email address yet"), config, visitor},
+            context! {title: "Unverified user", message: format!("This user has not verified the email address yet."), config, visitor},
         );
     }
 

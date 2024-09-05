@@ -12,6 +12,9 @@ use crate::test_lib::{params, read_code_from_email};
 pub const FOO_EMAIL: &str = "foo@meet-os.com";
 pub const FOO_PW: &str = "123foo";
 pub const USER_EMAIL: &str = "user@meet-os.com";
+pub const UNVERIFIED_EMAIL: &str = "unverified@meet-os.com";
+pub const UNVERIFIED_PW: &str = "qwerty";
+pub const UNVERIFIED_NAME: &str = "Halfway Through";
 pub const ADMIN_EMAIL: &str = "admin@meet-os.com";
 pub const ADMIN_PW: &str = "123456";
 pub const ADMIN_NAME: &str = "Site Manager";
@@ -63,6 +66,10 @@ pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
 
 pub fn setup_user(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, "Foo 1", USER_EMAIL, "password1", &email_folder);
+}
+
+pub fn setup_unverified_user(client: &Client, email_folder: &PathBuf) {
+    register_user(&client, UNVERIFIED_NAME, UNVERIFIED_EMAIL, UNVERIFIED_PW);
 }
 
 pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {

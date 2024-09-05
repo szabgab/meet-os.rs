@@ -1,6 +1,7 @@
 use crate::test_helpers::{
-    logout, register_and_verify_user, setup_admin, setup_many_users, setup_owner, ADMIN_EMAIL,
-    ADMIN_NAME, ADMIN_PW, FOO_EMAIL,
+    logout, register_and_verify_user, setup_admin, setup_many_users, setup_owner,
+    setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, FOO_EMAIL,
+    UNVERIFIED_NAME,
 };
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
@@ -499,5 +500,47 @@ fn user_page() {
         assert!(html.contains(r#"<td>No GitHub provided.</td"#));
         assert!(html.contains(r#"<td>No GitLab provided.</td"#));
         assert!(html.contains(r#"<td>No LinkedIn provided.</td>"#));
+    });
+}
+
+#[test]
+fn unverified_user_page_by_guest() {
+    run_inprocess(|email_folder, client| {
+        setup_unverified_user(&client, &email_folder);
+        logout(&client);
+
+        let res = client.get("/user/1").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Unverified user");
+        check_html(&html, "h1", "Unverified user");
+        assert!(html.contains("This user has not verified the email address yet."));
+        assert!(!html.contains(UNVERIFIED_NAME));
+    });
+
+    // TODO check by logged in user, owner, and admin as well
+}
+
+#[test]
+fn unverified_user_on_user_page_by_guest() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_user(&client, &email_folder);
+        setup_unverified_user(&client, &email_folder);
+        logout(&client);
+
+        let res = client.get("/users").dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "List Users");
+        check_html(&html, "h1", "List Users");
+        assert!(html.contains(r#"<a href="/user/1">Site Manager</a>"#));
+        assert!(html.contains(r#"<a href="/user/2">Foo 1</a></li>"#));
+        assert!(!html.contains(UNVERIFIED_NAME));
+
+        // TODO check by logged in user, owner, and admin as well
     });
 }
