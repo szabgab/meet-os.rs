@@ -1,7 +1,7 @@
 use crate::test_helpers::{register_and_verify_user, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
-    extract_cookie, params, read_code_from_email, run_inprocess,
+    params, read_code_from_email, run_inprocess,
 };
 use rocket::http::{ContentType, Status};
 
@@ -47,8 +47,6 @@ fn register_user() {
         // Verify the email
         let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
         assert_eq!(res.status(), Status::Ok);
-
-        let cookie_str = extract_cookie(&res);
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Thank you for registering");
@@ -147,7 +145,6 @@ fn login_regular_user() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
 
-        let cookie_str = extract_cookie(&res);
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
@@ -180,7 +177,6 @@ fn login_regular_user() {
         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
         // If we want to make sure that the user cannot access the system any more we'll have to manage the login information
         // on the server side.
-        //check_profile_page_in_process(&client, &url, &cookie_str, "");
     });
 }
 
@@ -200,7 +196,6 @@ fn login_admin_user() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
 
-        let cookie_str = extract_cookie(&res);
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "x");
@@ -224,7 +219,6 @@ fn login_admin_user() {
         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
         // If we want to make sure that the user cannot access the system any more we'll have to manage the login information
         // on the server side.
-        //check_profile_page_in_process(&client, &url, &cookie_str, "");
     });
 }
 

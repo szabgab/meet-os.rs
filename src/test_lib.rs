@@ -58,21 +58,6 @@ pub fn check_profile_page_in_process(client: &Client, email: &str, h1: &str) {
     }
 }
 
-pub fn extract_cookie(res: &rocket::local::blocking::LocalResponse) -> String {
-    let cookie = res.headers().get_one("set-cookie").unwrap();
-    println!("cookie: {cookie}");
-    assert!(cookie.contains("meet-os="));
-    let re = Regex::new("meet-os=([^;]+);").unwrap();
-    let cookie_str = match re.captures(cookie) {
-        Some(value) => value[1].to_owned(),
-        None => panic!("Code not found cookie"),
-    };
-
-    println!("cookie_str: {cookie_str}");
-
-    cookie_str
-}
-
 pub fn check_guest_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 

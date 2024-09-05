@@ -7,7 +7,7 @@ use rocket::http::{ContentType, Status};
 use rocket::local::blocking::Client;
 use scraper::{Html, Selector};
 
-use crate::test_lib::{extract_cookie, params, read_code_from_email};
+use crate::test_lib::{params, read_code_from_email};
 
 pub const FOO_EMAIL: &str = "foo@meet-os.com";
 
