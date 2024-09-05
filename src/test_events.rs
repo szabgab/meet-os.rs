@@ -26,7 +26,11 @@ fn leave_event_before_joining_it() {
         //assert_eq!(html, "");
         check_html(&html, "title", "You were not registered to the event");
         check_html(&html, "h1", "You were not registered to the event");
-        assert!(html.contains(r#"You were not registered to the <a href="/event/1">event</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"You were not registered to the <a href="/event/1">event</a>"#,
+        );
     });
 }
 
@@ -72,7 +76,11 @@ fn join_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "RSVPed to event");
         check_html(&html, "h1", "RSVPed to event");
-        assert!(html.contains(r#"User RSVPed to <a href="/event/1">event</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"User RSVPed to <a href="/event/1">event</a>"#,
+        );
 
         // check if user has joined the group
         let res = client.get("/group/1").dispatch();
@@ -113,7 +121,11 @@ fn join_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Not attending");
         check_html(&html, "h1", "Not attending");
-        assert!(html.contains(r#"User not attending <a href="/event/1">event</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"User not attending <a href="/event/1">event</a>"#,
+        );
 
         // check if user is NOT listed on the event page
         let res = client
@@ -152,7 +164,11 @@ fn join_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "RSVPed to event");
         check_html(&html, "h1", "RSVPed to event");
-        assert!(html.contains(r#"User RSVPed to <a href="/event/1">event</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"User RSVPed to <a href="/event/1">event</a>"#,
+        );
 
         // check if user is listed on the event page
         let res = client
@@ -181,6 +197,7 @@ fn join_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "You were already RSVPed");
         check_html(&html, "h1", "You were already RSVPed");
+        check_html(&html, "#message", "You were already RSVPed");
     })
 }
 
@@ -198,6 +215,7 @@ fn join_not_existing_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "No such event");
         check_html(&html, "h1", "No such event");
+        check_html(&html, "#message", "No such event");
     })
 }
 
@@ -215,6 +233,7 @@ fn leave_not_existing_event() {
         //assert_eq!(html, "");
         check_html(&html, "title", "No such event");
         check_html(&html, "h1", "No such event");
+        check_html(&html, "#message", "No such event")
     })
 }
 
@@ -229,6 +248,7 @@ fn join_event_guest() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Not logged in");
         check_html(&html, "h1", "Not logged in");
+        check_html(&html, "#message", "You are not logged in");
     })
 }
 
@@ -243,6 +263,7 @@ fn leave_event_guest() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Not logged in");
         check_html(&html, "h1", "Not logged in");
+        check_html(&html, "#message", "You are not logged in");
     })
 }
 
@@ -262,7 +283,11 @@ fn join_event_by_group_owner() {
         check_html(&html, "title", "You are the owner of this group");
         check_html(&html, "h1", "You are the owner of this group");
 
-        assert!(html.contains("You cannot join an event in a group you own."));
+        check_html(
+            &html,
+            "#message",
+            "You cannot join an event in a group you own.",
+        );
     });
 }
 
@@ -278,6 +303,8 @@ fn post_edit_event_guest() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Not logged in");
+        check_html(&html, "h1", "Not logged in");
+        check_html(&html, "#message", "You are not logged in");
     });
 }
 
@@ -295,7 +322,11 @@ fn post_edit_event_user_missing_data() {
         assert_eq!(res.status(), Status::UnprocessableEntity);
 
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
+        //assert_eq!(html, "");
+        check_html(&html, "title", "422 Unprocessable Entity");
+        check_html(&html, "h1", "422: Unprocessable Entity");
+        // TODO setup catcher for this
+        //check_html(&html, "#message",
     });
 }
 
@@ -510,7 +541,8 @@ fn get_add_event_guest() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Not logged in");
-        // assert_eq!(html, "");
+        check_html(&html, "h1", "Not logged in");
+        check_html(&html, "#message", "You are not logged in");
     });
 }
 
