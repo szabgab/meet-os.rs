@@ -173,3 +173,12 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     //assert_eq!(res.status(), Status::Ok);
     rocket::info!("--------------- finished setup_many ----------------")
 }
+
+pub fn setup_for_events(client: &Client, email_folder: &PathBuf) {
+    setup_admin(&client, &email_folder);
+    setup_foo(&client, &email_folder);
+    setup_foo1(&client, &email_folder);
+    create_group_helper(&client, "First Group", 2);
+    setup_event(&client, 1);
+    logout(&client);
+}

@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_and_verify_user, setup_many, FOO_EMAIL};
+use crate::test_helpers::{logout, register_and_verify_user, setup_admin, setup_foo, FOO_EMAIL};
 use crate::test_lib::{
     check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
     read_code_from_email, run_inprocess,
@@ -145,7 +145,10 @@ fn save_password_get_invalid_uid() {
 #[test]
 fn save_password_get_invalid_code() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        logout(&client);
+
         let res = client.get("/save-password/2/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -179,7 +182,10 @@ fn save_password_post_invalid_uid() {
 #[test]
 fn save_password_post_invalid_code() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        logout(&client);
+
         let res = client
             .post("/save-password")
             .header(ContentType::Form)

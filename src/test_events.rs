@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_foo, setup_many, FOO1_EMAIL, FOO_EMAIL};
+use crate::test_helpers::{setup_foo, setup_for_events, FOO1_EMAIL, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -12,7 +12,7 @@ use rocket::http::{ContentType, Status};
 #[test]
 fn leave_event_before_joining_it() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/rsvp-no-event?eid=1")
@@ -30,7 +30,7 @@ fn leave_event_before_joining_it() {
 #[test]
 fn join_event() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         // event page before
         let res = client
@@ -184,7 +184,7 @@ fn join_event() {
 #[test]
 fn join_not_existing_event() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/rsvp-yes-event?eid=10")
@@ -201,7 +201,7 @@ fn join_not_existing_event() {
 #[test]
 fn leave_not_existing_event() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/rsvp-no-event?eid=10")
@@ -218,7 +218,7 @@ fn leave_not_existing_event() {
 #[test]
 fn join_event_guest() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client.get("/rsvp-yes-event?eid=1").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
@@ -232,7 +232,7 @@ fn join_event_guest() {
 #[test]
 fn leave_event_guest() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client.get("/rsvp-no-event?eid=1").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
@@ -246,7 +246,7 @@ fn leave_event_guest() {
 #[test]
 fn join_event_by_group_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/rsvp-yes-event?eid=1")
@@ -361,7 +361,7 @@ fn add_event_get_user_missing_gid() {
 #[test]
 fn add_event_get_user_not_the_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/add-event?gid=1")
@@ -381,7 +381,7 @@ fn add_event_get_user_not_the_owner() {
 #[test]
 fn add_event_get_user_is_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/add-event?gid=1")
@@ -403,7 +403,7 @@ fn add_event_get_user_is_owner() {
 #[test]
 fn visit_event_as_guest() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client.get("/event/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -447,7 +447,7 @@ fn get_edit_event_as_user_no_eid() {
 #[test]
 fn get_edit_event_as_user_but_not_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/edit-event?eid=1")
@@ -465,7 +465,7 @@ fn get_edit_event_as_user_but_not_owner() {
 #[test]
 fn get_edit_event_as_owner_with_eid() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .get("/edit-event?eid=1")
