@@ -88,9 +88,9 @@ pub fn check_user_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 }
 
-pub fn check_html(html: &str, tag: &str, text: &str) {
+pub fn check_html(html: &str, selectors: &str, text: &str) {
     let document = Html::parse_document(html);
-    let selector = Selector::parse(tag).unwrap();
+    let selector = Selector::parse(selectors).unwrap();
     assert_eq!(
         document.select(&selector).next().unwrap().inner_html(),
         text
