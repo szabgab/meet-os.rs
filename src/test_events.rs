@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_foo, setup_many, FOO_EMAIL};
+use crate::test_helpers::{setup_foo, setup_many, FOO1_EMAIL, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -16,7 +16,7 @@ fn leave_event_before_joining_it() {
 
         let res = client
             .get("/rsvp-no-event?eid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -35,7 +35,7 @@ fn join_event() {
         // event page before
         let res = client
             .get("/event/1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -62,7 +62,7 @@ fn join_event() {
         // RSVP to event
         let res = client
             .get("/rsvp-yes-event?eid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -86,7 +86,7 @@ fn join_event() {
         // check if user is listed on the event page
         let res = client
             .get("/event/1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -103,7 +103,7 @@ fn join_event() {
         // leave event
         let res = client
             .get("/rsvp-no-event?eid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -115,7 +115,7 @@ fn join_event() {
         // check if user is NOT listed on the event page
         let res = client
             .get("/event/1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -142,7 +142,7 @@ fn join_event() {
         // join event again
         let res = client
             .get("/rsvp-yes-event?eid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -154,7 +154,7 @@ fn join_event() {
         // check if user is listed on the event page
         let res = client
             .get("/event/1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -171,7 +171,7 @@ fn join_event() {
         // join event again while already joined
         let res = client
             .get("/rsvp-yes-event?eid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -188,7 +188,7 @@ fn join_not_existing_event() {
 
         let res = client
             .get("/rsvp-yes-event?eid=10")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -205,7 +205,7 @@ fn leave_not_existing_event() {
 
         let res = client
             .get("/rsvp-no-event?eid=10")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -250,7 +250,7 @@ fn join_event_by_group_owner() {
 
         let res = client
             .get("/rsvp-yes-event?eid=1")
-            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -363,11 +363,9 @@ fn add_event_get_user_not_the_owner() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo1_email = "foo1@meet-os.com";
-
         let res = client
             .get("/add-event?gid=1")
-            .private_cookie(("meet-os", foo1_email))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -451,11 +449,9 @@ fn get_edit_event_as_user_but_not_owner() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo1_email = "foo1@meet-os.com";
-
         let res = client
             .get("/edit-event?eid=1")
-            .private_cookie(("meet-os", foo1_email))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);

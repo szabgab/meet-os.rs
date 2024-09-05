@@ -138,7 +138,7 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
         "First event",
         "2030-01-01 10:10",
         "1",
-        String::from("foo@meet-os.com"),
+        String::from(FOO_EMAIL),
     );
 
     add_event_helper(
@@ -146,7 +146,7 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
         "Second event",
         "2030-01-02 10:10",
         "1",
-        String::from("foo@meet-os.com"),
+        String::from(FOO_EMAIL),
     );
 
     add_event_helper(
@@ -154,7 +154,7 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
         "Third event",
         "2030-01-03 10:10",
         "2",
-        String::from("foo@meet-os.com"),
+        String::from(FOO_EMAIL),
     );
 
     // Make sure the client is not logged in after the setup

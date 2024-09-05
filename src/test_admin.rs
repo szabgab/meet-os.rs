@@ -61,7 +61,7 @@ fn admin_users_page_as_guest() {
 fn admin_users_page_as_user() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
-        login_helper(&client, "foo@meet-os.com", "123foo");
+        login_helper(&client, FOO_EMAIL, "123foo");
 
         let res = client.get("/admin/users").dispatch();
         assert_eq!(res.status(), Status::Forbidden);

@@ -358,13 +358,12 @@ fn login_with_invalid_email() {
 #[test]
 fn register_with_short_password() {
     run_inprocess(|email_folder, client| {
-        let email = "foo@meet-os.com";
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
             .body(params!([
                 ("name", "Foo Bar"),
-                ("email", email),
+                ("email", FOO_EMAIL),
                 ("password", "123"),
             ]))
             .dispatch();
