@@ -47,10 +47,7 @@ fn admin_page_as_admin() {
 fn admin_users_page_as_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/admin/users").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
+        check_not_logged_in(res);
     })
 }
 
@@ -90,9 +87,7 @@ fn admin_users_page_as_admin() {
 fn admin_search_get_as_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/admin/search").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
+        check_not_logged_in(res);
     })
 }
 
@@ -131,9 +126,7 @@ fn admin_search_post_as_guest() {
             .post("/admin/search")
             .header(ContentType::Form)
             .dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
+        check_not_logged_in(res);
     })
 }
 
@@ -194,10 +187,7 @@ fn admin_search_post_as_admin() {
 fn admin_audit_as_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/admin/audit").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
+        check_not_logged_in(res);
     })
 }
 

@@ -1,20 +1,12 @@
 use crate::test_helpers::{setup_many, setup_many_users, OWNER_EMAIL, USER_EMAIL};
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 #[test]
 fn contact_members_get_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/contact-members").dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-
-        check_html(&html, "title", "Not logged in");
-        //assert_eq!(html, "");
-        // check_html(&html, "title", "Register");
-        // check_html(&html, "h1", "Register");
-        // assert!(html.contains(r#"<form method="POST" action="/register">"#));
+        check_not_logged_in(res);
     });
 }
 
@@ -109,11 +101,7 @@ fn contact_members_post_guest() {
             .post("/contact-members")
             .header(ContentType::Form)
             .dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-
-        check_html(&html, "title", "Not logged in");
+        check_not_logged_in(res);
     });
 }
 

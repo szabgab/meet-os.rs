@@ -2,7 +2,7 @@ use crate::test_helpers::{
     create_group_helper, logout, register_and_verify_user, setup_admin, setup_owner, setup_user,
     ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL,
 };
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form
@@ -136,13 +136,7 @@ fn create_group_guest() {
     run_inprocess(|email_folder, client| {
         // Access the Group creation page without user
         let res = client.get("/admin/create-group?uid=1").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-
-        // assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("You are not logged in"));
+        check_not_logged_in(res);
 
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -162,12 +156,7 @@ fn create_group_guest() {
                 ("owner", "1"),
             ]))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("You are not logged in"));
+        check_not_logged_in(res);
 
         // List the groups
         let res = client.get("/groups").dispatch();
@@ -184,13 +173,7 @@ fn create_group_guest() {
 fn get_join_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/join-group?gid=1").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-
-        // assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("You are not logged in"));
+        check_not_logged_in(res);
     })
 }
 
@@ -326,13 +309,7 @@ fn get_join_group_as_owner() {
 fn get_leave_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/leave-group?gid=1").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-
-        // assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("You are not logged in"));
+        check_not_logged_in(res);
     })
 }
 
@@ -402,12 +379,7 @@ fn get_leave_group_user_does_not_belong_to() {
 fn get_edit_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/edit-group").dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("You are not logged in"));
+        check_not_logged_in(res);
     });
 }
 
@@ -502,12 +474,7 @@ fn post_edit_group_guest() {
             .post("/edit-group")
             .header(ContentType::Form)
             .dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        assert!(html.contains("You are not logged in"));
+        check_not_logged_in(res);
     });
 }
 #[test]
