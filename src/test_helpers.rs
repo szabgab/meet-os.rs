@@ -10,6 +10,7 @@ use scraper::{Html, Selector};
 use crate::test_lib::{params, read_code_from_email};
 
 pub const FOO_EMAIL: &str = "foo@meet-os.com";
+pub const FOO1_EMAIL: &str = "foo1@meet-os.com";
 
 pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
     let admin_email = "admin@meet-os.com";
@@ -100,6 +101,10 @@ pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
 
 pub fn setup_foo(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
+}
+
+pub fn setup_foo1(client: &Client, email_folder: &PathBuf) {
+    register_and_verify_user(&client, "Foo 1", FOO1_EMAIL, "password1", &email_folder);
 }
 
 pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {

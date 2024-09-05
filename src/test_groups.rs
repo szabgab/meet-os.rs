@@ -1,5 +1,6 @@
 use crate::test_helpers::{
-    register_and_verify_user, setup_admin, setup_foo, setup_many, FOO_EMAIL,
+    create_group_helper, register_and_verify_user, setup_admin, setup_foo, setup_foo1, setup_many,
+    FOO1_EMAIL, FOO_EMAIL,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
@@ -220,7 +221,7 @@ fn join_group_as_user() {
 
         let res = client
             .get("/join-group?gid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -301,11 +302,13 @@ fn join_group_as_user() {
 #[test]
 fn join_group_as_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
 
         let res = client
             .get("/join-group?gid=1")
-            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -334,11 +337,11 @@ fn leave_group_guest() {
 #[test]
 fn leave_not_existing_group() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .get("/leave-group?gid=20")
-            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -353,11 +356,13 @@ fn leave_not_existing_group() {
 #[test]
 fn leave_group_as_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
 
         let res = client
             .get("/leave-group?gid=1")
-            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -372,11 +377,14 @@ fn leave_group_as_owner() {
 #[test]
 fn leave_group_user_does_not_belong_to() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        setup_foo1(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
 
         let res = client
             .get("/leave-group?gid=1")
-            .private_cookie(("meet-os", "foo1@meet-os.com"))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -405,6 +413,7 @@ fn edit_group_get_guest() {
 fn edit_group_get_user_no_such_group() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
+
         let res = client
             .get("/edit-group?gid=1")
             .private_cookie(("meet-os", FOO_EMAIL))
@@ -422,12 +431,14 @@ fn edit_group_get_user_no_such_group() {
 #[test]
 fn edit_group_get_user_is_not_the_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        setup_foo1(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
 
-        let foo1_email = "foo1@meet-os.com";
         let res = client
             .get("/edit-group?gid=1")
-            .private_cookie(("meet-os", foo1_email))
+            .private_cookie(("meet-os", FOO1_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
