@@ -1,7 +1,7 @@
 use crate::test_helpers::{
     logout, register_and_verify_user, setup_admin, setup_many_users, setup_owner,
-    setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, FOO_EMAIL,
-    UNVERIFIED_NAME,
+    setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OWNER_EMAIL, OWNER_NAME,
+    OWNER_PW, UNVERIFIED_NAME,
 };
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
@@ -28,14 +28,13 @@ fn try_page_without_cookie() {
 #[test]
 fn register_user() {
     run_inprocess(|email_folder, client| {
-        let email = "foo@meet-os.com";
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
             .body(params!([
-                ("name", "Foo Bar"),
-                ("email", email),
-                ("password", "123456"),
+                ("name", OWNER_NAME),
+                ("email", OWNER_EMAIL),
+                ("password", OWNER_PW),
             ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -43,7 +42,8 @@ fn register_user() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "We sent you an email");
-        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
+        let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
+        assert!(html.contains(&expected));
         check_guest_menu(&html);
 
         let (uid, code) = read_code_from_email(&email_folder, "0.txt", "verify-email");
@@ -58,7 +58,7 @@ fn register_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(&client, email, "Foo Bar");
+        check_profile_page_in_process(&client, OWNER_EMAIL, OWNER_NAME);
     });
 }
 
@@ -81,9 +81,9 @@ fn verify_with_bad_code() {
             .post(format!("/register"))
             .header(ContentType::Form)
             .body(params!([
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
+                ("name", OWNER_NAME),
+                ("email", OWNER_EMAIL),
+                ("password", OWNER_PW),
             ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -104,9 +104,9 @@ fn duplicate_email() {
             .post(format!("/register"))
             .header(ContentType::Form)
             .body(params!([
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
+                ("name", OWNER_NAME),
+                ("email", OWNER_EMAIL),
+                ("password", OWNER_PW),
             ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -115,15 +115,16 @@ fn duplicate_email() {
         let html = res.into_string().unwrap();
         check_guest_menu(&html);
         check_html(&html, "title", "We sent you an email");
-        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."));
+        let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
+        assert!(html.contains(&expected));
 
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
             .body(params!([
-                ("name", "Foo Bar"),
-                ("email", "foo@meet-os.com"),
-                ("password", "123456"),
+                ("name", OWNER_NAME),
+                ("email", OWNER_EMAIL),
+                ("password", OWNER_PW),
             ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -138,14 +139,14 @@ fn duplicate_email() {
 #[test]
 fn login_regular_user() {
     run_inprocess(|email_folder, client| {
-        register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123456", &email_folder);
+        register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 
-        check_profile_page_in_process(&client, &FOO_EMAIL, "Foo Bar");
+        check_profile_page_in_process(&client, &OWNER_EMAIL, OWNER_NAME);
 
         let res = client
             .post("/login")
             .header(ContentType::Form)
-            .body(params!([("email", FOO_EMAIL), ("password", "123456")]))
+            .body(params!([("email", OWNER_EMAIL), ("password", OWNER_PW)]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
 
@@ -156,7 +157,7 @@ fn login_regular_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(&client, &FOO_EMAIL, "Foo Bar");
+        check_profile_page_in_process(&client, &OWNER_EMAIL, "Foo Bar");
 
         // TODO: logout requires a logged in user
         //let res = client.get("/logout").dispatch();
@@ -168,7 +169,7 @@ fn login_regular_user() {
         // logout
         let res = client
             .get("/logout")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -362,7 +363,7 @@ fn register_with_short_password() {
             .header(ContentType::Form)
             .body(params!([
                 ("name", "Foo Bar"),
-                ("email", FOO_EMAIL),
+                ("email", OWNER_EMAIL),
                 ("password", "123"),
             ]))
             .dispatch();
@@ -397,7 +398,7 @@ fn edit_profile_get_user() {
 
         let res = client
             .get("/edit-profile")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);

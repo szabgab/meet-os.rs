@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_for_events, setup_owner, FOO_EMAIL, USER_EMAIL};
+use crate::test_helpers::{setup_for_events, setup_owner, OWNER_EMAIL, USER_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -250,7 +250,7 @@ fn join_event_by_group_owner() {
 
         let res = client
             .get("/rsvp-yes-event?eid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -286,7 +286,7 @@ fn edit_event_post_user_missing_data() {
         let res = client
             .post("/edit-event")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::UnprocessableEntity);
@@ -312,7 +312,7 @@ fn edit_event_post_user_no_such_event() {
                 ("offset", "-180"),
                 ("eid", "1"),
             ]))
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -346,7 +346,7 @@ fn add_event_get_user_missing_gid() {
 
         let res = client
             .get("/add-event")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::NotFound);
@@ -385,7 +385,7 @@ fn add_event_get_user_is_owner() {
 
         let res = client
             .get("/add-event?gid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -434,7 +434,7 @@ fn get_edit_event_as_user_no_eid() {
 
         let res = client
             .get("/edit-event")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::NotFound);
@@ -469,7 +469,7 @@ fn get_edit_event_as_owner_with_eid() {
 
         let res = client
             .get("/edit-event?eid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);

@@ -1,6 +1,6 @@
 use crate::test_helpers::{
     create_group_helper, logout, register_and_verify_user, setup_admin, setup_owner, setup_user,
-    ADMIN_EMAIL, FOO_EMAIL, USER_EMAIL,
+    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
@@ -201,7 +201,7 @@ fn join_not_existing_group_as_user() {
 
         let res = client
             .get("/join-group?gid=20")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -310,7 +310,7 @@ fn join_group_as_owner() {
 
         let res = client
             .get("/join-group?gid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -343,7 +343,7 @@ fn leave_not_existing_group() {
 
         let res = client
             .get("/leave-group?gid=20")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -364,7 +364,7 @@ fn leave_group_as_owner() {
 
         let res = client
             .get("/leave-group?gid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -418,7 +418,7 @@ fn edit_group_get_user_no_such_group() {
 
         let res = client
             .get("/edit-group?gid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -461,7 +461,7 @@ fn edit_group_get_by_owner() {
 
         let res = client
             .get("/edit-group?gid=1")
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -518,7 +518,7 @@ fn edit_group_post_user_missing_gid() {
         let res = client
             .post("/edit-group")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::UnprocessableEntity);
@@ -540,7 +540,7 @@ fn edit_group_post_user_no_such_group() {
         let res = client
             .post("/edit-group")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("name", "Update"),
@@ -600,7 +600,7 @@ fn edit_group_post_owner() {
         let res = client
             .post("/edit-group")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", FOO_EMAIL))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("name", "Updated name"),

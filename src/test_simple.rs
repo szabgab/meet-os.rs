@@ -1,3 +1,4 @@
+use crate::test_helpers::{OWNER_EMAIL, OWNER_NAME};
 use crate::test_lib::{
     check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
     read_code_from_email, run_inprocess,
@@ -44,8 +45,6 @@ fn test_register_with_too_long_username() {
 #[test]
 fn test_simple() {
     run_inprocess(|email_folder, client| {
-        let email = "foo@meet-os.com";
-
         // register user
         let res = client
             .post("/register")
@@ -71,7 +70,7 @@ fn test_simple() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(&client, email, "Foo Bar");
+        check_profile_page_in_process(&client, OWNER_EMAIL, OWNER_NAME);
         //check_profile_page_in_process(&client, "foo@meet-os.com", "");
 
         // register with same email should fail
@@ -88,7 +87,7 @@ fn test_simple() {
         // edit profile page invalid github account
         let res = client
             .post("/edit-profile")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .body("name=XX&github=szabgab*&gitlab=&linkedin&about=")
             .dispatch();
@@ -100,7 +99,7 @@ fn test_simple() {
         // edit profile page invalid gitlab account
         let res = client
             .post("/edit-profile")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .body("name=XX&github=&gitlab=foo*bar&linkedin=&about=")
             .dispatch();
@@ -111,7 +110,7 @@ fn test_simple() {
 
         let res = client
             .post("/edit-profile")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .body("name=XX&github=&gitlab=&linkedin=szabgab&about=")
             .dispatch();
@@ -128,7 +127,7 @@ fn test_simple() {
         // verify that if we submit html tags to the about field, those are properly escaped in the result
         let res = client
             .post("/edit-profile")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .body("name= Lord 😎 Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  &about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n")
             .dispatch();
@@ -141,7 +140,7 @@ fn test_simple() {
         // Check updated profile
         let res = client
             .get("/profile")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);

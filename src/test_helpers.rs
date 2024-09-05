@@ -9,8 +9,9 @@ use scraper::{Html, Selector};
 
 use crate::test_lib::{params, read_code_from_email};
 
-pub const FOO_EMAIL: &str = "foo@meet-os.com";
-pub const FOO_PW: &str = "123foo";
+pub const OWNER_EMAIL: &str = "foo@meet-os.com";
+pub const OWNER_PW: &str = "123foo";
+pub const OWNER_NAME: &str = "Foo Bar";
 pub const USER_EMAIL: &str = "user@meet-os.com";
 pub const UNVERIFIED_EMAIL: &str = "unverified@meet-os.com";
 pub const UNVERIFIED_PW: &str = "qwerty";
@@ -61,7 +62,7 @@ pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
 }
 
 pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, FOO_PW, &email_folder);
+    register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 }
 
 pub fn setup_user(client: &Client, email_folder: &PathBuf) {
@@ -102,7 +103,7 @@ pub fn login_admin(client: &Client) {
 }
 
 pub fn login_owner(client: &Client) {
-    login_helper(client, FOO_EMAIL, FOO_PW);
+    login_helper(client, OWNER_EMAIL, OWNER_PW);
 }
 
 fn login_helper(client: &Client, email: &str, password: &str) {
@@ -157,21 +158,21 @@ pub fn setup_event(client: &Client, eid: usize) {
             "First event",
             "2030-01-01 10:10",
             "1",
-            String::from(FOO_EMAIL),
+            String::from(OWNER_EMAIL),
         ),
         2 => add_event_helper(
             &client,
             "Second event",
             "2030-01-02 10:10",
             "1",
-            String::from(FOO_EMAIL),
+            String::from(OWNER_EMAIL),
         ),
         3 => add_event_helper(
             &client,
             "Third event",
             "2030-01-03 10:10",
             "2",
-            String::from(FOO_EMAIL),
+            String::from(OWNER_EMAIL),
         ),
 
         _ => panic!("no such eid",),

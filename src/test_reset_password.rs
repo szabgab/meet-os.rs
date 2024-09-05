@@ -1,4 +1,6 @@
-use crate::test_helpers::{logout, register_and_verify_user, setup_admin, setup_owner, FOO_EMAIL};
+use crate::test_helpers::{
+    logout, register_and_verify_user, setup_admin, setup_owner, OWNER_EMAIL,
+};
 use crate::test_lib::{
     check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
     read_code_from_email, run_inprocess,
@@ -10,7 +12,7 @@ use rocket::http::{ContentType, Status};
 fn reset_password_full() {
     run_inprocess(|email_folder, client| {
         let name = "Foo Bar";
-        register_and_verify_user(&client, name, FOO_EMAIL, "123456", &email_folder);
+        register_and_verify_user(&client, name, OWNER_EMAIL, "123456", &email_folder);
 
         let res = client.get("/profile").dispatch();
         assert_eq!(
@@ -49,7 +51,7 @@ fn reset_password_full() {
         let res = client
             .post("/reset-password")
             .header(ContentType::Form)
-            .body(params!([("email", FOO_EMAIL),]))
+            .body(params!([("email", OWNER_EMAIL),]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -114,7 +116,10 @@ fn reset_password_full() {
         let res = client
             .post("/login")
             .header(ContentType::Form)
-            .body(params!([("email", FOO_EMAIL), ("password", &new_password)]))
+            .body(params!([
+                ("email", OWNER_EMAIL),
+                ("password", &new_password)
+            ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -122,7 +127,7 @@ fn reset_password_full() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Welcome back");
         check_user_menu(&html);
-        check_profile_page_in_process(&client, &FOO_EMAIL, name);
+        check_profile_page_in_process(&client, &OWNER_EMAIL, name);
 
         // Try again with the same code
         // Try with id that does not exist
