@@ -1337,17 +1337,7 @@ async fn edit_event_post(
         location,
         group_id: event.group_id,
     };
-    match db::update_event(dbh, &event).await {
-        Ok(result) => result,
-        Err(err) => {
-            rocket::info!("Error while trying to add event {err}");
-            // TODO special reporting when the email is already in the system
-            return Template::render(
-                "message",
-                context! {title: "Adding event failed", message: "Could not add event.", config, visitor},
-            );
-        }
-    };
+    db::update_event(dbh, &event).await.unwrap();
 
     Template::render(
         "message",
