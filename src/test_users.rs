@@ -1,4 +1,6 @@
-use crate::test_helpers::{register_and_verify_user, setup_many_users, FOO_EMAIL};
+use crate::test_helpers::{
+    register_and_verify_user, setup_admin, setup_foo, setup_many_users, FOO_EMAIL,
+};
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
     params, read_code_from_email, run_inprocess,
@@ -393,7 +395,7 @@ fn edit_profile_get_guest() {
 #[test]
 fn edit_profile_get_user() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .get("/edit-profile")
@@ -485,7 +487,8 @@ fn user_id_that_does_not_exist() {
 #[test]
 fn user_page() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client.get("/user/2").dispatch();
 

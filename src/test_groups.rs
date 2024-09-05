@@ -1,4 +1,6 @@
-use crate::test_helpers::{register_and_verify_user, setup_many, setup_many_users, FOO_EMAIL};
+use crate::test_helpers::{
+    register_and_verify_user, setup_admin, setup_foo, setup_many, FOO_EMAIL,
+};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -14,7 +16,8 @@ use rocket::http::{ContentType, Status};
 #[test]
 fn create_group_by_admin() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
         let admin_email = "admin@meet-os.com";
 
         // Access the Group creation page with authorized user
@@ -194,11 +197,11 @@ fn join_group_guest() {
 #[test]
 fn join_not_existing_group_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .get("/join-group?gid=20")
-            .private_cookie(("meet-os", "foo@meet-os.com"))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -401,7 +404,7 @@ fn edit_group_get_guest() {
 #[test]
 fn edit_group_get_user_no_such_group() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
         let res = client
             .get("/edit-group?gid=1")
             .private_cookie(("meet-os", FOO_EMAIL))
@@ -497,7 +500,7 @@ fn edit_group_post_guest() {
 #[test]
 fn edit_group_post_user_missing_gid() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .post("/edit-group")
@@ -519,7 +522,7 @@ fn edit_group_post_user_missing_gid() {
 #[test]
 fn edit_group_post_user_no_such_group() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .post("/edit-group")

@@ -90,14 +90,21 @@ pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, own
     //rocket::info!("{html}");
 }
 
-pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
+pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
     let name = "Site Manager";
     let email = "admin@meet-os.com";
     let password = "123456";
 
     register_and_verify_user(&client, name, email, password, &email_folder);
+}
 
+pub fn setup_foo(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
+}
+
+pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
+    setup_admin(client, email_folder);
+    setup_foo(client, email_folder);
 
     for ix in 1..3 {
         register_and_verify_user(

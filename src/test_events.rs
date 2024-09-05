@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_many, setup_many_users, FOO_EMAIL};
+use crate::test_helpers::{setup_foo, setup_many, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -281,7 +281,7 @@ fn edit_event_post_guest() {
 #[test]
 fn edit_event_post_user_missing_data() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .post("/edit-event")
@@ -299,7 +299,7 @@ fn edit_event_post_user_missing_data() {
 #[test]
 fn edit_event_post_user_no_such_event() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .post("/edit-event")
@@ -342,7 +342,7 @@ fn add_event_get_guest() {
 #[test]
 fn add_event_get_user_missing_gid() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .get("/add-event")
@@ -432,7 +432,7 @@ fn get_edit_event_as_guest() {
 #[test]
 fn get_edit_event_as_user_no_eid() {
     run_inprocess(|email_folder, client| {
-        setup_many_users(&client, &email_folder);
+        setup_foo(&client, &email_folder);
 
         let res = client
             .get("/edit-event")
