@@ -559,6 +559,36 @@ fn edit_group_post_user_no_such_group() {
 }
 
 #[test]
+fn edit_group_post_by_user_not_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
+        logout(&client);
+
+        let res = client
+            .post("/edit-group")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", USER_EMAIL))
+            .body(params!([
+                ("gid", "1"),
+                ("name", "Updated name"),
+                ("location", "Local"),
+                ("description", "Some group"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Not the owner");
+        check_html(&html, "h1", "Not the owner");
+        assert!(html.contains(r#"You are not the owner of the group <b>1</b>"#));
+    });
+}
+
+#[test]
 fn edit_group_post_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);

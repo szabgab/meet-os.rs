@@ -1101,7 +1101,7 @@ async fn edit_group_post(
     if group.owner != uid {
         return Template::render(
             "message",
-            context! {title: "Not the owner", message: format!("Not the owner"), config, visitor},
+            context! {title: "Not the owner", message: format!("You are not the owner of the group <b>{gid}</b>"), config, visitor},
         );
     }
 
