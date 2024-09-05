@@ -130,6 +130,33 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     //assert_eq!(res.status(), Status::Ok);
     rocket::info!("--------------- finished setup_many_users ----------------")
 }
+pub fn setup_event(client: &Client, eid: usize) {
+    match eid {
+        1 => add_event_helper(
+            &client,
+            "First event",
+            "2030-01-01 10:10",
+            "1",
+            String::from(FOO_EMAIL),
+        ),
+        2 => add_event_helper(
+            &client,
+            "Second event",
+            "2030-01-02 10:10",
+            "1",
+            String::from(FOO_EMAIL),
+        ),
+        3 => add_event_helper(
+            &client,
+            "Third event",
+            "2030-01-03 10:10",
+            "2",
+            String::from(FOO_EMAIL),
+        ),
+
+        _ => panic!("no such eid",),
+    }
+}
 
 pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     setup_many_users(client, email_folder);
@@ -137,29 +164,9 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     create_group_helper(&client, "First Group", 2);
     create_group_helper(&client, "Second Group", 2);
     create_group_helper(&client, "Third Group", 3);
-    add_event_helper(
-        &client,
-        "First event",
-        "2030-01-01 10:10",
-        "1",
-        String::from(FOO_EMAIL),
-    );
-
-    add_event_helper(
-        &client,
-        "Second event",
-        "2030-01-02 10:10",
-        "1",
-        String::from(FOO_EMAIL),
-    );
-
-    add_event_helper(
-        &client,
-        "Third event",
-        "2030-01-03 10:10",
-        "2",
-        String::from(FOO_EMAIL),
-    );
+    setup_event(client, 1);
+    setup_event(client, 2);
+    setup_event(client, 3);
 
     // Make sure the client is not logged in after the setup
     let res = client.get(format!("/logout")).dispatch();
