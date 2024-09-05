@@ -63,7 +63,7 @@ fn register_user() {
 }
 
 #[test]
-fn verify_with_non_existent_id() {
+fn get_verify_with_non_existent_id() {
     run_inprocess(|email_folder, client| {
         let res = client.get(format!("/verify-email/1/abc")).dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -75,7 +75,7 @@ fn verify_with_non_existent_id() {
 }
 
 #[test]
-fn verify_with_bad_code() {
+fn get_verify_email_with_bad_code() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post(format!("/register"))
@@ -98,7 +98,7 @@ fn verify_with_bad_code() {
 }
 
 #[test]
-fn duplicate_email() {
+fn post_register_duplicate_email() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post(format!("/register"))
@@ -137,7 +137,7 @@ fn duplicate_email() {
 }
 
 #[test]
-fn login_regular_user() {
+fn post_login_regular_user() {
     run_inprocess(|email_folder, client| {
         register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 
@@ -186,7 +186,7 @@ fn login_regular_user() {
 }
 
 #[test]
-fn login_admin_user() {
+fn post_login_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         logout(&client);
@@ -225,7 +225,7 @@ fn login_admin_user() {
 }
 
 #[test]
-fn register_with_bad_email_address() {
+fn post_register_with_bad_email_address() {
     run_inprocess(|email_folder, client| {
         // register new user
         let res = client
@@ -252,7 +252,7 @@ fn register_with_bad_email_address() {
 // TODO try to login with an email address that was not registered
 
 #[test]
-fn login_with_unregistered_email() {
+fn post_login_with_unregistered_email() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post("/login")
@@ -272,7 +272,7 @@ fn login_with_unregistered_email() {
 }
 
 #[test]
-fn login_with_bad_password() {
+fn post_login_with_bad_password() {
     run_inprocess(|email_folder, client| {
         register_and_verify_user(
             &client,
@@ -282,8 +282,7 @@ fn login_with_bad_password() {
             &email_folder,
         );
 
-        let res = client.get("/logout").dispatch();
-        // TODO
+        logout(&client);
 
         let res = client
             .post("/login")
@@ -306,7 +305,7 @@ fn login_with_bad_password() {
 }
 
 #[test]
-fn login_with_unverified_email() {
+fn post_login_with_unverified_email() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post("/register")
@@ -339,7 +338,7 @@ fn login_with_unverified_email() {
 }
 
 #[test]
-fn login_with_invalid_email() {
+fn post_login_with_invalid_email() {
     run_inprocess(|email_folder, client| {
         // no actual user needed in the system for this to work
         let res = client
@@ -356,7 +355,7 @@ fn login_with_invalid_email() {
 }
 
 #[test]
-fn register_with_short_password() {
+fn post_register_with_short_password() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post(format!("/register"))
@@ -380,7 +379,7 @@ fn register_with_short_password() {
 }
 
 #[test]
-fn edit_profile_get_guest() {
+fn get_edit_profile_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/edit-profile").dispatch();
 
@@ -392,7 +391,7 @@ fn edit_profile_get_guest() {
 }
 
 #[test]
-fn edit_profile_get_user() {
+fn get_edit_profile_user() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -414,7 +413,7 @@ fn edit_profile_get_user() {
 // edit_profile_get_unverified_user should fail
 
 #[test]
-fn register_get_guest() {
+fn get_register_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/register").dispatch();
 
@@ -432,7 +431,7 @@ fn register_get_guest() {
 //
 //
 #[test]
-fn list_users_empty_db_guest() {
+fn get_users_list_users_empty_db_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/users").dispatch();
 
@@ -447,7 +446,7 @@ fn list_users_empty_db_guest() {
 }
 
 #[test]
-fn list_users_many_users_guest() {
+fn get_users_list_users_many_users_guest() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
 
@@ -484,7 +483,7 @@ fn user_id_that_does_not_exist() {
 }
 
 #[test]
-fn user_page() {
+fn get_user_page() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);

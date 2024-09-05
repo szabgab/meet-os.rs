@@ -267,7 +267,7 @@ fn join_event_by_group_owner() {
 }
 
 #[test]
-fn edit_event_post_guest() {
+fn post_edit_event_guest() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post("/edit-event")
@@ -282,7 +282,7 @@ fn edit_event_post_guest() {
 }
 
 #[test]
-fn edit_event_post_user_missing_data() {
+fn post_edit_event_user_missing_data() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -300,7 +300,7 @@ fn edit_event_post_user_missing_data() {
 }
 
 #[test]
-fn edit_event_post_user_no_such_event() {
+fn post_edit_event_user_no_such_event() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
