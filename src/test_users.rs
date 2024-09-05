@@ -234,7 +234,7 @@ fn login_admin_user() {
 // fn login() {
 //    run_inprocess(|email_folder, client| {
 
-//         let register_user_helper(&client, "Foo Bar", "foo@meet-os.com", "123456");
+//         register_user_helper(&client, "Foo Bar", "foo@meet-os.com", "123456");
 //         //check_profile_page_in_process(&client, &url, &cookie_str, "Peti Bar");
 
 //         let res = client

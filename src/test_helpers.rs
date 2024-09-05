@@ -41,7 +41,7 @@ pub fn register_user_helper(
     email: &str,
     password: &str,
     email_folder: &PathBuf,
-) -> String {
+) {
     let res = client
         .post(format!("/register"))
         .header(ContentType::Form)
@@ -66,8 +66,6 @@ pub fn register_user_helper(
 
     let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);
-    let cookie_str = extract_cookie(&res);
-    return cookie_str;
 }
 
 pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, owner_email: String) {
