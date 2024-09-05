@@ -330,6 +330,59 @@ fn post_edit_event_user_no_such_event() {
 }
 
 #[test]
+fn post_edit_event_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_for_events(&client, &email_folder);
+
+        // check the event page before the update
+        let res = client.get("/event/1").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "First event");
+        check_html(&html, "h1", "First event");
+        assert!(html.contains("Virtual"));
+        assert!(html.contains(r#"<span class="datetime" value="2030-01-01T07:10:00Z"></span>"#));
+
+        // update
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .body(params!([
+                ("title", "The new title"),
+                ("date", "2030-10-10 08:00"),
+                ("location", "In a pub"),
+                ("description", "This is the explanation"),
+                ("offset", "-180"),
+                ("eid", "1"),
+            ]))
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Event udapted");
+        check_html(&html, "h1", "Event udapted");
+        assert!(html.contains(r#"Event updated: <a href="/event/1">The new title</a>"#));
+
+        // check the event page before the update
+        let res = client.get("/event/1").dispatch();
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "The new title");
+        check_html(&html, "h1", "The new title");
+        assert!(!html.contains("Virtual"));
+        assert!(html.contains("In a pub"));
+        assert!(html.contains(r#"<span class="datetime" value="2030-10-10T05:00:00Z"></span>"#));
+    });
+}
+
+#[test]
 fn get_add_event_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/add-event").dispatch();
