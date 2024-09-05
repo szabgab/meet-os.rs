@@ -452,6 +452,39 @@ fn post_add_event_user_not_owner() {
 }
 
 #[test]
+fn post_add_event_owner_title_too_short() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
+        create_group_helper(&client, "My group", 2);
+        logout(&client);
+
+        let res = client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .body(params!([
+                ("title", "OK"),
+                ("date", "2030-10-10 08:00"),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("offset", "-180"),
+                ("gid", "1"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Too short a title");
+        check_html(&html, "h1", "Too short a title");
+        assert!(html.contains(r#"Minimal title length 10 Current title len: 2"#));
+    });
+}
+
+#[test]
 fn post_add_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
