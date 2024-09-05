@@ -9,6 +9,8 @@ use scraper::{Html, Selector};
 
 use crate::test_lib::{extract_cookie, params, read_code_from_email};
 
+pub const FOO_EMAIL: &str = "foo@meet-os.com";
+
 pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
     let admin_email = "admin@meet-os.com";
     let res = client
@@ -95,13 +97,7 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
 
     register_user_helper(&client, name, email, password, &email_folder);
 
-    register_user_helper(
-        &client,
-        "Foo Bar",
-        "foo@meet-os.com",
-        "123foo",
-        &email_folder,
-    );
+    register_user_helper(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
 
     for ix in 1..3 {
         register_user_helper(

@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_user_helper, setup_many, setup_many_users};
+use crate::test_helpers::{register_user_helper, setup_many, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -402,10 +402,9 @@ fn edit_group_get_guest() {
 fn edit_group_get_user_no_such_group() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_email = "foo@meet-os.com";
         let res = client
             .get("/edit-group?gid=1")
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -442,10 +441,9 @@ fn edit_group_get_by_owner() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
         let res = client
             .get("/edit-group?gid=1")
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -500,11 +498,11 @@ fn edit_group_post_guest() {
 fn edit_group_post_user_missing_gid() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_email = "foo@meet-os.com";
+
         let res = client
             .post("/edit-group")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::UnprocessableEntity);
@@ -523,11 +521,10 @@ fn edit_group_post_user_no_such_group() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
         let res = client
             .post("/edit-group")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("name", "Update"),
@@ -550,11 +547,10 @@ fn edit_group_post_owner() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
         let res = client
             .post("/edit-group")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("name", "Updated name"),

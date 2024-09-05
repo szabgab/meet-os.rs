@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_many, setup_many_users};
+use crate::test_helpers::{setup_many, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -283,12 +283,10 @@ fn edit_event_post_user_missing_data() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
-
         let res = client
             .post("/edit-event")
             .header(ContentType::Form)
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::UnprocessableEntity);
@@ -303,8 +301,6 @@ fn edit_event_post_user_no_such_event() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
-
         let res = client
             .post("/edit-event")
             .header(ContentType::Form)
@@ -316,7 +312,7 @@ fn edit_event_post_user_no_such_event() {
                 ("offset", "-180"),
                 ("eid", "1"),
             ]))
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -347,11 +343,10 @@ fn add_event_get_guest() {
 fn add_event_get_user_missing_gid() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_email = "foo@meet-os.com";
 
         let res = client
             .get("/add-event")
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::NotFound);
@@ -390,11 +385,9 @@ fn add_event_get_user_is_owner() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
-
         let res = client
             .get("/add-event?gid=1")
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -440,11 +433,10 @@ fn get_edit_event_as_guest() {
 fn get_edit_event_as_user_no_eid() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_email = "foo@meet-os.com";
 
         let res = client
             .get("/edit-event")
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::NotFound);
@@ -479,11 +471,9 @@ fn get_edit_event_as_owner_with_eid() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo_email = "foo@meet-os.com";
-
         let res = client
             .get("/edit-event?eid=1")
-            .private_cookie(("meet-os", foo_email))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);

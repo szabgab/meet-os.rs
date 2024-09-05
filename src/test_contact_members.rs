@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_many, setup_many_users};
+use crate::test_helpers::{setup_many, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -22,11 +22,10 @@ fn contact_members_get_guest() {
 fn contact_members_get_user_without_gid() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_mail = "foo@meet-os.com";
 
         let res = client
             .get("/contact-members")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::NotFound);
@@ -42,11 +41,10 @@ fn contact_members_get_user_without_gid() {
 fn contact_members_get_user_with_invalid_gid() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_mail = "foo@meet-os.com";
 
         let res = client
             .get("/contact-members?gid=1")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -64,11 +62,9 @@ fn contact_members_get_owner_with_gid() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
 
-        let foo_mail = "foo@meet-os.com";
-
         let res = client
             .get("/contact-members?gid=1")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -127,11 +123,10 @@ fn contact_members_post_guest() {
 fn contact_members_post_user_without_gid() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
-        let foo_mail = "foo@meet-os.com";
 
         let res = client
             .post("/contact-members")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .header(ContentType::Form)
             .dispatch();
 
@@ -149,11 +144,10 @@ fn contact_members_post_user_without_gid() {
 fn contact_members_post_user_with_all() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
-        let foo_mail = "foo@meet-os.com";
 
         let res = client
             .post("/contact-members")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("subject", "Test subject line"),
@@ -177,11 +171,10 @@ fn contact_members_post_user_with_all() {
 fn contact_members_post_user_subject_too_short() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
-        let foo_mail = "foo@meet-os.com";
 
         let res = client
             .post("/contact-members")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("subject", "Test"),

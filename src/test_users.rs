@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_user_helper, setup_many_users};
+use crate::test_helpers::{register_user_helper, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
     extract_cookie, params, read_code_from_email, run_inprocess,
@@ -136,16 +136,15 @@ fn duplicate_email() {
 #[test]
 fn login_regular_user() {
     run_inprocess(|email_folder, client| {
-        let foo_mail = "foo@meet-os.com";
         let _cookie_str =
-            register_user_helper(&client, "Foo Bar", foo_mail, "123456", &email_folder);
+            register_user_helper(&client, "Foo Bar", FOO_EMAIL, "123456", &email_folder);
 
-        check_profile_page_in_process(&client, &foo_mail, "Foo Bar");
+        check_profile_page_in_process(&client, &FOO_EMAIL, "Foo Bar");
 
         let res = client
             .post("/login")
             .header(ContentType::Form)
-            .body(params!([("email", foo_mail), ("password", "123456")]))
+            .body(params!([("email", FOO_EMAIL), ("password", "123456")]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
 
@@ -157,7 +156,7 @@ fn login_regular_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(&client, &foo_mail, "Foo Bar");
+        check_profile_page_in_process(&client, &FOO_EMAIL, "Foo Bar");
 
         // TODO: logout requires a logged in user
         //let res = client.get("/logout").dispatch();
@@ -169,7 +168,7 @@ fn login_regular_user() {
         // logout
         let res = client
             .get("/logout")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -402,11 +401,10 @@ fn edit_profile_get_guest() {
 fn edit_profile_get_user() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);
-        let foo_mail = "foo@meet-os.com";
 
         let res = client
             .get("/edit-profile")
-            .private_cookie(("meet-os", foo_mail))
+            .private_cookie(("meet-os", FOO_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
