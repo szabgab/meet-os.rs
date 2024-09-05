@@ -181,7 +181,7 @@ fn create_group_guest() {
 }
 
 #[test]
-fn join_group_guest() {
+fn get_join_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/join-group?gid=1").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
@@ -195,7 +195,7 @@ fn join_group_guest() {
 }
 
 #[test]
-fn join_not_existing_group_as_user() {
+fn get_join_group_not_existing_group_as_user() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -214,7 +214,7 @@ fn join_not_existing_group_as_user() {
 }
 
 #[test]
-fn join_group_as_user() {
+fn get_join_group_as_user() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -302,7 +302,7 @@ fn join_group_as_user() {
 }
 
 #[test]
-fn join_group_as_owner() {
+fn get_join_group_as_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -323,7 +323,7 @@ fn join_group_as_owner() {
 }
 
 #[test]
-fn leave_group_guest() {
+fn get_leave_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/leave-group?gid=1").dispatch();
         assert_eq!(res.status(), Status::Unauthorized);
@@ -337,7 +337,7 @@ fn leave_group_guest() {
 }
 
 #[test]
-fn leave_not_existing_group() {
+fn get_leave_not_existing_group() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -356,7 +356,7 @@ fn leave_not_existing_group() {
 }
 
 #[test]
-fn leave_group_as_owner() {
+fn get_leave_group_as_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -377,7 +377,7 @@ fn leave_group_as_owner() {
 }
 
 #[test]
-fn leave_group_user_does_not_belong_to() {
+fn get_leave_group_user_does_not_belong_to() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -399,7 +399,7 @@ fn leave_group_user_does_not_belong_to() {
 }
 
 #[test]
-fn edit_group_get_guest() {
+fn get_edit_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/edit-group").dispatch();
 
@@ -412,7 +412,7 @@ fn edit_group_get_guest() {
 }
 
 #[test]
-fn edit_group_get_user_no_such_group() {
+fn get_edit_group_user_no_such_group() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -431,7 +431,7 @@ fn edit_group_get_user_no_such_group() {
 }
 
 #[test]
-fn edit_group_get_user_is_not_the_owner() {
+fn get_edit_group_user_is_not_the_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -453,7 +453,7 @@ fn edit_group_get_user_is_not_the_owner() {
 }
 
 #[test]
-fn edit_group_get_by_owner() {
+fn get_edit_group_by_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -482,7 +482,7 @@ fn edit_group_get_by_owner() {
 }
 
 #[test]
-fn visit_group_that_does_not_exist() {
+fn get_group_that_does_not_exist() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/group/42").dispatch();
 
@@ -496,7 +496,7 @@ fn visit_group_that_does_not_exist() {
 }
 
 #[test]
-fn edit_group_post_guest() {
+fn post_edit_group_guest() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post("/edit-group")
@@ -511,7 +511,7 @@ fn edit_group_post_guest() {
     });
 }
 #[test]
-fn edit_group_post_user_missing_gid() {
+fn post_edit_group_user_missing_gid() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -533,7 +533,7 @@ fn edit_group_post_user_missing_gid() {
 }
 
 #[test]
-fn edit_group_post_user_no_such_group() {
+fn post_edit_group_user_no_such_group() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
 
@@ -559,7 +559,7 @@ fn edit_group_post_user_no_such_group() {
 }
 
 #[test]
-fn edit_group_post_by_user_not_owner() {
+fn post_edit_group_by_user_not_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
@@ -619,7 +619,7 @@ fn post_edit_group_user_not_owner() {
 }
 
 #[test]
-fn edit_group_post_owner() {
+fn post_edit_group_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
