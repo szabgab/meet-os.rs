@@ -103,6 +103,7 @@ pub fn check_not_logged_in(res: LocalResponse) {
     check_html(&html, "title", "Not logged in");
     check_html(&html, "h1", "Not logged in");
     check_html(&html, "#message", "You are not logged in");
+    check_guest_menu(&html);
 }
 
 // check_html_list(
