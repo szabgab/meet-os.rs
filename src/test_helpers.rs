@@ -11,25 +11,83 @@ use crate::test_lib::{params, read_code_from_email};
 
 pub const FOO_EMAIL: &str = "foo@meet-os.com";
 pub const FOO_PW: &str = "123foo";
-pub const FOO1_EMAIL: &str = "foo1@meet-os.com";
+pub const USER_EMAIL: &str = "user@meet-os.com";
 pub const ADMIN_EMAIL: &str = "admin@meet-os.com";
 pub const ADMIN_PW: &str = "123456";
 pub const ADMIN_NAME: &str = "Site Manager";
 
-pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
+pub fn register_user(client: &Client, name: &str, email: &str, password: &str) {
     let res = client
-        .post("/admin/create-group")
+        .post(format!("/register"))
         .header(ContentType::Form)
         .body(params!([
             ("name", name),
-            ("location", ""),
-            ("description", "",),
-            ("owner", &owner.to_string()),
+            ("email", email),
+            ("password", password)
         ]))
-        .private_cookie(("meet-os", ADMIN_EMAIL))
         .dispatch();
-
     assert_eq!(res.status(), Status::Ok);
+}
+
+pub fn register_and_verify_user(
+    client: &Client,
+    name: &str,
+    email: &str,
+    password: &str,
+    email_folder: &PathBuf,
+) {
+    register_user(client, name, email, password);
+
+    let dir = email_folder
+        .read_dir()
+        .expect("read_dir call failed")
+        .flatten()
+        .collect::<Vec<_>>();
+    println!("dir: {}", dir.len());
+
+    // -2 because after the email with the code we also send a notification to the admin.
+    let filename = format!("{}.txt", dir.len() - 2);
+    let (uid, code) = read_code_from_email(email_folder, &filename, "verify-email");
+
+    let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
+    assert_eq!(res.status(), Status::Ok);
+}
+
+pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
+    register_and_verify_user(&client, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW, &email_folder);
+}
+
+pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
+    register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, FOO_PW, &email_folder);
+}
+
+pub fn setup_user(client: &Client, email_folder: &PathBuf) {
+    register_and_verify_user(&client, "Foo 1", USER_EMAIL, "password1", &email_folder);
+}
+
+pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
+    setup_admin(client, email_folder);
+    setup_owner(client, email_folder);
+    setup_user(client, email_folder);
+
+    for ix in 2..3 {
+        register_and_verify_user(
+            &client,
+            format!("Foo {ix}").as_str(),
+            format!("foo{ix}@meet-os.com").as_str(),
+            format!("password{ix}").as_str(),
+            &email_folder,
+        );
+    }
+
+    // Make sure the client is not logged in after the setup
+    let res = client.get(format!("/logout")).dispatch();
+    //assert_eq!(res.status(), Status::Ok);
+    rocket::info!("--------------- finished setup_many_users ----------------")
+}
+
+pub fn logout(client: &Client) {
+    client.get(format!("/logout")).dispatch();
 }
 
 pub fn login_admin(client: &Client) {
@@ -46,39 +104,6 @@ fn login_helper(client: &Client, email: &str, password: &str) {
         .header(ContentType::Form)
         .body(params!([("email", email), ("password", password)]))
         .dispatch();
-    assert_eq!(res.status(), Status::Ok);
-}
-
-pub fn register_and_verify_user(
-    client: &Client,
-    name: &str,
-    email: &str,
-    password: &str,
-    email_folder: &PathBuf,
-) {
-    let res = client
-        .post(format!("/register"))
-        .header(ContentType::Form)
-        .body(params!([
-            ("name", name),
-            ("email", email),
-            ("password", password)
-        ]))
-        .dispatch();
-    assert_eq!(res.status(), Status::Ok);
-
-    let dir = email_folder
-        .read_dir()
-        .expect("read_dir call failed")
-        .flatten()
-        .collect::<Vec<_>>();
-    println!("dir: {}", dir.len());
-
-    // -2 because after the email with the code we also send a notification to the admin.
-    let filename = format!("{}.txt", dir.len() - 2);
-    let (uid, code) = read_code_from_email(email_folder, &filename, "verify-email");
-
-    let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);
 }
 
@@ -102,41 +127,22 @@ pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, own
     //rocket::info!("{html}");
 }
 
-pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW, &email_folder);
+pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
+    let res = client
+        .post("/admin/create-group")
+        .header(ContentType::Form)
+        .body(params!([
+            ("name", name),
+            ("location", ""),
+            ("description", "",),
+            ("owner", &owner.to_string()),
+        ]))
+        .private_cookie(("meet-os", ADMIN_EMAIL))
+        .dispatch();
+
+    assert_eq!(res.status(), Status::Ok);
 }
 
-pub fn logout(client: &Client) {
-    client.get(format!("/logout")).dispatch();
-}
-
-pub fn setup_foo(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, FOO_PW, &email_folder);
-}
-
-pub fn setup_foo1(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, "Foo 1", FOO1_EMAIL, "password1", &email_folder);
-}
-
-pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
-    setup_admin(client, email_folder);
-    setup_foo(client, email_folder);
-
-    for ix in 1..3 {
-        register_and_verify_user(
-            &client,
-            format!("Foo {ix}").as_str(),
-            format!("foo{ix}@meet-os.com").as_str(),
-            format!("password{ix}").as_str(),
-            &email_folder,
-        );
-    }
-
-    // Make sure the client is not logged in after the setup
-    let res = client.get(format!("/logout")).dispatch();
-    //assert_eq!(res.status(), Status::Ok);
-    rocket::info!("--------------- finished setup_many_users ----------------")
-}
 pub fn setup_event(client: &Client, eid: usize) {
     match eid {
         1 => add_event_helper(
@@ -183,8 +189,8 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
 
 pub fn setup_for_events(client: &Client, email_folder: &PathBuf) {
     setup_admin(&client, &email_folder);
-    setup_foo(&client, &email_folder);
-    setup_foo1(&client, &email_folder);
+    setup_owner(&client, &email_folder);
+    setup_user(&client, &email_folder);
     create_group_helper(&client, "First Group", 2);
     setup_event(&client, 1);
     logout(&client);

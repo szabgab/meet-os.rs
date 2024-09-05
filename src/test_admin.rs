@@ -1,4 +1,4 @@
-use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_foo, setup_many};
+use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_many, setup_owner};
 use crate::test_lib::{check_html, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
@@ -17,7 +17,7 @@ fn admin_page_as_guest() {
 #[test]
 fn admin_page_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         login_owner(&client);
 
         let res = client.get("/admin").dispatch();
@@ -60,7 +60,7 @@ fn admin_users_page_as_guest() {
 #[test]
 fn admin_users_page_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         login_owner(&client);
 
         let res = client.get("/admin/users").dispatch();
@@ -102,7 +102,7 @@ fn admin_search_get_as_guest() {
 #[test]
 fn admin_search_get_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         login_owner(&client);
 
         let res = client.get("/admin/search").dispatch();
@@ -143,7 +143,7 @@ fn admin_search_post_as_guest() {
 #[test]
 fn admin_search_post_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         login_owner(&client);
 
         let res = client
@@ -207,7 +207,7 @@ fn admin_audit_as_guest() {
 #[test]
 fn admin_audit_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         login_owner(&client);
 
         let res = client.get("/admin/audit").dispatch();

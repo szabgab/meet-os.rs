@@ -1,4 +1,4 @@
-use crate::test_helpers::{setup_many, setup_many_users, FOO1_EMAIL, FOO_EMAIL};
+use crate::test_helpers::{setup_many, setup_many_users, FOO_EMAIL, USER_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -87,7 +87,7 @@ fn contact_members_get_user_not_owner() {
 
         let res = client
             .get("/contact-members?gid=1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -198,7 +198,7 @@ fn contact_members_post_user_who_is_not_the_owner() {
 
         let res = client
             .post("/contact-members")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .body(params!([
                 ("gid", "1"),
                 ("subject", "Test subject line"),

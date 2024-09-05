@@ -1,6 +1,6 @@
 use crate::test_helpers::{
-    create_group_helper, logout, register_and_verify_user, setup_admin, setup_foo, setup_foo1,
-    ADMIN_EMAIL, FOO1_EMAIL, FOO_EMAIL,
+    create_group_helper, logout, register_and_verify_user, setup_admin, setup_owner, setup_user,
+    ADMIN_EMAIL, FOO_EMAIL, USER_EMAIL,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
@@ -18,7 +18,7 @@ use rocket::http::{ContentType, Status};
 fn create_group_by_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
         // Access the Group creation page with authorized user
         let res = client
@@ -197,7 +197,7 @@ fn join_group_guest() {
 #[test]
 fn join_not_existing_group_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
         let res = client
             .get("/join-group?gid=20")
@@ -217,15 +217,15 @@ fn join_not_existing_group_as_user() {
 fn join_group_as_user() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
-        setup_foo1(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
         logout(&client);
 
         // user joins group
         let res = client
             .get("/join-group?gid=1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -248,7 +248,7 @@ fn join_group_as_user() {
         // visit the group page as a member of the group
         let res = client
             .get("/group/1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -263,7 +263,7 @@ fn join_group_as_user() {
         // try to join the same group again - should fail
         let res = client
             .get("/join-group?gid=1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -278,7 +278,7 @@ fn join_group_as_user() {
         // leave group
         let res = client
             .get("/leave-group?gid=1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -305,7 +305,7 @@ fn join_group_as_user() {
 fn join_group_as_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
 
         let res = client
@@ -339,7 +339,7 @@ fn leave_group_guest() {
 #[test]
 fn leave_not_existing_group() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
         let res = client
             .get("/leave-group?gid=20")
@@ -359,7 +359,7 @@ fn leave_not_existing_group() {
 fn leave_group_as_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
 
         let res = client
@@ -380,13 +380,13 @@ fn leave_group_as_owner() {
 fn leave_group_user_does_not_belong_to() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
-        setup_foo1(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
 
         let res = client
             .get("/leave-group?gid=1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -414,7 +414,7 @@ fn edit_group_get_guest() {
 #[test]
 fn edit_group_get_user_no_such_group() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
         let res = client
             .get("/edit-group?gid=1")
@@ -434,13 +434,13 @@ fn edit_group_get_user_no_such_group() {
 fn edit_group_get_user_is_not_the_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
-        setup_foo1(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
 
         let res = client
             .get("/edit-group?gid=1")
-            .private_cookie(("meet-os", FOO1_EMAIL))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -456,7 +456,7 @@ fn edit_group_get_user_is_not_the_owner() {
 fn edit_group_get_by_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
 
         let res = client
@@ -513,7 +513,7 @@ fn edit_group_post_guest() {
 #[test]
 fn edit_group_post_user_missing_gid() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
         let res = client
             .post("/edit-group")
@@ -535,7 +535,7 @@ fn edit_group_post_user_missing_gid() {
 #[test]
 fn edit_group_post_user_no_such_group() {
     run_inprocess(|email_folder, client| {
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
         let res = client
             .post("/edit-group")
@@ -562,7 +562,7 @@ fn edit_group_post_user_no_such_group() {
 fn edit_group_post_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        setup_foo(&client, &email_folder);
+        setup_owner(&client, &email_folder);
         //setup_foo1(&client, &email_folder);
         create_group_helper(&client, "First Group", 2);
         logout(&client);
