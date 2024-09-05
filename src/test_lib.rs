@@ -4,7 +4,7 @@ use regex::Regex;
 use std::path::PathBuf;
 
 use rocket::http::{ContentType, Status};
-use rocket::local::blocking::Client;
+use rocket::local::blocking::{Client, LocalResponse};
 use scraper::{Html, Selector};
 
 macro_rules! params {
@@ -95,6 +95,14 @@ pub fn check_html(html: &str, selectors: &str, text: &str) {
         document.select(&selector).next().unwrap().inner_html(),
         text
     );
+}
+
+pub fn check_not_logged_in(res: LocalResponse) {
+    assert_eq!(res.status(), Status::Unauthorized);
+    let html = res.into_string().unwrap();
+    check_html(&html, "title", "Not logged in");
+    check_html(&html, "h1", "Not logged in");
+    check_html(&html, "#message", "You are not logged in");
 }
 
 // check_html_list(

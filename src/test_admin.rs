@@ -1,5 +1,5 @@
 use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_many, setup_owner};
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
 
@@ -7,10 +7,7 @@ use rocket::http::{ContentType, Status};
 fn admin_page_as_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/admin").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
+        check_not_logged_in(res);
     })
 }
 

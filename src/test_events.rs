@@ -2,7 +2,7 @@ use crate::test_helpers::{
     create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
     OWNER_EMAIL, USER_EMAIL,
 };
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // Create event
@@ -243,12 +243,7 @@ fn join_event_guest() {
         setup_for_events(&client, &email_folder);
 
         let res = client.get("/rsvp-yes-event?eid=1").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        check_html(&html, "#message", "You are not logged in");
+        check_not_logged_in(res);
     })
 }
 
@@ -258,12 +253,7 @@ fn leave_event_guest() {
         setup_for_events(&client, &email_folder);
 
         let res = client.get("/rsvp-no-event?eid=1").dispatch();
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        check_html(&html, "#message", "You are not logged in");
+        check_not_logged_in(res);
     })
 }
 
@@ -299,12 +289,7 @@ fn post_edit_event_guest() {
             .header(ContentType::Form)
             .dispatch();
 
-        assert_eq!(res.status(), Status::Unauthorized);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        check_html(&html, "#message", "You are not logged in");
+        check_not_logged_in(res);
     });
 }
 
@@ -550,13 +535,7 @@ fn post_edit_event_owner() {
 fn get_add_event_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/add-event").dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        check_html(&html, "#message", "You are not logged in");
+        check_not_logged_in(res);
     });
 }
 
@@ -628,13 +607,7 @@ fn post_add_event_guest() {
             .post("/add-event")
             .header(ContentType::Form)
             .dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        check_html(&html, "#message", "You are not logged in");
+        check_not_logged_in(res);
     });
 }
 
@@ -838,12 +811,7 @@ fn get_edit_event_as_guest() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/edit-event").dispatch();
 
-        assert_eq!(res.status(), Status::Unauthorized);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not logged in");
-        check_html(&html, "h1", "Not logged in");
-        check_html(&html, "#message", "You are not logged in");
+        check_not_logged_in(res);
     });
 }
 
