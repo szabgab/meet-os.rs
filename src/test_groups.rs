@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_user_helper, setup_many, setup_many_users, FOO_EMAIL};
+use crate::test_helpers::{register_and_verify_user, setup_many, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
@@ -86,7 +86,7 @@ fn create_group_by_admin() {
 fn create_group_unauthorized() {
     run_inprocess(|email_folder, client| {
         let email = "peti@meet-os.com";
-        register_user_helper(&client, "Peti Bar", email, "petibar", &email_folder);
+        register_and_verify_user(&client, "Peti Bar", email, "petibar", &email_folder);
 
         // Access the Group creation page with unauthorized user
         let res = client

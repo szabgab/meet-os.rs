@@ -37,7 +37,7 @@ pub fn login_helper(client: &Client, email: &str, password: &str) {
     assert_eq!(res.status(), Status::Ok);
 }
 
-pub fn register_user_helper(
+pub fn register_and_verify_user(
     client: &Client,
     name: &str,
     email: &str,
@@ -95,12 +95,12 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     let email = "admin@meet-os.com";
     let password = "123456";
 
-    register_user_helper(&client, name, email, password, &email_folder);
+    register_and_verify_user(&client, name, email, password, &email_folder);
 
-    register_user_helper(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
+    register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
 
     for ix in 1..3 {
-        register_user_helper(
+        register_and_verify_user(
             &client,
             format!("Foo {ix}").as_str(),
             format!("foo{ix}@meet-os.com").as_str(),

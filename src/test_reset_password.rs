@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_user_helper, setup_many};
+use crate::test_helpers::{register_and_verify_user, setup_many};
 use crate::test_lib::{
     check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
     read_code_from_email, run_inprocess,
@@ -11,7 +11,7 @@ fn reset_password_full() {
     run_inprocess(|email_folder, client| {
         let name = "Foo Bar";
         let email = "foo@meet-os.com";
-        register_user_helper(&client, name, email, "123456", &email_folder);
+        register_and_verify_user(&client, name, email, "123456", &email_folder);
 
         let res = client.get("/profile").dispatch();
         assert_eq!(

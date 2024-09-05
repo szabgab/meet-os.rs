@@ -1,4 +1,4 @@
-use crate::test_helpers::register_user_helper;
+use crate::test_helpers::register_and_verify_user;
 use crate::test_lib::{params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
@@ -17,7 +17,7 @@ fn test_complex() {
         let admin_name = "Admin";
         let admin_email = "admin@meet-os.com";
         let admin_password = "123456";
-        register_user_helper(
+        register_and_verify_user(
             &client,
             admin_name,
             admin_email,
@@ -28,7 +28,7 @@ fn test_complex() {
         let owner_name = "Owner";
         let owner_email = "owner@meet-os.com";
         let owner_password = "123456";
-        register_user_helper(
+        register_and_verify_user(
             &client,
             owner_name,
             &owner_email,

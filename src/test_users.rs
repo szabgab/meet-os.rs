@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_user_helper, setup_many_users, FOO_EMAIL};
+use crate::test_helpers::{register_and_verify_user, setup_many_users, FOO_EMAIL};
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
     extract_cookie, params, read_code_from_email, run_inprocess,
@@ -137,7 +137,7 @@ fn duplicate_email() {
 fn login_regular_user() {
     run_inprocess(|email_folder, client| {
         let _cookie_str =
-            register_user_helper(&client, "Foo Bar", FOO_EMAIL, "123456", &email_folder);
+            register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123456", &email_folder);
 
         check_profile_page_in_process(&client, &FOO_EMAIL, "Foo Bar");
 
@@ -192,7 +192,7 @@ fn login_admin_user() {
         let email = "admin@meet-os.com";
         let password = "123456";
 
-        let _cookie_str = register_user_helper(&client, name, email, password, &email_folder);
+        let _cookie_str = register_and_verify_user(&client, name, email, password, &email_folder);
 
         let res = client
             .post("/login")
@@ -279,7 +279,7 @@ fn login_with_unregistered_email() {
 #[test]
 fn login_with_bad_password() {
     run_inprocess(|email_folder, client| {
-        register_user_helper(
+        register_and_verify_user(
             &client,
             "Foo Bar",
             "foo@meet-os.com",
