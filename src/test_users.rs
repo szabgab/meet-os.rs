@@ -4,23 +4,17 @@ use crate::test_helpers::{
     OWNER_PW, UNVERIFIED_NAME,
 };
 use crate::test_lib::{
-    check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
-    params, read_code_from_email, run_inprocess,
+    check_admin_menu, check_guest_menu, check_html, check_not_logged_in,
+    check_profile_page_in_process, check_user_menu, params, read_code_from_email, run_inprocess,
 };
 use rocket::http::{ContentType, Status};
 
 #[test]
-fn try_page_without_cookie() {
+fn protected_pages_as_guest() {
     run_inprocess(|email_folder, client| {
         for path in ["/profile", "/admin/create-group?uid=1", "/admin"] {
-            // Access the profile without a cookie
             let res = client.get(path).dispatch();
-            assert_eq!(res.status(), Status::Unauthorized, "{path}");
-            let html = res.into_string().unwrap();
-            //assert_eq!(html, "");
-            check_html(&html, "title", "Not logged in");
-            assert!(html.contains("You are not logged in"));
-            check_guest_menu(&html);
+            check_not_logged_in(res);
         }
     });
 }
