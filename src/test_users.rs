@@ -1,5 +1,6 @@
 use crate::test_helpers::{
-    register_and_verify_user, setup_admin, setup_foo, setup_many_users, FOO_EMAIL,
+    logout, register_and_verify_user, setup_admin, setup_foo, setup_many_users, ADMIN_EMAIL,
+    ADMIN_NAME, ADMIN_PW, FOO_EMAIL,
 };
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
@@ -185,16 +186,13 @@ fn login_regular_user() {
 #[test]
 fn login_admin_user() {
     run_inprocess(|email_folder, client| {
-        let name = "Site Manager";
-        let email = "admin@meet-os.com";
-        let password = "123456";
-
-        register_and_verify_user(&client, name, email, password, &email_folder);
+        setup_admin(&client, &email_folder);
+        logout(&client);
 
         let res = client
             .post("/login")
             .header(ContentType::Form)
-            .body(params!([("email", email), ("password", password)]))
+            .body(params!([("email", ADMIN_EMAIL), ("password", ADMIN_PW)]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
 
@@ -205,11 +203,11 @@ fn login_admin_user() {
         check_admin_menu(&html);
 
         // // Access the profile with the cookie
-        check_profile_page_in_process(&client, &email, name);
+        check_profile_page_in_process(&client, &ADMIN_EMAIL, ADMIN_NAME);
 
         let res = client
             .get("/logout")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", ADMIN_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);

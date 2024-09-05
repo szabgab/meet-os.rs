@@ -18,6 +18,8 @@ macro_rules! params {
 }
 pub(crate) use params;
 
+use crate::test_helpers::ADMIN_EMAIL;
+
 pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     use rocket::config::Config;
 
@@ -32,7 +34,7 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
         .merge(("database_name", &db_name))
         .merge(("email", "Folder"))
         .merge(("email_folder", email_folder.to_str().unwrap()))
-        .merge(("admins", ["admin@meet-os.com"]));
+        .merge(("admins", [ADMIN_EMAIL]));
 
     let app = super::rocket().configure(provider);
     let client = Client::tracked(app).unwrap();

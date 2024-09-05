@@ -1,4 +1,4 @@
-use crate::test_helpers::{login_helper, setup_admin, setup_foo, setup_many, FOO_EMAIL};
+use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_foo, setup_many};
 use crate::test_lib::{check_html, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
@@ -18,7 +18,7 @@ fn admin_page_as_guest() {
 fn admin_page_as_user() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
-        login_helper(&client, FOO_EMAIL, "123foo");
+        login_owner(&client);
 
         let res = client.get("/admin").dispatch();
         assert_eq!(res.status(), Status::Forbidden);
@@ -32,7 +32,7 @@ fn admin_page_as_user() {
 fn admin_page_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        login_helper(&client, "admin@meet-os.com", "123456");
+        login_admin(&client);
 
         let res = client.get("/admin").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -61,7 +61,7 @@ fn admin_users_page_as_guest() {
 fn admin_users_page_as_user() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
-        login_helper(&client, FOO_EMAIL, "123foo");
+        login_owner(&client);
 
         let res = client.get("/admin/users").dispatch();
         assert_eq!(res.status(), Status::Forbidden);
@@ -75,7 +75,7 @@ fn admin_users_page_as_user() {
 fn admin_users_page_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
-        login_helper(&client, "admin@meet-os.com", "123456");
+        login_admin(&client);
 
         let res = client.get("/admin/users").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -103,7 +103,7 @@ fn admin_search_get_as_guest() {
 fn admin_search_get_as_user() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
-        login_helper(&client, FOO_EMAIL, "123foo");
+        login_owner(&client);
 
         let res = client.get("/admin/search").dispatch();
         assert_eq!(res.status(), Status::Forbidden);
@@ -116,8 +116,7 @@ fn admin_search_get_as_user() {
 fn admin_search_get_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-
-        login_helper(&client, "admin@meet-os.com", "123456");
+        login_admin(&client);
 
         let res = client.get("/admin/search").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -145,7 +144,7 @@ fn admin_search_post_as_guest() {
 fn admin_search_post_as_user() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
-        login_helper(&client, FOO_EMAIL, "123foo");
+        login_owner(&client);
 
         let res = client
             .post("/admin/search")
@@ -161,7 +160,7 @@ fn admin_search_post_as_user() {
 fn admin_search_post_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
-        login_helper(&client, "admin@meet-os.com", "123456");
+        login_admin(&client);
 
         //no params
         let res = client
@@ -209,7 +208,7 @@ fn admin_audit_as_guest() {
 fn admin_audit_as_user() {
     run_inprocess(|email_folder, client| {
         setup_foo(&client, &email_folder);
-        login_helper(&client, FOO_EMAIL, "123foo");
+        login_owner(&client);
 
         let res = client.get("/admin/audit").dispatch();
         assert_eq!(res.status(), Status::Forbidden);
@@ -223,7 +222,7 @@ fn admin_audit_as_user() {
 fn admin_audit_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
-        login_helper(&client, "admin@meet-os.com", "123456");
+        login_admin(&client);
 
         let res = client.get("/admin/audit").dispatch();
         assert_eq!(res.status(), Status::Ok);

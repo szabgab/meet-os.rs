@@ -1,4 +1,4 @@
-use crate::test_helpers::register_and_verify_user;
+use crate::test_helpers::{register_and_verify_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW};
 use crate::test_lib::{params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
@@ -14,16 +14,7 @@ fn test_complex() {
         assert!(!html.contains(r#"<h2 class="title is-4">Events</h2>"#));
         assert!(!html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
 
-        let admin_name = "Admin";
-        let admin_email = "admin@meet-os.com";
-        let admin_password = "123456";
-        register_and_verify_user(
-            &client,
-            admin_name,
-            admin_email,
-            admin_password,
-            &email_folder,
-        );
+        register_and_verify_user(&client, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW, &email_folder);
 
         let owner_name = "Owner";
         let owner_email = "owner@meet-os.com";
@@ -56,7 +47,7 @@ fn test_complex() {
                 ("description", ""),
                 ("owner", "2"),
             ]))
-            .private_cookie(("meet-os", admin_email))
+            .private_cookie(("meet-os", ADMIN_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();

@@ -1,6 +1,6 @@
 use crate::test_helpers::{
     create_group_helper, logout, register_and_verify_user, setup_admin, setup_foo, setup_foo1,
-    FOO1_EMAIL, FOO_EMAIL,
+    ADMIN_EMAIL, FOO1_EMAIL, FOO_EMAIL,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
@@ -19,12 +19,11 @@ fn create_group_by_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_foo(&client, &email_folder);
-        let admin_email = "admin@meet-os.com";
 
         // Access the Group creation page with authorized user
         let res = client
             .get("/admin/create-group?uid=2")
-            .private_cookie(("meet-os", admin_email))
+            .private_cookie(("meet-os", ADMIN_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -46,7 +45,7 @@ fn create_group_by_admin() {
                 ),
                 ("owner", "2"),
             ]))
-            .private_cookie(("meet-os", admin_email))
+            .private_cookie(("meet-os", ADMIN_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -70,7 +69,7 @@ fn create_group_by_admin() {
                 ("description", "Text with [link](https://code-maven.com/)"),
                 ("owner", "2"),
             ]))
-            .private_cookie(("meet-os", admin_email))
+            .private_cookie(("meet-os", ADMIN_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
 

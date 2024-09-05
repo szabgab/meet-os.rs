@@ -10,10 +10,13 @@ use scraper::{Html, Selector};
 use crate::test_lib::{params, read_code_from_email};
 
 pub const FOO_EMAIL: &str = "foo@meet-os.com";
+pub const FOO_PW: &str = "123foo";
 pub const FOO1_EMAIL: &str = "foo1@meet-os.com";
+pub const ADMIN_EMAIL: &str = "admin@meet-os.com";
+pub const ADMIN_PW: &str = "123456";
+pub const ADMIN_NAME: &str = "Site Manager";
 
 pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
-    let admin_email = "admin@meet-os.com";
     let res = client
         .post("/admin/create-group")
         .header(ContentType::Form)
@@ -23,13 +26,21 @@ pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
             ("description", "",),
             ("owner", &owner.to_string()),
         ]))
-        .private_cookie(("meet-os", admin_email))
+        .private_cookie(("meet-os", ADMIN_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
 }
 
-pub fn login_helper(client: &Client, email: &str, password: &str) {
+pub fn login_admin(client: &Client) {
+    login_helper(client, ADMIN_EMAIL, ADMIN_PW);
+}
+
+pub fn login_owner(client: &Client) {
+    login_helper(client, FOO_EMAIL, FOO_PW);
+}
+
+fn login_helper(client: &Client, email: &str, password: &str) {
     let res = client
         .post("/login")
         .header(ContentType::Form)
@@ -92,11 +103,7 @@ pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, own
 }
 
 pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
-    let name = "Site Manager";
-    let email = "admin@meet-os.com";
-    let password = "123456";
-
-    register_and_verify_user(&client, name, email, password, &email_folder);
+    register_and_verify_user(&client, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW, &email_folder);
 }
 
 pub fn logout(client: &Client) {
@@ -104,7 +111,7 @@ pub fn logout(client: &Client) {
 }
 
 pub fn setup_foo(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
+    register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, FOO_PW, &email_folder);
 }
 
 pub fn setup_foo1(client: &Client, email_folder: &PathBuf) {
