@@ -518,6 +518,39 @@ fn post_add_event_owner_invalid_date() {
 }
 
 #[test]
+fn post_add_event_owner_event_in_the_past() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        //setup_user(&client, &email_folder);
+        create_group_helper(&client, "My group", 2);
+        logout(&client);
+
+        let res = client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .body(params!([
+                ("title", "Event title"),
+                ("date", "2020-02-10 08:00"),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("offset", "-180"),
+                ("gid", "1"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Can't schedule event to the past");
+        check_html(&html, "h1", "Can't schedule event to the past");
+        assert!(html.contains(r#"Can't schedule event to the past '2020-02-10 05:00:00 UTC'"#));
+    });
+}
+
+#[test]
 fn post_add_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
