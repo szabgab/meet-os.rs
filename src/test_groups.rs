@@ -1,5 +1,5 @@
 use crate::test_helpers::{
-    create_group_helper, register_and_verify_user, setup_admin, setup_foo, setup_foo1, setup_many,
+    create_group_helper, logout, register_and_verify_user, setup_admin, setup_foo, setup_foo1,
     FOO1_EMAIL, FOO_EMAIL,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
@@ -217,8 +217,13 @@ fn join_not_existing_group_as_user() {
 #[test]
 fn join_group_as_user() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        setup_foo1(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
+        logout(&client);
 
+        // user joins group
         let res = client
             .get("/join-group?gid=1")
             .private_cookie(("meet-os", FOO1_EMAIL))
@@ -451,7 +456,9 @@ fn edit_group_get_user_is_not_the_owner() {
 #[test]
 fn edit_group_get_by_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
 
         let res = client
             .get("/edit-group?gid=1")
@@ -478,8 +485,6 @@ fn edit_group_get_by_owner() {
 #[test]
 fn visit_group_that_does_not_exist() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
-
         let res = client.get("/group/42").dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -557,7 +562,11 @@ fn edit_group_post_user_no_such_group() {
 #[test]
 fn edit_group_post_owner() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_admin(&client, &email_folder);
+        setup_foo(&client, &email_folder);
+        //setup_foo1(&client, &email_folder);
+        create_group_helper(&client, "First Group", 2);
+        logout(&client);
 
         let res = client
             .post("/edit-group")

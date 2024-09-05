@@ -99,6 +99,10 @@ pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, name, email, password, &email_folder);
 }
 
+pub fn logout(client: &Client) {
+    client.get(format!("/logout")).dispatch();
+}
+
 pub fn setup_foo(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, "Foo Bar", FOO_EMAIL, "123foo", &email_folder);
 }
