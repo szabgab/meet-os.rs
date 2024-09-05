@@ -419,6 +419,36 @@ fn post_edit_event_owner_invalid_date() {
 }
 
 #[test]
+fn post_edit_event_owner_date_in_the_past() {
+    run_inprocess(|email_folder, client| {
+        setup_for_events(&client, &email_folder);
+
+        // update
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .body(params!([
+                ("title", "The title is good"),
+                ("date", "2020-10-10 08:00"),
+                ("location", "In a pub"),
+                ("description", "This is the explanation"),
+                ("offset", "-180"),
+                ("eid", "1"),
+            ]))
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Can't schedule event to the past");
+        check_html(&html, "h1", "Can't schedule event to the past");
+        assert!(html.contains(r#"Can't schedule event to the past '2020-10-10 05:00:00 UTC'"#));
+    });
+}
+
+#[test]
 fn post_edit_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
