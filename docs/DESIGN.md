@@ -15,11 +15,12 @@
 
 ## Costs
 
-* The biggest cost will be the time spent on developing and maintaining the platform.
+* Time spent on developing and maintaining the platform instead of providing training and consulting to clients.
 * Support for the users.
 * UI Design, graphics.
-* Hosting is probably less than $100 / month for a long time.
-* Email sending - depending on the service, but it won't go over $100/month for quite some time either.
+* Hosting cost.
+* Email sending cost.
+* Marketing.
 
 ## Permission levels
 * Site Admin
