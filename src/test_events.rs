@@ -485,6 +485,39 @@ fn post_add_event_owner_title_too_short() {
 }
 
 #[test]
+fn post_add_event_owner_invalid_date() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
+        create_group_helper(&client, "My group", 2);
+        logout(&client);
+
+        let res = client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .body(params!([
+                ("title", "Event title"),
+                ("date", "2030-02-30 08:00"),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("offset", "-180"),
+                ("gid", "1"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Invalid date");
+        check_html(&html, "h1", "Invalid date");
+        assert!(html.contains(r#"Invalid date '2030-02-30 08:00' offset '-180'"#));
+    });
+}
+
+#[test]
 fn post_add_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
