@@ -389,6 +389,36 @@ fn post_edit_event_owner_title_too_short() {
 }
 
 #[test]
+fn post_edit_event_owner_invalid_date() {
+    run_inprocess(|email_folder, client| {
+        setup_for_events(&client, &email_folder);
+
+        // update
+        let res = client
+            .post("/edit-event")
+            .header(ContentType::Form)
+            .body(params!([
+                ("title", "The title is good"),
+                ("date", "2030-13-10 08:00"),
+                ("location", "In a pub"),
+                ("description", "This is the explanation"),
+                ("offset", "-180"),
+                ("eid", "1"),
+            ]))
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        //assert_eq!(html, "");
+        check_html(&html, "title", "Invalid date");
+        check_html(&html, "h1", "Invalid date");
+        assert!(html.contains(r#"Invalid date '2030-13-10 08:00' offset '-180'"#));
+    });
+}
+
+#[test]
 fn post_edit_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
