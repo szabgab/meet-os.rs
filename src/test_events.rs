@@ -419,6 +419,39 @@ fn post_add_event_guest() {
 }
 
 #[test]
+fn post_add_event_user_not_owner() {
+    run_inprocess(|email_folder, client| {
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
+        setup_user(&client, &email_folder);
+        create_group_helper(&client, "My group", 2);
+        logout(&client);
+
+        let res = client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .private_cookie(("meet-os", USER_EMAIL))
+            .body(params!([
+                ("title", "Event title"),
+                ("date", "2030-10-10 08:00"),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("offset", "-180"),
+                ("gid", "1"),
+            ]))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
+
+        let html = res.into_string().unwrap();
+        // assert_eq!(html, "");
+        check_html(&html, "title", "Not the owner");
+        check_html(&html, "h1", "Not the owner");
+        assert!(html.contains(r#"You are not the owner of group <b>1</b>"#));
+    });
+}
+
+#[test]
 fn post_add_event_owner() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
