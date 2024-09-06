@@ -876,6 +876,13 @@ async fn edit_profile_post(
         );
     }
 
+    if MAX_NAME_LEN < name.len() {
+        return Template::render(
+            "message",
+            context! {title: "Name is too long", message: format!("Name is too long. Max {MAX_NAME_LEN} while the current name is {} long. Please try again.", name.len()), config, visitor},
+        );
+    }
+
     db::update_user(dbh, uid, name, github, gitlab, linkedin, about)
         .await
         .unwrap();

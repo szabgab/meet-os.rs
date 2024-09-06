@@ -688,6 +688,23 @@ fn post_edit_profile_failures() {
             r#"The LinkedIn profile link `szabgab` is not valid."#,
         );
 
+        // edit profile name too long
+        let res = client
+                .post("/edit-profile")
+                .private_cookie(("meet-os", OWNER_EMAIL))
+                .header(ContentType::Form)
+                .body("name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&github=&gitlab=&linkedin=")
+                .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Name is too long");
+        check_html(&html, "h1", "Name is too long");
+        check_html(
+            &html,
+            "#message",
+            "Name is too long. Max 50 while the current name is 53 long. Please try again.",
+        );
+
         // TODO test the validation of the other fields as well!
     });
 }
