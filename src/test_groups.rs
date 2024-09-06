@@ -1,8 +1,8 @@
 use crate::test_helpers::{
-    create_group_helper, logout, register_and_verify_user, setup_admin, setup_owner, setup_user,
-    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    create_group_helper, logout, setup_admin, setup_owner, setup_user, ADMIN_EMAIL, OWNER_EMAIL,
+    USER_EMAIL, USER_NAME,
 };
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_unauthorized, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form
@@ -88,20 +88,14 @@ fn create_group_by_admin() {
 #[test]
 fn create_group_unauthorized() {
     run_inprocess(|email_folder, client| {
-        let email = "peti@meet-os.com";
-        register_and_verify_user(&client, "Peti Bar", email, "petibar", &email_folder);
+        setup_user(&client, &email_folder);
 
         // Access the Group creation page with unauthorized user
         let res = client
             .get("/admin/create-group?uid=1")
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
-        check_html(&html, "title", "Unauthorized");
-        check_html(&html, "h1", "Unauthorized");
+        check_unauthorized(res);
 
         // Create group should fail
         let res = client
@@ -112,22 +106,9 @@ fn create_group_unauthorized() {
                 ("description", "nope"),
                 ("owner", "1"),
             ]))
-            .private_cookie(("meet-os", email))
+            .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Unauthorized");
-        check_html(&html, "h1", "Unauthorized");
-
-        // List the groups
-        let res = client.get("/groups").dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "x");
-        assert!(!html.contains("/group/1"));
-        check_html(&html, "title", "Groups");
-        check_html(&html, "h1", "Groups");
+        check_unauthorized(res);
     });
 }
 
