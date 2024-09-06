@@ -2,7 +2,7 @@ use crate::test_helpers::{
     create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
     OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_unprocessable, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // Create event
@@ -271,15 +271,7 @@ fn post_edit_event_user_missing_data() {
             .header(ContentType::Form)
             .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::UnprocessableEntity);
-
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "422 Unprocessable Entity");
-        check_html(&html, "h1", "422: Unprocessable Entity");
-        // TODO setup catcher for this
-        //check_html(&html, "#message",
+        check_unprocessable(res);
     });
 }
 

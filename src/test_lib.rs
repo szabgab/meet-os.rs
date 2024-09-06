@@ -118,6 +118,7 @@ pub fn check_unauthorized(res: LocalResponse) {
     );
 }
 
+// TODO setup catcher for this
 pub fn check_unprocessable(res: LocalResponse) {
     assert_eq!(res.status(), Status::UnprocessableEntity);
     let html = res.into_string().unwrap();
