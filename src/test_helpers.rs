@@ -25,6 +25,10 @@ pub const ADMIN_EMAIL: &str = "admin@meet-os.com";
 pub const ADMIN_PW: &str = "123456";
 pub const ADMIN_NAME: &str = "Site Manager";
 
+pub const OTHER_NAME: &str = "Foo Alpha";
+pub const OTHER_EMAIL: &str = "foo-alpha@meet-os.com";
+pub const OTHER_PW: &str = "password1";
+
 pub fn register_user_helper(client: &Client, name: &str, email: &str, password: &str) {
     let res = client
         .post(format!("/register"))
@@ -87,15 +91,7 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     setup_owner(client, email_folder);
     setup_user(client, email_folder);
 
-    for ix in 2..3 {
-        register_and_verify_user(
-            &client,
-            format!("Foo {ix}").as_str(),
-            format!("foo{ix}@meet-os.com").as_str(),
-            format!("password{ix}").as_str(),
-            &email_folder,
-        );
-    }
+    register_and_verify_user(&client, OTHER_NAME, OTHER_EMAIL, OTHER_PW, &email_folder);
 
     // Make sure the client is not logged in after the setup
     let res = client.get(format!("/logout")).dispatch();

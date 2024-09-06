@@ -1,4 +1,6 @@
-use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_all, setup_owner};
+use crate::test_helpers::{
+    login_admin, login_owner, setup_admin, setup_all, setup_owner, ADMIN_NAME, OTHER_NAME,
+};
 use crate::test_lib::{check_html, check_unauthorized, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
@@ -50,8 +52,11 @@ fn admin_users_page_as_admin() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "List Users by Admin");
         check_html(&html, "h1", "List Users by Admin");
-        assert!(html.contains(r#"<a href="/user/4">Foo 2</a>"#));
-        assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
+        //assert_eq!(html, "");
+        let expected = format!(r#"<a href="/user/4">{OTHER_NAME}</a>"#);
+        assert!(html.contains(&expected));
+        let expected = format!(r#"<td><a href="/user/1">{ADMIN_NAME}</a></td>"#);
+        assert!(html.contains(&expected));
         assert!(html.contains(r#"<b>Total: 4</b>"#));
     })
 }
