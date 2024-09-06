@@ -12,12 +12,15 @@ use crate::test_lib::{params, read_code_from_email};
 pub const OWNER_EMAIL: &str = "foo@meet-os.com";
 pub const OWNER_PW: &str = "123foo";
 pub const OWNER_NAME: &str = "Foo Bar";
+
 pub const USER_EMAIL: &str = "user@meet-os.com";
 pub const USER_PW: &str = "password1";
-pub const USER_NAME: &str = "Foo 1";
+pub const USER_NAME: &str = "Sancho Panza";
+
 pub const UNVERIFIED_EMAIL: &str = "unverified@meet-os.com";
 pub const UNVERIFIED_PW: &str = "qwerty";
 pub const UNVERIFIED_NAME: &str = "Halfway Through";
+
 pub const ADMIN_EMAIL: &str = "admin@meet-os.com";
 pub const ADMIN_PW: &str = "123456";
 pub const ADMIN_NAME: &str = "Site Manager";
