@@ -231,6 +231,7 @@ fn post_login_admin() {
         setup_admin(&client, &email_folder);
         logout(&client);
 
+        // login as admin
         let res = client
             .post("/login")
             .header(ContentType::Form)
@@ -239,29 +240,19 @@ fn post_login_admin() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-
-        //assert_eq!(html, "x");
         check_html(&html, "title", "Welcome back");
         check_admin_menu(&html);
 
-        // // Access the profile with the cookie
         check_profile_by_user(&client, &ADMIN_EMAIL, ADMIN_NAME);
 
-        let res = client
-            .get("/logout")
-            .private_cookie(("meet-os", ADMIN_EMAIL))
-            .dispatch();
+        // logout
+        let res = client.get("/logout").dispatch();
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Logged out");
         check_html(&html, "h1", "Logged out");
         check_profile_by_guest(&client);
-
-        // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
-        // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
-        // If we want to make sure that the user cannot access the system any more we'll have to manage the login information
-        // on the server side.
     });
 }
 
