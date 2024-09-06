@@ -542,11 +542,7 @@ fn get_add_event_user_is_owner() {
 #[test]
 fn post_add_event_user_not_owner() {
     run_inprocess(|email_folder, client| {
-        setup_admin(&client, &email_folder);
-        setup_owner(&client, &email_folder);
-        setup_user(&client, &email_folder);
-        create_group_helper(&client, "My group", 2);
-        logout(&client);
+        setup_for_events(&client, &email_folder);
 
         let res = client
             .post("/add-event")
