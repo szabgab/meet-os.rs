@@ -59,7 +59,6 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu(&html);
-        // assert_eq!(html, "");
         check_html(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please click on the link to reset your password.");
         check_html(&html, "#message", &expected);

@@ -128,6 +128,18 @@ pub fn check_unprocessable(res: LocalResponse) {
     ));
 }
 
+pub fn check_not_the_owner(res: LocalResponse) {
+    assert_eq!(res.status(), Status::Ok);
+    let html = res.into_string().unwrap();
+    check_html(&html, "title", "Not the owner");
+    check_html(&html, "h1", "Not the owner");
+    check_html(
+        &html,
+        "#message",
+        r#"You are not the owner of the group <b>1</b>"#,
+    );
+}
+
 // check_html_list(
 //     &html,
 //     "li",

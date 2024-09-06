@@ -2,7 +2,9 @@ use crate::test_helpers::{
     create_group_helper, logout, setup_admin, setup_owner, setup_user, ADMIN_EMAIL, OWNER_EMAIL,
     USER_EMAIL, USER_NAME,
 };
-use crate::test_lib::{check_html, check_unauthorized, check_unprocessable, params, run_inprocess};
+use crate::test_lib::{
+    check_html, check_not_the_owner, check_unauthorized, check_unprocessable, params, run_inprocess,
+};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form
@@ -28,7 +30,6 @@ fn create_group_by_admin() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "x");
         check_html(&html, "title", "Create Group");
         check_html(&html, "h1", "Create Group");
 
@@ -55,7 +56,6 @@ fn create_group_by_admin() {
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "x");
         assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
@@ -118,7 +118,6 @@ fn create_group_guest() {
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "x");
         assert!(!html.contains("/group/")); // No link to any group
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
@@ -127,7 +126,6 @@ fn create_group_guest() {
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         assert!(!html.contains("/group/1"));
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
@@ -146,10 +144,9 @@ fn get_join_group_not_existing_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        // assert_eq!(html, "");
         check_html(&html, "title", "No such group");
         check_html(&html, "h1", "No such group");
-        assert!(html.contains("There is not group with id <b>20</b>"));
+        check_html(&html, "#message", "There is not group with id <b>20</b>");
     })
 }
 
@@ -170,16 +167,18 @@ fn get_join_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
         check_html(&html, "title", "Membership");
         check_html(&html, "h1", "Membership");
-        assert!(html.contains(r#"User added to <a href="/group/1">group</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"User added to <a href="/group/1">group</a>"#,
+        );
 
         // check if user is listed on the group page
         let res = client.get("/group/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
@@ -471,12 +470,7 @@ fn post_edit_group_by_user_not_owner() {
             ]))
             .dispatch();
 
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        assert!(html.contains(r#"You are not the owner of the group <b>1</b>"#));
+        check_not_the_owner(res);
     });
 }
 
@@ -503,10 +497,13 @@ fn post_edit_group_user_not_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
-        assert!(html.contains(r#"You are not the owner of the group <b>1</b>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"You are not the owner of the group <b>1</b>"#,
+        );
     });
 }
 
@@ -533,16 +530,18 @@ fn post_edit_group_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Group updated");
         check_html(&html, "h1", "Group updated");
-        assert!(html.contains(r#"Check out the <a href="/group/1">group</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Check out the <a href="/group/1">group</a>"#,
+        );
 
         // check if the group was updated
         let res = client.get("/group/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Updated name");
         check_html(&html, "h1", "Updated name");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));

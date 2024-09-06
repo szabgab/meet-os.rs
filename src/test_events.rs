@@ -2,7 +2,9 @@ use crate::test_helpers::{
     create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
     OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
-use crate::test_lib::{check_html, check_unprocessable, params, run_inprocess};
+use crate::test_lib::{
+    check_html, check_not_the_owner, check_unprocessable, params, run_inprocess,
+};
 use rocket::http::{ContentType, Status};
 
 // Create event
@@ -323,16 +325,7 @@ fn post_edit_event_user_not_the_owner() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
 
-        assert_eq!(res.status(), Status::Ok);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(
-            &html,
-            "#message",
-            r#"You are not the owner of group <b>1</b>"#,
-        );
+        check_not_the_owner(res);
     });
 }
 
@@ -519,13 +512,7 @@ fn get_add_event_user_not_the_owner() {
             .get("/add-event?gid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(&html, "#message", "You are not the owner of group <b>1</b>");
+        check_not_the_owner(res);
     });
 }
 
@@ -574,17 +561,7 @@ fn post_add_event_user_not_owner() {
                 ("gid", "1"),
             ]))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(
-            &html,
-            "#message",
-            r#"You are not the owner of group <b>1</b>"#,
-        );
+        check_not_the_owner(res);
     });
 }
 
@@ -740,7 +717,6 @@ fn get_event_as_guest() {
         let res = client.get("/event/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "First event");
         check_html(&html, "h1", "First event");
         // TODO check that there are no participants in this event
@@ -775,12 +751,7 @@ fn get_edit_event_as_user_but_not_owner() {
             .get("/edit-event?eid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(&html, "#message", "You are not the owner of group <b>1</b>");
+        check_not_the_owner(res);
     });
 }
 #[test]
@@ -796,7 +767,6 @@ fn get_edit_event_as_owner_with_eid() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Edit event in the 'First Group' group");
         check_html(&html, "h1", "Edit event in the 'First Group' group");
         assert!(html.contains(r#"<form method="POST" action="/edit-event" id="edit-event">"#));

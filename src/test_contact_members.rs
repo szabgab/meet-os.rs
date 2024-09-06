@@ -1,5 +1,7 @@
 use crate::test_helpers::{setup_many, setup_many_users, OWNER_EMAIL, USER_EMAIL};
-use crate::test_lib::{check_html, check_unprocessable, params, run_inprocess};
+use crate::test_lib::{
+    check_html, check_not_the_owner, check_unprocessable, params, run_inprocess,
+};
 use rocket::http::{ContentType, Status};
 
 #[test]
@@ -71,12 +73,7 @@ fn contact_members_get_user_not_owner() {
             .get("/contact-members?gid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(&html, "#message", "Not the owner");
+        check_not_the_owner(res);
     });
 }
 
@@ -168,17 +165,6 @@ fn contact_members_post_user_who_is_not_the_owner() {
             ]))
             .header(ContentType::Form)
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(
-            &html,
-            "#message",
-            r#"You are not the owner of group <b>1</b>"#,
-        );
-        //assert_eq!(html, "");
+        check_not_the_owner(res);
     });
 }
