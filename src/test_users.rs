@@ -260,7 +260,7 @@ fn post_login_admin() {
 }
 
 #[test]
-fn test_register_with_invalid_email_address() {
+fn post_register_with_invalid_email_address() {
     run_inprocess(|email_folder, client| {
         //"name=Foo Bar&email=meet-os.com&password=123456"
         let res = client
@@ -284,7 +284,7 @@ fn test_register_with_invalid_email_address() {
 }
 
 #[test]
-fn test_register_with_too_long_username() {
+fn post_register_with_too_long_username() {
     run_inprocess(|email_folder, client| {
         let res = client
             .post("/register")
@@ -671,6 +671,7 @@ fn post_edit_profile_failures() {
             r#"The GitLab username `foo*bar` is not valid."#,
         );
 
+        // edit profile invalid linkein
         let res = client
             .post("/edit-profile")
             .private_cookie(("meet-os", OWNER_EMAIL))
