@@ -77,3 +77,5 @@ multiple_crate_versions = "allow"  # see https://rust-lang.github.io/rust-clippy
 
 
 blocks_in_conditions = "allow" # We get some strange reports at struct definitions and not in if blocks. Let's disable this for now.
+
+separated_literal_suffix = "allow" # I think it is more readable to write 3_i16 than to write 3i16.

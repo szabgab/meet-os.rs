@@ -1,15 +1,15 @@
-#![allow(clippy::std_instead_of_core)]
+#![allow(clippy::allow_attributes_without_reason)]
 #![allow(unused_variables)]
 #![allow(clippy::needless_pass_by_value)]
 
 #[macro_use]
 extern crate rocket;
 
-#[allow(clippy::pub_with_shorthand)]
+#[expect(clippy::pub_with_shorthand)]
 pub(crate) mod admin;
-#[allow(clippy::pub_with_shorthand)]
+#[expect(clippy::pub_with_shorthand)]
 pub(crate) mod public;
-#[allow(clippy::pub_with_shorthand)]
+#[expect(clippy::pub_with_shorthand)]
 pub(crate) mod web;
 
 mod notify;
@@ -225,7 +225,7 @@ async fn login_post(
 
     // It seems despite calling add_private, the cookies will still return the old value so
     // for now we have a separate constructor for the Visitor
-    #[allow(clippy::shadow_unrelated)]
+    #[expect(clippy::shadow_unrelated)]
     let visitor = Visitor::new_after_login(&email, dbh, myconfig).await;
     Template::render(
         "message",
@@ -238,7 +238,7 @@ fn logout_get(cookies: &CookieJar<'_>, visitor: Visitor, logged_in: LoggedIn) ->
     cookies.remove_private("meet-os");
     let config = get_public_config();
 
-    #[allow(clippy::shadow_unrelated)]
+    #[expect(clippy::shadow_unrelated)]
     let visitor = Visitor::new_after_logout();
 
     Template::render(
@@ -587,7 +587,7 @@ async fn verify_email(
     notify::admin_new_user_verified(myconfig, &user).await;
 
     // take into account the newly set cookie value
-    #[allow(clippy::shadow_unrelated)]
+    #[expect(clippy::shadow_unrelated)]
     let visitor = Visitor::new_after_login(&user.email, dbh, myconfig).await;
 
     Template::render(
@@ -1164,7 +1164,7 @@ async fn add_event_post(
         );
     };
 
-    #[allow(clippy::arithmetic_side_effects)]
+    #[expect(clippy::arithmetic_side_effects)]
     let date = ts.to_utc() + Duration::minutes(offset);
 
     let utc: DateTime<Utc> = Utc::now();
@@ -1318,7 +1318,7 @@ async fn edit_event_post(
         );
     };
 
-    #[allow(clippy::arithmetic_side_effects)]
+    #[expect(clippy::arithmetic_side_effects)]
     let date = ts.to_utc() + Duration::minutes(offset);
 
     let utc: DateTime<Utc> = Utc::now();

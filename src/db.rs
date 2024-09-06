@@ -1,5 +1,3 @@
-#![allow(clippy::std_instead_of_core)]
-
 use chrono::{DateTime, Utc};
 
 use rocket::fairing::AdHoc;
@@ -530,7 +528,6 @@ pub async fn increment(dbh: &Surreal<Client>, name: &str) -> surrealdb::Result<u
         .query("DEFINE INDEX counter_name ON TABLE counter COLUMNS name UNIQUE")
         .await?;
 
-    #[allow(clippy::separated_literal_suffix)]
     let response = dbh
         .query(
             "
