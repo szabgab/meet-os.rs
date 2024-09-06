@@ -1,6 +1,6 @@
 use crate::test_helpers::{
-    create_group_helper, logout, setup_admin, setup_owner, setup_user, ADMIN_EMAIL, OWNER_EMAIL,
-    USER_EMAIL, USER_NAME,
+    create_group_helper, logout, setup_admin, setup_for_groups, setup_owner, setup_user,
+    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use crate::test_lib::{
     check_html, check_not_the_owner, check_unauthorized, check_unprocessable, params, run_inprocess,
@@ -347,10 +347,7 @@ fn get_edit_group_user_no_such_group() {
 #[test]
 fn get_edit_group_user_is_not_the_owner() {
     run_inprocess(|email_folder, client| {
-        setup_admin(&client, &email_folder);
-        setup_owner(&client, &email_folder);
-        setup_user(&client, &email_folder);
-        create_group_helper(&client, "First Group", 2);
+        setup_for_groups(&client, &email_folder);
 
         let res = client
             .get("/edit-group?gid=1")
@@ -446,11 +443,7 @@ fn post_edit_group_user_no_such_group() {
 #[test]
 fn post_edit_group_by_user_not_owner() {
     run_inprocess(|email_folder, client| {
-        setup_admin(&client, &email_folder);
-        setup_owner(&client, &email_folder);
-        setup_user(&client, &email_folder);
-        create_group_helper(&client, "First Group", 2);
-        logout(&client);
+        setup_for_groups(&client, &email_folder);
 
         let res = client
             .post("/edit-group")
@@ -471,11 +464,7 @@ fn post_edit_group_by_user_not_owner() {
 #[test]
 fn post_edit_group_user_not_owner() {
     run_inprocess(|email_folder, client| {
-        setup_admin(&client, &email_folder);
-        setup_owner(&client, &email_folder);
-        setup_user(&client, &email_folder);
-        create_group_helper(&client, "First Group", 2);
-        logout(&client);
+        setup_for_groups(&client, &email_folder);
 
         let res = client
             .post("/edit-group")
