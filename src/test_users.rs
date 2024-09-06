@@ -4,8 +4,8 @@ use crate::test_helpers::{
     OWNER_PW, UNVERIFIED_NAME,
 };
 use crate::test_lib::{
-    check_admin_menu, check_guest_menu, check_html, check_not_logged_in,
-    check_profile_page_in_process, check_user_menu, params, read_code_from_email, run_inprocess,
+    check_admin_menu, check_guest_menu, check_html, check_not_logged_in, check_profile_page,
+    check_user_menu, params, read_code_from_email, run_inprocess,
 };
 use rocket::http::{ContentType, Status};
 
@@ -97,7 +97,7 @@ fn register_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(&client, OWNER_EMAIL, OWNER_NAME);
+        check_profile_page(&client, OWNER_EMAIL, OWNER_NAME);
     });
 }
 
@@ -182,7 +182,7 @@ fn post_login_regular_user() {
     run_inprocess(|email_folder, client| {
         register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 
-        check_profile_page_in_process(&client, &OWNER_EMAIL, OWNER_NAME);
+        check_profile_page(&client, &OWNER_EMAIL, OWNER_NAME);
 
         let res = client
             .post("/login")
@@ -198,7 +198,7 @@ fn post_login_regular_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page_in_process(&client, &OWNER_EMAIL, "Foo Bar");
+        check_profile_page(&client, &OWNER_EMAIL, "Foo Bar");
 
         // TODO: logout requires a logged in user
         //let res = client.get("/logout").dispatch();
@@ -246,7 +246,7 @@ fn post_login_admin() {
         check_admin_menu(&html);
 
         // // Access the profile with the cookie
-        check_profile_page_in_process(&client, &ADMIN_EMAIL, ADMIN_NAME);
+        check_profile_page(&client, &ADMIN_EMAIL, ADMIN_NAME);
 
         let res = client
             .get("/logout")

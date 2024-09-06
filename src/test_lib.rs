@@ -42,7 +42,7 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     func(email_folder, client);
 }
 
-pub fn check_profile_page_in_process(client: &Client, email: &str, h1: &str) {
+pub fn check_profile_page(client: &Client, email: &str, h1: &str) {
     let res = client
         .get("/profile")
         .private_cookie(("meet-os", email.to_owned()))
