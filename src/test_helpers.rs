@@ -13,6 +13,8 @@ pub const OWNER_EMAIL: &str = "foo@meet-os.com";
 pub const OWNER_PW: &str = "123foo";
 pub const OWNER_NAME: &str = "Foo Bar";
 pub const USER_EMAIL: &str = "user@meet-os.com";
+pub const USER_PW: &str = "password1";
+pub const USER_NAME: &str = "Foo 1";
 pub const UNVERIFIED_EMAIL: &str = "unverified@meet-os.com";
 pub const UNVERIFIED_PW: &str = "qwerty";
 pub const UNVERIFIED_NAME: &str = "Halfway Through";
@@ -70,7 +72,7 @@ pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
 }
 
 pub fn setup_user(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, "Foo 1", USER_EMAIL, "password1", &email_folder);
+    register_and_verify_user(&client, USER_NAME, USER_EMAIL, USER_PW, &email_folder);
 }
 
 pub fn setup_unverified_user(client: &Client, email_folder: &PathBuf) {

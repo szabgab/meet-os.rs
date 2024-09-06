@@ -1,6 +1,6 @@
 use crate::test_helpers::{
     create_group_helper, logout, register_and_verify_user, setup_admin, setup_owner, setup_user,
-    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL,
+    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
@@ -202,7 +202,8 @@ fn get_join_group_as_user() {
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
-        assert!(html.contains(r#"<a href="/user/3">Foo 1</a>"#));
+        let expected = format!(r#"<a href="/user/3">{USER_NAME}</a>"#);
+        assert!(html.contains(&expected));
 
         // visit the group page as a member of the group
         let res = client
@@ -215,7 +216,8 @@ fn get_join_group_as_user() {
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
-        assert!(html.contains(r#"<a href="/user/3">Foo 1</a>"#));
+        let expected = format!(r#"<a href="/user/3">{USER_NAME}</a>"#);
+        assert!(html.contains(&expected));
         assert!(html.contains(r#"You are a member."#));
         assert!(html.contains(r#"<a href="/leave-group?gid=1"><button class="button is-link">leave group</button></a>"#));
 
@@ -255,7 +257,7 @@ fn get_join_group_as_user() {
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
-        assert!(!html.contains("Foo 1"));
+        assert!(!html.contains(USER_NAME));
         assert!(!html.contains("/user/3"));
     })
 }

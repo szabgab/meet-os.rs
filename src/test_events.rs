@@ -1,6 +1,6 @@
 use crate::test_helpers::{
     create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
-    OWNER_EMAIL, USER_EMAIL,
+    OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
@@ -45,13 +45,15 @@ fn join_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "First event");
         check_html(&html, "h1", "First event");
 
         assert!(html.contains(r#"<h2 class="title is-4">Participating</h2>"#));
-        assert!(!html.contains(r#"<li>Foo 1</li>"#));
+        let expected_user_name_listed_as_participant =
+            format!(r#"<li><a href="/user/3">{USER_NAME}</a></li>"#);
+        assert!(!html.contains(&expected_user_name_listed_as_participant));
 
         assert!(html.contains(r#"<button class="button is-link">"#));
         assert!(html.contains(r#"RSVP to the event"#));
@@ -59,12 +61,12 @@ fn join_event() {
         // make sure user not in the group
         let res = client.get("/group/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
-        assert!(!html.contains(r#"Foo 1"#));
+        assert!(!html.contains(&expected_user_name_listed_as_participant));
 
         // RSVP to event
         let res = client
@@ -72,8 +74,8 @@ fn join_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "RSVPed to event");
         check_html(&html, "h1", "RSVPed to event");
         check_html(
@@ -85,14 +87,13 @@ fn join_event() {
         // check if user has joined the group
         let res = client.get("/group/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
-        assert!(html.contains(r#"<td><a href="/user/3">Foo 1</a></td>"#));
-
-        //assert!(html.contains(r#""#));
+        let expected = format!(r#"<td><a href="/user/3">{USER_NAME}</a></td>"#);
+        assert!(html.contains(&expected));
 
         // check if user is listed on the event page
         let res = client
@@ -100,14 +101,12 @@ fn join_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "First event");
         check_html(&html, "h1", "First event");
-
         assert!(html.contains(r#"<h2 class="title is-4">Participating</h2>"#));
-        assert!(html.contains(r#"<li>Foo 1</li>"#));
-
+        assert!(html.contains(USER_NAME));
         assert!(html.contains(r#"<button class="button is-link">"#));
         assert!(html.contains(r#"Unregister from the event"#));
 
@@ -117,8 +116,8 @@ fn join_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Not attending");
         check_html(&html, "h1", "Not attending");
         check_html(
@@ -139,7 +138,7 @@ fn join_event() {
         check_html(&html, "h1", "First event");
 
         assert!(html.contains(r#"<h2 class="title is-4">Participating</h2>"#));
-        assert!(!html.contains(r#"<li>Foo 1</li>"#));
+        assert!(!html.contains(&expected_user_name_listed_as_participant));
 
         assert!(html.contains(r#"<button class="button is-link">"#));
         assert!(html.contains(r#"RSVP to the event"#));
@@ -152,7 +151,8 @@ fn join_event() {
         check_html(&html, "title", "First Group");
         check_html(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
-        assert!(html.contains(r#"<td><a href="/user/3">Foo 1</a></td>"#));
+        let expected = format!(r#"<td><a href="/user/3">{USER_NAME}</a></td>"#);
+        assert!(html.contains(&expected));
 
         // join event again
         let res = client
@@ -176,13 +176,13 @@ fn join_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "First event");
         check_html(&html, "h1", "First event");
 
         assert!(html.contains(r#"<h2 class="title is-4">Participating</h2>"#));
-        assert!(html.contains(r#"<li>Foo 1</li>"#));
+        assert!(html.contains(USER_NAME));
 
         assert!(html.contains(r#"<button class="button is-link">"#));
         assert!(html.contains(r#"Unregister from the event"#));
@@ -193,8 +193,8 @@ fn join_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "You were already RSVPed");
         check_html(&html, "h1", "You were already RSVPed");
         check_html(&html, "#message", "You were already RSVPed");
@@ -211,8 +211,8 @@ fn join_not_existing_event() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "No such event");
         check_html(&html, "h1", "No such event");
         check_html(&html, "#message", "No such event");

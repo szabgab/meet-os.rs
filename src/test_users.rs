@@ -1,7 +1,7 @@
 use crate::test_helpers::{
     logout, register_and_verify_user, setup_admin, setup_many_users, setup_owner,
     setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OWNER_EMAIL, OWNER_NAME,
-    OWNER_PW, UNVERIFIED_NAME,
+    OWNER_PW, UNVERIFIED_NAME, USER_NAME,
 };
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_not_logged_in, check_profile_by_guest,
@@ -530,7 +530,8 @@ fn get_users_list_users_many_users_guest() {
         assert!(!html.contains(r#"No users"#));
 
         assert!(html.contains(r#"<li><a href="/user/2">Foo Bar</a></li>"#));
-        assert!(html.contains(r#"<li><a href="/user/3">Foo 1</a></li>"#));
+        let expected = format!(r#"<li><a href="/user/3">{USER_NAME}</a></li>"#);
+        assert!(html.contains(&expected));
         assert!(html.contains(r#"<li><a href="/user/4">Foo 2</a></li>"#));
         assert!(html.contains(r#"<li><a href="/user/1">Site Manager</a></li>"#));
     });
@@ -607,7 +608,8 @@ fn unverified_user_on_user_page_by_guest() {
         check_html(&html, "title", "List Users");
         check_html(&html, "h1", "List Users");
         assert!(html.contains(r#"<a href="/user/1">Site Manager</a>"#));
-        assert!(html.contains(r#"<a href="/user/2">Foo 1</a></li>"#));
+        let expected = format!(r#"<a href="/user/2">{USER_NAME}</a></li>"#);
+        assert!(html.contains(&expected));
         assert!(!html.contains(UNVERIFIED_NAME));
 
         // TODO check by logged in user, owner, and admin as well

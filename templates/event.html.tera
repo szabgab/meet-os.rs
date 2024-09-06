@@ -61,7 +61,7 @@
             <ul>
             {% for person in people %}
               {% if person.0.status %}
-                 <li>{{ person.1.name }}</li>
+                 <li><a href="/user/{{ person.1.uid }}">{{ person.1.name }}</a></li>
               {% endif %}
             {% endfor %}
           </div>
