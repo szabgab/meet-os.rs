@@ -26,6 +26,7 @@ fn protected_pages_as_guest() {
             "/edit-event",
             "/rsvp-yes-event?eid=1",
             "/rsvp-no-event?eid=1",
+            "/edit-profile",
             "/profile",
         ] {
             let res = client.get(path).dispatch();
@@ -444,18 +445,6 @@ fn post_register_with_short_password() {
         //assert_eq!(html, "");
         assert!(html.contains("The password must be at least 6 characters long."));
         check_guest_menu(&html);
-    });
-}
-
-#[test]
-fn get_edit_profile_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/edit-profile").dispatch();
-
-        assert_eq!(res.status(), Status::Unauthorized);
-        let html = res.into_string().unwrap();
-
-        check_html(&html, "title", "Not logged in");
     });
 }
 
