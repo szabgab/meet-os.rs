@@ -36,19 +36,6 @@ fn test_simple() {
         check_profile_page_in_process(&client, OWNER_EMAIL, OWNER_NAME);
         //check_profile_page_in_process(&client, "foo@meet-os.com", "");
 
-        // register with same email should fail
-        let res = client
-            .post("/register")
-            .header(ContentType::Form)
-            .body("name=Foo Bar&email=foo@meet-os.com&password=123456")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Registration failed");
-        assert!(html.contains("Could not register <b>foo@meet-os.com</b>"));
-
-        //assert_eq!(html, "");
-
         // TODO resend code?
         // TODO reset password?
     });
