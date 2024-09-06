@@ -136,4 +136,17 @@ docker exec surreal /surreal import -e http://localhost:8000 --namespace meet-os
 docker exec -it surreal /surreal sql -e http://localhost:8000 --ns meet-os-ns --db meet-os-ns --pretty
 ```
 
+## Measure elapsed time of tests
+
+* If you don't have it yet, install the nightly toolchain of Rust:
+
+```
+rustup toolchain install nightly
+```
+
+Then run the test with these flags:
+
+```
+cargo +nightly test -- -Z unstable-options --report-time
+```
 
