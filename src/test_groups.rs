@@ -134,10 +134,6 @@ fn create_group_unauthorized() {
 #[test]
 fn create_group_guest() {
     run_inprocess(|email_folder, client| {
-        // Access the Group creation page without user
-        let res = client.get("/admin/create-group?uid=1").dispatch();
-        check_not_logged_in(res);
-
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -167,14 +163,6 @@ fn create_group_guest() {
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
     });
-}
-
-#[test]
-fn get_join_group_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/join-group?gid=1").dispatch();
-        check_not_logged_in(res);
-    })
 }
 
 #[test]
@@ -306,14 +294,6 @@ fn get_join_group_as_owner() {
 }
 
 #[test]
-fn get_leave_group_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/leave-group?gid=1").dispatch();
-        check_not_logged_in(res);
-    })
-}
-
-#[test]
 fn get_leave_not_existing_group() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
@@ -372,14 +352,6 @@ fn get_leave_group_user_does_not_belong_to() {
         check_html(&html, "title", "You are not a member of this group");
         check_html(&html, "h1", "You are not a member of this group");
         assert!(html.contains(r#"You cannot leave a group where you are not a member."#));
-    });
-}
-
-#[test]
-fn get_edit_group_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/edit-group").dispatch();
-        check_not_logged_in(res);
     });
 }
 

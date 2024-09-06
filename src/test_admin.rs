@@ -4,14 +4,6 @@ use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 #[test]
-fn admin_page_as_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/admin").dispatch();
-        check_not_logged_in(res);
-    })
-}
-
-#[test]
 fn admin_page_as_user() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
@@ -44,14 +36,6 @@ fn admin_page_as_admin() {
 }
 
 #[test]
-fn admin_users_page_as_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/admin/users").dispatch();
-        check_not_logged_in(res);
-    })
-}
-
-#[test]
 fn admin_users_page_as_user() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
@@ -80,14 +64,6 @@ fn admin_users_page_as_admin() {
         assert!(html.contains(r#"<a href="/user/4">Foo 2</a>"#));
         assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
         assert!(html.contains(r#"<b>Total: 4</b>"#));
-    })
-}
-
-#[test]
-fn admin_search_get_as_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/admin/search").dispatch();
-        check_not_logged_in(res);
     })
 }
 
@@ -180,14 +156,6 @@ fn admin_search_post_as_admin() {
         assert!(html.contains(r#"<b>Total: 1</b>"#));
         assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
         assert!(html.contains(r#"<td>admin@meet-os.com</td>"#));
-    })
-}
-
-#[test]
-fn admin_audit_as_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/admin/audit").dispatch();
-        check_not_logged_in(res);
     })
 }
 

@@ -238,26 +238,6 @@ fn leave_not_existing_event() {
 }
 
 #[test]
-fn join_event_guest() {
-    run_inprocess(|email_folder, client| {
-        setup_for_events(&client, &email_folder);
-
-        let res = client.get("/rsvp-yes-event?eid=1").dispatch();
-        check_not_logged_in(res);
-    })
-}
-
-#[test]
-fn leave_event_guest() {
-    run_inprocess(|email_folder, client| {
-        setup_for_events(&client, &email_folder);
-
-        let res = client.get("/rsvp-no-event?eid=1").dispatch();
-        check_not_logged_in(res);
-    })
-}
-
-#[test]
 fn join_event_by_group_owner() {
     run_inprocess(|email_folder, client| {
         setup_for_events(&client, &email_folder);
@@ -532,14 +512,6 @@ fn post_edit_event_owner() {
 }
 
 #[test]
-fn get_add_event_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/add-event").dispatch();
-        check_not_logged_in(res);
-    });
-}
-
-#[test]
 fn get_add_event_user_missing_gid() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
@@ -803,15 +775,6 @@ fn get_event_as_guest() {
         check_html(&html, "title", "First event");
         check_html(&html, "h1", "First event");
         // TODO check that there are no participants in this event
-    });
-}
-
-#[test]
-fn get_edit_event_as_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/edit-event").dispatch();
-
-        check_not_logged_in(res);
     });
 }
 

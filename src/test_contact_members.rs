@@ -3,14 +3,6 @@ use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 #[test]
-fn contact_members_get_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client.get("/contact-members").dispatch();
-        check_not_logged_in(res);
-    });
-}
-
-#[test]
 fn contact_members_get_user_without_gid() {
     run_inprocess(|email_folder, client| {
         setup_many_users(&client, &email_folder);

@@ -12,7 +12,22 @@ use rocket::http::{ContentType, Status};
 #[test]
 fn protected_pages_as_guest() {
     run_inprocess(|email_folder, client| {
-        for path in ["/profile", "/admin/create-group?uid=1", "/admin"] {
+        for path in [
+            "/admin",
+            "/admin/audit",
+            "/admin/create-group?uid=1",
+            "/admin/search",
+            "/admin/users",
+            "/join-group?gid=1",
+            "/leave-group?gid=1",
+            "/edit-group",
+            "/contact-members",
+            "/add-event",
+            "/edit-event",
+            "/rsvp-yes-event?eid=1",
+            "/rsvp-no-event?eid=1",
+            "/profile",
+        ] {
             let res = client.get(path).dispatch();
             check_not_logged_in(res);
         }
