@@ -264,6 +264,43 @@ fn post_login_admin() {
 }
 
 #[test]
+fn test_register_with_invalid_email_address() {
+    run_inprocess(|email_folder, client| {
+        //"name=Foo Bar&email=meet-os.com&password=123456"
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body(params!([
+                ("name", "Foo Bar"),
+                ("email", "meet-os.com"),
+                ("password", "123456"),
+            ]))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid email address");
+        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+    });
+}
+
+#[test]
+fn test_register_with_too_long_username() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&email=long@meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Name is too long");
+        assert!(html.contains(
+            "Name is too long. Max 50 while the current name is 53 long. Please try again."
+        ));
+    });
+}
+
+#[test]
 fn post_register_with_bad_email_address() {
     run_inprocess(|email_folder, client| {
         // register new user

@@ -1,46 +1,9 @@
 use crate::test_helpers::{OWNER_EMAIL, OWNER_NAME};
 use crate::test_lib::{
-    check_guest_menu, check_html, check_profile_page_in_process, check_user_menu, params,
+    check_guest_menu, check_html, check_profile_page_in_process, check_user_menu,
     read_code_from_email, run_inprocess,
 };
 use rocket::http::{ContentType, Status};
-
-#[test]
-fn test_register_with_invalid_email_address() {
-    run_inprocess(|email_folder, client| {
-        //"name=Foo Bar&email=meet-os.com&password=123456"
-        let res = client
-            .post("/register")
-            .header(ContentType::Form)
-            .body(params!([
-                ("name", "Foo Bar"),
-                ("email", "meet-os.com"),
-                ("password", "123456"),
-            ]))
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid email address");
-        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
-    });
-}
-
-#[test]
-fn test_register_with_too_long_username() {
-    run_inprocess(|email_folder, client| {
-        let res = client
-            .post("/register")
-            .header(ContentType::Form)
-            .body("name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&email=long@meet-os.com&password=123456")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Name is too long");
-        assert!(html.contains(
-            "Name is too long. Max 50 while the current name is 53 long. Please try again."
-        ));
-    });
-}
 
 #[test]
 fn test_simple() {
