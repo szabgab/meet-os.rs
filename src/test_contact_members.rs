@@ -1,5 +1,5 @@
 use crate::test_helpers::{setup_many, setup_many_users, OWNER_EMAIL, USER_EMAIL};
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_unprocessable, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 #[test]
@@ -15,9 +15,9 @@ fn contact_members_get_user_without_gid() {
         assert_eq!(res.status(), Status::NotFound);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
         check_html(&html, "title", "404 Not Found");
         check_html(&html, "h1", "404 Not Found");
+        check_html(&html, "#message", "404 Not Found");
     });
 }
 
@@ -34,10 +34,9 @@ fn contact_members_get_user_with_invalid_gid() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
         check_html(&html, "title", "No such group");
         check_html(&html, "h1", "No such group");
-        assert!(html.contains("Group <b>1</b> does not exist"));
+        check_html(&html, "#message", "Group <b>1</b> does not exist");
     });
 }
 
@@ -54,7 +53,6 @@ fn contact_members_get_owner_with_gid() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
         check_html(&html, "title", "Contact members of the 'First Group' group");
         check_html(&html, "h1", "Contact members of the 'First Group' group");
         assert!(
@@ -76,10 +74,9 @@ fn contact_members_get_user_not_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-
-        //assert_eq!(html, "");
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
+        check_html(&html, "#message", "Not the owner");
     });
 }
 
@@ -96,14 +93,7 @@ fn contact_members_post_user_without_gid() {
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .dispatch();
-
-        assert_eq!(res.status(), Status::UnprocessableEntity);
-        //let html = res.into_string().unwrap();
-
-        //assert_eq!(html, "");
-        // check_html(&html, "title", "Register");
-        // check_html(&html, "h1", "Register");
-        // assert!(html.contains(r#"<form method="POST" action="/register">"#));
+        check_unprocessable(res);
     });
 }
 
@@ -126,9 +116,9 @@ fn contact_members_post_user_with_all() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
         check_html(&html, "title", "Message sent");
         check_html(&html, "h1", "Message sent");
+        check_html(&html, "#message", "Message sent");
         // TODO read email file
         // TODO check who was this message sent to
     });
@@ -155,8 +145,11 @@ fn contact_members_post_user_subject_too_short() {
 
         check_html(&html, "title", "Too short a subject");
         check_html(&html, "h1", "Too short a subject");
-        assert!(html.contains(r#"Minimal subject length 5 Current subject len: 4"#));
-        //assert_eq!(html, "");
+        check_html(
+            &html,
+            "#message",
+            r#"Minimal subject length 5 Current subject len: 4"#,
+        );
     });
 }
 
@@ -181,7 +174,11 @@ fn contact_members_post_user_who_is_not_the_owner() {
 
         check_html(&html, "title", "Not the owner");
         check_html(&html, "h1", "Not the owner");
-        assert!(html.contains(r#"You are not the owner of group <b>1</b>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"You are not the owner of group <b>1</b>"#,
+        );
         //assert_eq!(html, "");
     });
 }

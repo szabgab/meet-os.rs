@@ -44,7 +44,6 @@ fn test_complex() {
         assert!(html.contains("Owned Groups"));
         assert!(!html.contains("Group Membership"));
         assert!(html.contains(r#"<a href="/group/1">Rust Maven</a>"#));
-        //assert_eq!(html, "");
 
         // Add event 1
         let first_event_title = "The first meeting";

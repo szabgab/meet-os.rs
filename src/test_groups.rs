@@ -77,7 +77,7 @@ fn create_group_by_admin() {
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "x");
+
         assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
         assert!(html.contains(r#"<li><a href="/group/2">Python Maven</a></li>"#));
         check_html(&html, "title", "Groups");
