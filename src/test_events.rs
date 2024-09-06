@@ -2,7 +2,7 @@ use crate::test_helpers::{
     create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
     OWNER_EMAIL, USER_EMAIL,
 };
-use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
+use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // Create event
@@ -258,18 +258,6 @@ fn join_event_by_group_owner() {
             "#message",
             "You cannot join an event in a group you own.",
         );
-    });
-}
-
-#[test]
-fn post_edit_event_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client
-            .post("/edit-event")
-            .header(ContentType::Form)
-            .dispatch();
-
-        check_not_logged_in(res);
     });
 }
 
@@ -569,17 +557,6 @@ fn get_add_event_user_is_owner() {
         assert!(html.contains(r#"<input type="hidden" name="gid" value="1">"#));
         assert!(html.contains(r#"<input type="hidden" name="offset" id="offset">"#));
         // TODO the rest of the form
-    });
-}
-
-#[test]
-fn post_add_event_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client
-            .post("/add-event")
-            .header(ContentType::Form)
-            .dispatch();
-        check_not_logged_in(res);
     });
 }
 

@@ -2,7 +2,7 @@ use crate::test_helpers::{
     create_group_helper, logout, register_and_verify_user, setup_admin, setup_owner, setup_user,
     ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL,
 };
-use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
+use crate::test_lib::{check_html, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 // GET /create-group show form
@@ -141,18 +141,6 @@ fn create_group_guest() {
         assert!(!html.contains("/group/")); // No link to any group
         check_html(&html, "title", "Groups");
         check_html(&html, "h1", "Groups");
-
-        // Create group should fail
-        let res = client
-            .post("/admin/create-group")
-            .body(params!([
-                ("name", "Rust Maven"),
-                ("location", ""),
-                ("description", ""),
-                ("owner", "1"),
-            ]))
-            .dispatch();
-        check_not_logged_in(res);
 
         // List the groups
         let res = client.get("/groups").dispatch();
@@ -439,16 +427,6 @@ fn get_group_that_does_not_exist() {
     });
 }
 
-#[test]
-fn post_edit_group_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client
-            .post("/edit-group")
-            .header(ContentType::Form)
-            .dispatch();
-        check_not_logged_in(res);
-    });
-}
 #[test]
 fn post_edit_group_user_missing_gid() {
     run_inprocess(|email_folder, client| {

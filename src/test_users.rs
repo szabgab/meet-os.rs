@@ -35,6 +35,36 @@ fn protected_pages_as_guest() {
 }
 
 #[test]
+fn protected_post_requests_as_guest() {
+    run_inprocess(|email_folder, client| {
+        for path in [
+            "/contact-members",
+            "/add-event",
+            "/edit-event",
+            "/edit-group",
+            "/admin/search",
+            "/admin/create-group",
+        ] {
+            let res = client.post(path).header(ContentType::Form).dispatch();
+
+            check_not_logged_in(res);
+        }
+
+        // Create group should fail even if we have the parameters
+        let res = client
+            .post("/admin/create-group")
+            .body(params!([
+                ("name", "Rust Maven"),
+                ("location", ""),
+                ("description", ""),
+                ("owner", "1"),
+            ]))
+            .dispatch();
+        check_not_logged_in(res);
+    });
+}
+
+#[test]
 fn register_user() {
     run_inprocess(|email_folder, client| {
         let res = client

@@ -1,5 +1,5 @@
 use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_many, setup_owner};
-use crate::test_lib::{check_html, check_not_logged_in, params, run_inprocess};
+use crate::test_lib::{check_html, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
 
@@ -92,17 +92,6 @@ fn admin_search_get_as_admin() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Search");
         assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
-    })
-}
-
-#[test]
-fn admin_search_post_as_guest() {
-    run_inprocess(|email_folder, client| {
-        let res = client
-            .post("/admin/search")
-            .header(ContentType::Form)
-            .dispatch();
-        check_not_logged_in(res);
     })
 }
 
