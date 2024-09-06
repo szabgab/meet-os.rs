@@ -1,6 +1,4 @@
-use crate::test_helpers::{
-    setup_for_groups, setup_many, setup_many_users, OWNER_EMAIL, USER_EMAIL,
-};
+use crate::test_helpers::{setup_all, setup_for_groups, setup_many_users, OWNER_EMAIL, USER_EMAIL};
 use crate::test_lib::{
     check_html, check_not_the_owner, check_unprocessable, params, run_inprocess,
 };
@@ -47,7 +45,7 @@ fn contact_members_get_user_with_invalid_gid() {
 #[test]
 fn contact_members_get_owner_with_gid() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_all(&client, &email_folder);
 
         let res = client
             .get("/contact-members?gid=1")
@@ -85,7 +83,7 @@ fn contact_members_get_user_not_owner() {
 #[test]
 fn contact_members_post_user_without_gid() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_all(&client, &email_folder);
 
         let res = client
             .post("/contact-members")
@@ -99,7 +97,7 @@ fn contact_members_post_user_without_gid() {
 #[test]
 fn contact_members_post_user_with_all() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_all(&client, &email_folder);
 
         let res = client
             .post("/contact-members")
@@ -126,7 +124,7 @@ fn contact_members_post_user_with_all() {
 #[test]
 fn contact_members_post_user_subject_too_short() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_all(&client, &email_folder);
 
         let res = client
             .post("/contact-members")

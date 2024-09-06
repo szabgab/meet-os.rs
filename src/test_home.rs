@@ -1,4 +1,4 @@
-use crate::test_helpers::setup_many;
+use crate::test_helpers::setup_all;
 use crate::test_lib::{check_guest_menu, check_html, run_inprocess};
 use rocket::http::Status;
 
@@ -24,7 +24,7 @@ fn main_page_empty_db() {
 #[test]
 fn main_page_with_data() {
     run_inprocess(|email_folder, client| {
-        setup_many(&client, &email_folder);
+        setup_all(&client, &email_folder);
 
         let res = client.get("/").dispatch();
         assert_eq!(res.status(), Status::Ok);

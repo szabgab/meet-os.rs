@@ -188,7 +188,7 @@ pub fn setup_event(client: &Client, eid: usize) {
     }
 }
 
-pub fn setup_many(client: &Client, email_folder: &PathBuf) {
+pub fn setup_all(client: &Client, email_folder: &PathBuf) {
     setup_many_users(client, email_folder);
 
     create_group_helper(&client, "First Group", 2);
@@ -201,7 +201,7 @@ pub fn setup_many(client: &Client, email_folder: &PathBuf) {
     // Make sure the client is not logged in after the setup
     let res = client.get(format!("/logout")).dispatch();
     //assert_eq!(res.status(), Status::Ok);
-    rocket::info!("--------------- finished setup_many ----------------")
+    rocket::info!("--------------- finished setup_all ----------------")
 }
 
 pub fn setup_for_groups(client: &Client, email_folder: &PathBuf) {
