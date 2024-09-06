@@ -4,8 +4,8 @@ use crate::test_helpers::{
     OWNER_PW, UNVERIFIED_NAME,
 };
 use crate::test_lib::{
-    check_admin_menu, check_guest_menu, check_html, check_not_logged_in, check_profile_page,
-    check_user_menu, params, read_code_from_email, run_inprocess,
+    check_admin_menu, check_guest_menu, check_html, check_not_logged_in, check_profile_by_guest,
+    check_profile_by_user, check_user_menu, params, read_code_from_email, run_inprocess,
 };
 use rocket::http::{ContentType, Status};
 
@@ -96,8 +96,7 @@ fn register_user() {
         assert!(html.contains("Your email was verified."));
         check_user_menu(&html);
 
-        // Access the profile with the cookie
-        check_profile_page(&client, OWNER_EMAIL, OWNER_NAME);
+        check_profile_by_user(&client, OWNER_EMAIL, OWNER_NAME);
     });
 }
 
@@ -182,7 +181,7 @@ fn post_login_regular_user() {
     run_inprocess(|email_folder, client| {
         register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 
-        check_profile_page(&client, &OWNER_EMAIL, OWNER_NAME);
+        check_profile_by_user(&client, &OWNER_EMAIL, OWNER_NAME);
 
         let res = client
             .post("/login")
@@ -198,7 +197,7 @@ fn post_login_regular_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_page(&client, &OWNER_EMAIL, "Foo Bar");
+        check_profile_by_user(&client, &OWNER_EMAIL, "Foo Bar");
 
         // TODO: logout requires a logged in user
         //let res = client.get("/logout").dispatch();
@@ -246,7 +245,7 @@ fn post_login_admin() {
         check_admin_menu(&html);
 
         // // Access the profile with the cookie
-        check_profile_page(&client, &ADMIN_EMAIL, ADMIN_NAME);
+        check_profile_by_user(&client, &ADMIN_EMAIL, ADMIN_NAME);
 
         let res = client
             .get("/logout")
@@ -257,6 +256,7 @@ fn post_login_admin() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Logged out");
         check_html(&html, "h1", "Logged out");
+        check_profile_by_guest(&client);
 
         // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.

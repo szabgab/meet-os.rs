@@ -2,7 +2,7 @@ use crate::test_helpers::{
     logout, register_and_verify_user, setup_admin, setup_owner, OWNER_EMAIL,
 };
 use crate::test_lib::{
-    check_guest_menu, check_html, check_profile_page, check_user_menu, params,
+    check_guest_menu, check_html, check_profile_by_user, check_user_menu, params,
     read_code_from_email, run_inprocess,
 };
 
@@ -127,7 +127,7 @@ fn reset_password_full() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Welcome back");
         check_user_menu(&html);
-        check_profile_page(&client, &OWNER_EMAIL, name);
+        check_profile_by_user(&client, &OWNER_EMAIL, name);
 
         // Try again with the same code
         // Try with id that does not exist

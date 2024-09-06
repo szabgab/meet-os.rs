@@ -42,7 +42,12 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     func(email_folder, client);
 }
 
-pub fn check_profile_page(client: &Client, email: &str, h1: &str) {
+pub fn check_profile_by_guest(client: &Client) {
+    let res = client.get("/profile").dispatch();
+    check_not_logged_in(res);
+}
+
+pub fn check_profile_by_user(client: &Client, email: &str, h1: &str) {
     let res = client
         .get("/profile")
         .private_cookie(("meet-os", email.to_owned()))
@@ -51,13 +56,8 @@ pub fn check_profile_page(client: &Client, email: &str, h1: &str) {
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
-    if h1.is_empty() {
-        check_html(&html, "title", "Not logged in");
-        assert!(html.contains("It seems you are not logged in"));
-    } else {
-        check_html(&html, "title", "Profile");
-        check_html(&html, "h1", h1);
-    }
+    check_html(&html, "title", "Profile");
+    check_html(&html, "h1", h1);
 }
 
 pub fn check_guest_menu(html: &str) {
