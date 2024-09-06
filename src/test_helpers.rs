@@ -33,15 +33,7 @@ pub fn register_user(client: &Client, name: &str, email: &str, password: &str) {
     assert_eq!(res.status(), Status::Ok);
 }
 
-pub fn register_and_verify_user(
-    client: &Client,
-    name: &str,
-    email: &str,
-    password: &str,
-    email_folder: &PathBuf,
-) {
-    register_user(client, name, email, password);
-
+fn verify_email(email_folder: &PathBuf, client: &Client) {
     let dir = email_folder
         .read_dir()
         .expect("read_dir call failed")
@@ -55,6 +47,18 @@ pub fn register_and_verify_user(
 
     let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);
+}
+
+pub fn register_and_verify_user(
+    client: &Client,
+    name: &str,
+    email: &str,
+    password: &str,
+    email_folder: &PathBuf,
+) {
+    register_user(client, name, email, password);
+
+    verify_email(email_folder, client);
 }
 
 pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
