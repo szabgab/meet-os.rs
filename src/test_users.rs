@@ -197,7 +197,7 @@ fn post_login_regular_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_by_user(&client, &OWNER_EMAIL, "Foo Bar");
+        check_profile_by_user(&client, &OWNER_EMAIL, OWNER_NAME);
 
         // TODO: logout requires a logged in user
         //let res = client.get("/logout").dispatch();
@@ -529,11 +529,13 @@ fn get_users_list_users_many_users_guest() {
         check_html(&html, "h1", "List Users");
         assert!(!html.contains(r#"No users"#));
 
-        assert!(html.contains(r#"<li><a href="/user/2">Foo Bar</a></li>"#));
+        let expected = format!(r#"<li><a href="/user/2">{OWNER_NAME}</a></li>"#);
+        assert!(html.contains(&expected));
         let expected = format!(r#"<li><a href="/user/3">{USER_NAME}</a></li>"#);
         assert!(html.contains(&expected));
         assert!(html.contains(r#"<li><a href="/user/4">Foo 2</a></li>"#));
-        assert!(html.contains(r#"<li><a href="/user/1">Site Manager</a></li>"#));
+        let expected = format!(r#"<li><a href="/user/1">{ADMIN_NAME}</a></li>"#);
+        assert!(html.contains(&expected));
     });
 }
 
@@ -564,9 +566,10 @@ fn get_user_page() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "Foo Bar");
-        check_html(&html, "h1", "Foo Bar");
-        assert!(html.contains(r#"<td>Name:</td><td>Foo Bar</td>"#));
+        check_html(&html, "title", OWNER_NAME);
+        check_html(&html, "h1", OWNER_NAME);
+        let expected = format!(r#"<td>Name:</td><td>{OWNER_NAME}</td>"#);
+        assert!(html.contains(&expected));
         assert!(html.contains(r#"<td>No GitHub provided.</td"#));
         assert!(html.contains(r#"<td>No GitLab provided.</td"#));
         assert!(html.contains(r#"<td>No LinkedIn provided.</td>"#));

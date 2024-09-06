@@ -9,9 +9,9 @@ use scraper::{Html, Selector};
 
 use crate::test_lib::{params, read_code_from_email};
 
-pub const OWNER_EMAIL: &str = "foo@meet-os.com";
+pub const OWNER_EMAIL: &str = "owner@meet-os.com";
 pub const OWNER_PW: &str = "123foo";
-pub const OWNER_NAME: &str = "Foo Bar";
+pub const OWNER_NAME: &str = "Don Quijote de la Mancha";
 
 pub const USER_EMAIL: &str = "user@meet-os.com";
 pub const USER_PW: &str = "password1";

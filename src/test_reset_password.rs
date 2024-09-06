@@ -58,7 +58,8 @@ fn reset_password_full() {
         check_guest_menu(&html);
         // assert_eq!(html, "");
         check_html(&html, "title", "We sent you an email");
-        assert!(html.contains("We sent you an email to <b>foo@meet-os.com</b> Please click on the link to reset your password."));
+        let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please click on the link to reset your password.");
+        assert!(html.contains(&expected));
 
         // get code from email
         let (uid, code) = read_code_from_email(&email_folder, "3.txt", "save-password");
