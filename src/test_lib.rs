@@ -118,12 +118,11 @@ pub fn check_unauthorized(res: LocalResponse) {
     );
 }
 
-// TODO setup catcher for this
 pub fn check_unprocessable(res: LocalResponse) {
     assert_eq!(res.status(), Status::UnprocessableEntity);
     let html = res.into_string().unwrap();
     check_html(&html, "title", "422 Unprocessable Entity");
-    check_html(&html, "h1", "422: Unprocessable Entity");
+    check_html(&html, "h1", "422 Unprocessable Entity");
     assert!(html.contains(
         "The request was well-formed but was unable to be followed due to semantic errors."
     ));
