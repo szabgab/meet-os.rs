@@ -82,7 +82,7 @@ struct ProfileForm<'r> {
     github: &'r str,
     gitlab: &'r str,
     linkedin: &'r str,
-    about: &'r str,
+    //about: &'r str,
 }
 
 #[derive(FromForm)]
@@ -810,12 +810,13 @@ async fn show_profile(
     let groups = db::get_groups_by_membership_id(dbh, uid).await.unwrap();
     rocket::info!("groups: {groups:?}");
 
-    let about = visitor
-        .user
-        .clone()
-        .unwrap()
-        .about
-        .map(|text| markdown2html(&text).unwrap());
+    let about = "";
+    // let about = visitor
+    //     .user
+    //     .clone()
+    //     .unwrap()
+    //     .about
+    //     .map(|text| markdown2html(&text).unwrap());
 
     Template::render(
         "profile",
@@ -850,7 +851,8 @@ async fn edit_profile_post(
     let github = input.github.trim();
     let gitlab = input.gitlab.trim();
     let linkedin = input.linkedin.trim();
-    let about = input.about;
+    //let about = input.about;
+    let about = "";
 
     if !re.is_match(github) {
         return Template::render(
@@ -1024,7 +1026,8 @@ async fn user(dbh: &State<Surreal<Client>>, visitor: Visitor, uid: usize) -> Tem
         );
     }
 
-    let about = user.clone().about.map(|text| markdown2html(&text).unwrap());
+    let about = "";
+    //let about = user.clone().about.map(|text| markdown2html(&text).unwrap());
     let owned_groups = db::get_groups_by_owner_id(dbh, user.uid).await.unwrap();
     let groups = db::get_groups_by_membership_id(dbh, user.uid)
         .await

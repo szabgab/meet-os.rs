@@ -618,7 +618,7 @@ fn post_edit_profile_failures() {
             .post("/edit-profile")
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
-            .body("name=XX&github=szabgab*&gitlab=&linkedin&about=")
+            .body("name=XX&github=szabgab*&gitlab=&linkedin")
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -630,7 +630,7 @@ fn post_edit_profile_failures() {
             .post("/edit-profile")
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
-            .body("name=XX&github=&gitlab=foo*bar&linkedin=&about=")
+            .body("name=XX&github=&gitlab=foo*bar&linkedin=")
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -641,7 +641,7 @@ fn post_edit_profile_failures() {
             .post("/edit-profile")
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
-            .body("name=XX&github=&gitlab=&linkedin=szabgab&about=")
+            .body("name=XX&github=&gitlab=&linkedin=szabgab")
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -662,8 +662,9 @@ fn post_edit_profile_works() {
             .post("/edit-profile")
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
-            .body("name= Lord 😎 Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  &about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n")
+            .body("name= Lord 😎 Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  ")
             .dispatch();
+        // &about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n"
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -688,16 +689,15 @@ fn post_edit_profile_works() {
         //assert!(html.contains(r#"<div><a href="https:://www.linkedin.com/in/szabgab/">LinkedIn</a></div>"#));
 
         eprintln!("{html}");
-        //assert_eq!(html, "");
-        assert!(html.contains(
-            r#"<div><ul>
-<li>text</li>
-<li>more</li>
-<li><a href="https://meet-os.com/">link</a></li>
-<li>&lt;b&gt;bold&lt;/b&gt;</li>
-<li>&lt;a href=&quot;https://meet-os.com/&quot;&gt;bad link&lt;/a&gt;</li>
-</ul>
-</div>"#
-        ));
+        //         assert!(html.contains(
+        //             r#"<div><ul>
+        // <li>text</li>
+        // <li>more</li>
+        // <li><a href="https://meet-os.com/">link</a></li>
+        // <li>&lt;b&gt;bold&lt;/b&gt;</li>
+        // <li>&lt;a href=&quot;https://meet-os.com/&quot;&gt;bad link&lt;/a&gt;</li>
+        // </ul>
+        // </div>"#
+        //         ));
     });
 }

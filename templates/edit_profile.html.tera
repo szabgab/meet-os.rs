@@ -11,7 +11,6 @@
         <tr><td>GitHub Username:</td><td><input name="github" id="github" type="text" value="{{user.github}}"></td></tr>
         <tr><td>GitLab Username:</td><td><input name="gitlab" id="gitlab" type="text" value="{{user.gitlab}}"></td></tr>
         <tr><td>LinkedIn URL:</td><td><input name="linkedin" id="linkedin" type="text" value="{{user.linkedin}}"></td></tr>
-        <tr><td>About (<a href="/markdown">Markdown</a>):</td><td><textarea name="about" id="about">{{user.about}}</textarea></td></tr>
         </table>
         <input type="submit" value="Save">
         </form>
