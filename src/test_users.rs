@@ -82,8 +82,9 @@ fn register_user() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "We sent you an email");
+        check_html(&html, "h1", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
-        assert!(html.contains(&expected));
+        check_html(&html, "#message", &expected);
         check_guest_menu(&html);
 
         let (uid, code) = read_code_from_email(&email_folder, "0.txt", "verify-email");
@@ -94,7 +95,8 @@ fn register_user() {
 
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Thank you for registering");
-        assert!(html.contains("Your email was verified."));
+        check_html(&html, "h1", "Thank you for registering");
+        check_html(&html, "#message", "Your email was verified.");
         check_user_menu(&html);
 
         check_profile_by_user(&client, OWNER_EMAIL, OWNER_NAME);
@@ -111,7 +113,7 @@ fn get_verify_with_non_existent_id() {
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
         check_html(&html, "title", "Invalid id");
-        assert!(html.contains("Invalid id <b>1</b>"));
+        check_html(&html, "#message", "Invalid id <b>1</b>");
     });
 }
 
@@ -134,7 +136,7 @@ fn get_verify_email_with_bad_code() {
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
         check_html(&html, "title", "Invalid code");
-        assert!(html.contains("Invalid code <b>abc</b>"));
+        check_html(&html, "#message", "Invalid code <b>abc</b>");
     });
 }
 
@@ -157,7 +159,7 @@ fn post_register_duplicate_email() {
         check_guest_menu(&html);
         check_html(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
-        assert!(html.contains(&expected));
+        check_html(&html, "#message", &expected);
 
         let res = client
             .post(format!("/register"))
@@ -273,7 +275,11 @@ fn test_register_with_invalid_email_address() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Invalid email address");
-        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+        check_html(
+            &html,
+            "#message",
+            "Invalid email address <b>meet-os.com</b> Please try again",
+        );
     });
 }
 
@@ -288,9 +294,11 @@ fn test_register_with_too_long_username() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Name is too long");
-        assert!(html.contains(
-            "Name is too long. Max 50 while the current name is 53 long. Please try again."
-        ));
+        check_html(
+            &html,
+            "#message",
+            "Name is too long. Max 50 while the current name is 53 long. Please try again.",
+        );
     });
 }
 
@@ -314,7 +322,11 @@ fn post_register_with_bad_email_address() {
         // TODO make these tests parse the HTML and verify the extracted title tag!
         //assert_eq!(html, "");
         check_html(&html, "title", "Invalid email address");
-        assert!(html.contains("Invalid email address <b>meet-os.com</b> Please try again"));
+        check_html(
+            &html,
+            "#message",
+            "Invalid email address <b>meet-os.com</b> Please try again",
+        );
         check_guest_menu(&html);
     });
 }
@@ -336,7 +348,11 @@ fn post_login_with_unregistered_email() {
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
         check_html(&html, "title", "No such user");
-        assert!(html.contains("No user with address <b>other@meet-os.com</b>"));
+        check_html(
+            &html,
+            "#message",
+            "No user with address <b>other@meet-os.com</b>. Please try again",
+        );
         check_guest_menu(&html);
     });
 }
@@ -402,7 +418,7 @@ fn post_login_with_unverified_email() {
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Unverified email");
-        assert!(html.contains("Email must be verified before login."));
+        check_html(&html, "#message", "Email must be verified before login.");
         check_guest_menu(&html);
     });
 }
@@ -443,7 +459,11 @@ fn post_register_with_short_password() {
         check_html(&html, "title", "Invalid password");
         check_html(&html, "h1", "Invalid password");
         //assert_eq!(html, "");
-        assert!(html.contains("The password must be at least 6 characters long."));
+        check_html(
+            &html,
+            "#message",
+            "The password must be at least 6 characters long.",
+        );
         check_guest_menu(&html);
     });
 }
@@ -539,7 +559,7 @@ fn user_id_that_does_not_exist() {
         // assert_eq!(html, "");
         check_html(&html, "title", "User not found");
         check_html(&html, "h1", "User not found");
-        assert!(html.contains(r#"There is no user with id <b>42</b>."#));
+        check_html(&html, "#message", r#"There is no user with id <b>42</b>."#);
     });
 }
 
@@ -577,7 +597,11 @@ fn unverified_user_page_by_guest() {
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Unverified user");
         check_html(&html, "h1", "Unverified user");
-        assert!(html.contains("This user has not verified the email address yet."));
+        check_html(
+            &html,
+            "#message",
+            "This user has not verified the email address yet.",
+        );
         assert!(!html.contains(UNVERIFIED_NAME));
     });
 
@@ -623,7 +647,12 @@ fn post_edit_profile_failures() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Invalid GitHub username");
-        assert!(html.contains(r#"The GitHub username `szabgab*` is not valid."#));
+        check_html(&html, "h1", "Invalid GitHub username");
+        check_html(
+            &html,
+            "#message",
+            r#"The GitHub username `szabgab*` is not valid."#,
+        );
 
         // edit profile page invalid gitlab account
         let res = client
@@ -635,7 +664,12 @@ fn post_edit_profile_failures() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Invalid GitLab username");
-        assert!(html.contains(r#"The GitLab username `foo*bar` is not valid."#));
+        check_html(&html, "h1", "Invalid GitLab username");
+        check_html(
+            &html,
+            "#message",
+            r#"The GitLab username `foo*bar` is not valid."#,
+        );
 
         let res = client
             .post("/edit-profile")
@@ -646,7 +680,12 @@ fn post_edit_profile_failures() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Invalid LinkedIn profile link");
-        assert!(html.contains(r#"The LinkedIn profile link `szabgab` is not valid."#));
+        check_html(&html, "h1", "Invalid LinkedIn profile link");
+        check_html(
+            &html,
+            "#message",
+            r#"The LinkedIn profile link `szabgab` is not valid."#,
+        );
 
         // TODO test the validation of the other fields as well!
     });
@@ -669,7 +708,11 @@ fn post_edit_profile_works() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Profile updated");
-        assert!(html.contains(r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord 😎 Voldemort</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord 😎 Voldemort</a>"#,
+        );
 
         // Check updated profile
         let res = client
