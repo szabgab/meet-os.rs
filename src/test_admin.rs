@@ -4,12 +4,20 @@ use crate::test_lib::{check_html, check_unauthorized, params, run_inprocess};
 use rocket::http::{ContentType, Status};
 
 #[test]
-fn admin_page_as_user() {
+fn admin_pages_as_user() {
     run_inprocess(|email_folder, client| {
         setup_owner(&client, &email_folder);
         login_owner(&client);
 
-        let res = client.get("/admin").dispatch();
+        for path in ["/admin", "/admin/users", "/admin/audit", "/admin/search"] {
+            let res = client.get(path).dispatch();
+            check_unauthorized(res);
+        }
+
+        let res = client
+            .post("/admin/search")
+            .header(ContentType::Form)
+            .dispatch();
         check_unauthorized(res);
     })
 }
@@ -33,17 +41,6 @@ fn admin_page_as_admin() {
 }
 
 #[test]
-fn admin_users_page_as_user() {
-    run_inprocess(|email_folder, client| {
-        setup_owner(&client, &email_folder);
-        login_owner(&client);
-
-        let res = client.get("/admin/users").dispatch();
-        check_unauthorized(res);
-    })
-}
-
-#[test]
 fn admin_users_page_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_many(&client, &email_folder);
@@ -62,17 +59,6 @@ fn admin_users_page_as_admin() {
 }
 
 #[test]
-fn admin_search_get_as_user() {
-    run_inprocess(|email_folder, client| {
-        setup_owner(&client, &email_folder);
-        login_owner(&client);
-
-        let res = client.get("/admin/search").dispatch();
-        check_unauthorized(res);
-    })
-}
-
-#[test]
 fn admin_search_get_as_admin() {
     run_inprocess(|email_folder, client| {
         setup_admin(&client, &email_folder);
@@ -84,20 +70,6 @@ fn admin_search_get_as_admin() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Search");
         assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
-    })
-}
-
-#[test]
-fn admin_search_post_as_user() {
-    run_inprocess(|email_folder, client| {
-        setup_owner(&client, &email_folder);
-        login_owner(&client);
-
-        let res = client
-            .post("/admin/search")
-            .header(ContentType::Form)
-            .dispatch();
-        check_unauthorized(res);
     })
 }
 
@@ -135,17 +107,6 @@ fn admin_search_post_as_admin() {
         assert!(html.contains(r#"<b>Total: 1</b>"#));
         assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
         assert!(html.contains(r#"<td>admin@meet-os.com</td>"#));
-    })
-}
-
-#[test]
-fn admin_audit_as_user() {
-    run_inprocess(|email_folder, client| {
-        setup_owner(&client, &email_folder);
-        login_owner(&client);
-
-        let res = client.get("/admin/audit").dispatch();
-        check_unauthorized(res);
     })
 }
 
