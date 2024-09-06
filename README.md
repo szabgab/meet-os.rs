@@ -15,4 +15,7 @@ There is a [Zulip stream](https://osdc.zulipchat.com/#narrow/stream/422181-meet-
 
 ## Badges
 
+[![CI](https://github.com/szabgab/meet-os.rs/actions/workflows/ci.yml/badge.svg)](https://github.com/szabgab/meet-os.rs/actions/workflows/ci.yml)
+
 [![Coverage Status](https://coveralls.io/repos/github/szabgab/meet-os.rs/badge.svg?branch=main)](https://coveralls.io/github/szabgab/meet-os.rs?branch=main)
+
