@@ -1447,7 +1447,7 @@ async fn http_403(request: &Request<'_>) -> Template {
     let config = get_public_config();
     Template::render(
         "message",
-        context! {title: "Unauthorized", message: format!("Unauthorized"), config, visitor},
+        context! {title: "Unauthorized", message: format!("You don't have the rights to access this page."), config, visitor},
     )
 }
 

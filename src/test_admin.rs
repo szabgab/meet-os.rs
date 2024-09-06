@@ -1,5 +1,5 @@
 use crate::test_helpers::{login_admin, login_owner, setup_admin, setup_many, setup_owner};
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{check_html, check_unauthorized, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
 
@@ -10,10 +10,7 @@ fn admin_page_as_user() {
         login_owner(&client);
 
         let res = client.get("/admin").dispatch();
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
-        check_html(&html, "title", "Unauthorized");
+        check_unauthorized(res);
     })
 }
 
@@ -42,10 +39,7 @@ fn admin_users_page_as_user() {
         login_owner(&client);
 
         let res = client.get("/admin/users").dispatch();
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Unauthorized");
+        check_unauthorized(res);
     })
 }
 
@@ -74,9 +68,7 @@ fn admin_search_get_as_user() {
         login_owner(&client);
 
         let res = client.get("/admin/search").dispatch();
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Unauthorized");
+        check_unauthorized(res);
     })
 }
 
@@ -105,9 +97,7 @@ fn admin_search_post_as_user() {
             .post("/admin/search")
             .header(ContentType::Form)
             .dispatch();
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Unauthorized");
+        check_unauthorized(res);
     })
 }
 
@@ -155,10 +145,7 @@ fn admin_audit_as_user() {
         login_owner(&client);
 
         let res = client.get("/admin/audit").dispatch();
-        assert_eq!(res.status(), Status::Forbidden);
-        let html = res.into_string().unwrap();
-        // assert_eq!(html, "");
-        check_html(&html, "title", "Unauthorized");
+        check_unauthorized(res);
     })
 }
 
