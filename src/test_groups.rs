@@ -356,13 +356,7 @@ fn get_edit_group_user_is_not_the_owner() {
             .get("/edit-group?gid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        assert!(html.contains("You are not the owner of the group <b>1</b>"));
+        check_not_the_owner(res);
     });
 }
 
@@ -494,16 +488,7 @@ fn post_edit_group_user_not_owner() {
                 ("description", "Some group"),
             ]))
             .dispatch();
-
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Not the owner");
-        check_html(&html, "h1", "Not the owner");
-        check_html(
-            &html,
-            "#message",
-            r#"You are not the owner of the group <b>1</b>"#,
-        );
+        check_not_the_owner(res);
     });
 }
 
