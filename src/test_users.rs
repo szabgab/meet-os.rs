@@ -101,6 +101,8 @@ fn register_user() {
     });
 }
 
+// TODO resend code?
+
 #[test]
 fn get_verify_with_non_existent_id() {
     run_inprocess(|email_folder, client| {
