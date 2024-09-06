@@ -43,9 +43,12 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu(&html);
-        //assert_eq!(html, "");
         check_html(&html, "title", "No such user");
-        assert!(html.contains("No user with address <b>peter@meet-os.com</b>"));
+        check_html(
+            &html,
+            "#message",
+            "No user with address <b>peter@meet-os.com</b>. Please try again",
+        );
 
         // Try with the right email address
         let res = client
@@ -59,7 +62,7 @@ fn reset_password_full() {
         // assert_eq!(html, "");
         check_html(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please click on the link to reset your password.");
-        assert!(html.contains(&expected));
+        check_html(&html, "#message", &expected);
 
         // get code from email
         let (uid, code) = read_code_from_email(&email_folder, "3.txt", "save-password");
@@ -70,7 +73,6 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu(&html);
-        //assert_eq!(html, "");
         // TODO check the form exists
         check_html(&html, "title", "Type in your new password");
         assert!(html.contains(r#"<input name="uid" id="uid" type="hidden" value="1">"#));
@@ -89,11 +91,14 @@ fn reset_password_full() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_guest_menu(&html);
         check_html(&html, "title", "Invalid password");
         check_html(&html, "h1", "Invalid password");
-        assert!(html.contains("The password must be at least 6 characters long."));
+        check_html(
+            &html,
+            "#message",
+            "The password must be at least 6 characters long.",
+        );
 
         let new_password = String::from("new password");
         let res = client
@@ -109,11 +114,9 @@ fn reset_password_full() {
         let html = res.into_string().unwrap();
         check_guest_menu(&html);
         check_html(&html, "title", "Password updated");
-        assert!(html.contains("Your password was updated."));
-        //assert_eq!(html, "");
+        check_html(&html, "#message", "Your password was updated.");
 
         // Try to login
-
         let res = client
             .post("/login")
             .header(ContentType::Form)
@@ -142,9 +145,8 @@ fn save_password_get_invalid_uid() {
         let res = client.get("/save-password/42/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Invalid id");
-        assert!(html.contains("Invalid id <b>42</b>"));
+        check_html(&html, "#message", "Invalid id <b>42</b>");
     });
 }
 
@@ -158,9 +160,8 @@ fn save_password_get_invalid_code() {
         let res = client.get("/save-password/2/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Invalid code");
-        assert!(html.contains("Invalid code <b>abc</b>"));
+        check_html(&html, "#message", "Invalid code <b>abc</b>");
     });
 }
 
@@ -177,11 +178,11 @@ fn save_password_post_invalid_uid() {
             ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Invalid userid");
         check_html(&html, "h1", "Invalid userid");
-        assert!(html.contains("Invalid userid <b>42</b>"));
+        check_html(&html, "#message", "Invalid userid <b>42</b>.");
     });
 }
 
@@ -202,10 +203,10 @@ fn save_password_post_invalid_code() {
             ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html(&html, "title", "Invalid code");
         check_html(&html, "h1", "Invalid code");
-        assert!(html.contains("Invalid code <b>abc</b>"));
+        check_html(&html, "#message", "Invalid code <b>abc</b>.");
     });
 }
