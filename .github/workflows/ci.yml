@@ -48,6 +48,9 @@ jobs:
     - name: Check cargo fmt
       run: cargo fmt --check
 
+    - name: Update toolhain
+      run: rustup update
+
     - name: Clippy stop at any warning
       run: cargo clippy -- --deny warnings --no-deps
 
