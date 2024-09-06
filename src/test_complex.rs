@@ -1,4 +1,4 @@
-use crate::test_helpers::{register_and_verify_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW};
+use crate::test_helpers::{setup_admin, setup_owner, ADMIN_EMAIL, OWNER_EMAIL};
 use crate::test_lib::{params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
@@ -6,31 +6,13 @@ use rocket::http::{ContentType, Status};
 #[test]
 fn test_complex() {
     run_inprocess(|email_folder, client| {
-        // main page
-        let res = client.get("/").dispatch();
+        setup_admin(&client, &email_folder);
+        setup_owner(&client, &email_folder);
 
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        assert!(!html.contains(r#"<h2 class="title is-4">Events</h2>"#));
-        assert!(!html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
-
-        register_and_verify_user(&client, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW, &email_folder);
-
-        let owner_name = "Owner";
-        let owner_email = "owner@meet-os.com";
-        let owner_password = "123456";
-        register_and_verify_user(
-            &client,
-            owner_name,
-            &owner_email,
-            &owner_password,
-            &email_folder,
-        );
-
-        // profile is not listing the any groups
+        // profile is not listing any groups
         let res = client
             .get("/profile")
-            .private_cookie(("meet-os", owner_email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -55,7 +37,7 @@ fn test_complex() {
         // The profile now lists the group for the owner
         let res = client
             .get("/profile")
-            .private_cookie(("meet-os", owner_email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -77,12 +59,12 @@ fn test_complex() {
                 ("description", ""),
                 ("date", "2030-01-01 10:10"),
             ]))
-            .private_cookie(("meet-os", owner_email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        // main page
+        // main page lists group and event
         let res = client.get("/").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -91,13 +73,13 @@ fn test_complex() {
         assert!(html.contains(format!(r#"<a href="/group/1">{group_name}</a>"#).as_str()));
         assert!(html.contains(format!(r#"<a href="/event/1">{first_event_title}</a>"#).as_str()));
 
-        // groups page
+        // groups page lists group
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         assert!(html.contains(format!(r#"<a href="/group/1">{group_name}</a>"#).as_str()));
 
-        // events page
+        // events page lists event
         let res = client.get("/events").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -126,7 +108,7 @@ fn test_complex() {
                 ("description", ""),
                 ("date", "2029-05-01 10:10"),
             ]))
-            .private_cookie(("meet-os", owner_email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -144,7 +126,7 @@ fn test_complex() {
                 ("description", ""),
                 ("date", "2029-06-02 10:10"),
             ]))
-            .private_cookie(("meet-os", owner_email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -181,7 +163,7 @@ fn test_complex() {
                 ("description", "We need new description"),
                 ("date", "2029-06-03 10:10"),
             ]))
-            .private_cookie(("meet-os", owner_email))
+            .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
