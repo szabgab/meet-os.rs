@@ -843,7 +843,8 @@ async fn edit_profile_post(
 ) -> Template {
     let config = get_public_config();
 
-    let re = Regex::new("^[a-zA-Z0-9]*$").unwrap();
+    let re_github = Regex::new("^[a-zA-Z0-9]*$").unwrap();
+    let re_gitlab = Regex::new("^[a-zA-Z0-9]*$").unwrap();
     let re_linkedin = Regex::new("^https://www.linkedin.com/in/[a-zA-Z0-9-]+/?$").unwrap();
 
     let uid = visitor.user.clone().unwrap().uid;
@@ -854,14 +855,14 @@ async fn edit_profile_post(
     //let about = input.about;
     let about = "";
 
-    if !re.is_match(github) {
+    if !re_github.is_match(github) {
         return Template::render(
             "message",
             context! {title: "Invalid GitHub username", message: format!("The GitHub username `{github}` is not valid."), config, visitor},
         );
     }
 
-    if !re.is_match(gitlab) {
+    if !re_gitlab.is_match(gitlab) {
         return Template::render(
             "message",
             context! {title: "Invalid GitLab username", message: format!("The GitLab username `{gitlab}` is not valid."), config, visitor},
