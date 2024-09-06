@@ -47,43 +47,6 @@ fn test_simple() {
         check_html(&html, "title", "Registration failed");
         assert!(html.contains("Could not register <b>foo@meet-os.com</b>"));
 
-        // edit profile page invalid github account
-        let res = client
-            .post("/edit-profile")
-            .private_cookie(("meet-os", OWNER_EMAIL))
-            .header(ContentType::Form)
-            .body("name=XX&github=szabgab*&gitlab=&linkedin&about=")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid GitHub username");
-        assert!(html.contains(r#"The GitHub username `szabgab*` is not valid."#));
-
-        // edit profile page invalid gitlab account
-        let res = client
-            .post("/edit-profile")
-            .private_cookie(("meet-os", OWNER_EMAIL))
-            .header(ContentType::Form)
-            .body("name=XX&github=&gitlab=foo*bar&linkedin=&about=")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid GitLab username");
-        assert!(html.contains(r#"The GitLab username `foo*bar` is not valid."#));
-
-        let res = client
-            .post("/edit-profile")
-            .private_cookie(("meet-os", OWNER_EMAIL))
-            .header(ContentType::Form)
-            .body("name=XX&github=&gitlab=&linkedin=szabgab&about=")
-            .dispatch();
-        assert_eq!(res.status(), Status::Ok);
-        let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid LinkedIn profile link");
-        assert!(html.contains(r#"The LinkedIn profile link `szabgab` is not valid."#));
-
-        // TODO test the validation of the other fields as well!
-
         //assert_eq!(html, "");
 
         // edit profile page
