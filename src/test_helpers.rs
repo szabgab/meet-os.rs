@@ -25,7 +25,7 @@ pub const ADMIN_EMAIL: &str = "admin@meet-os.com";
 pub const ADMIN_PW: &str = "123456";
 pub const ADMIN_NAME: &str = "Site Manager";
 
-pub fn register_user(client: &Client, name: &str, email: &str, password: &str) {
+pub fn register_user_helper(client: &Client, name: &str, email: &str, password: &str) {
     let res = client
         .post(format!("/register"))
         .header(ContentType::Form)
@@ -61,7 +61,7 @@ pub fn register_and_verify_user(
     password: &str,
     email_folder: &PathBuf,
 ) {
-    register_user(client, name, email, password);
+    register_user_helper(client, name, email, password);
 
     verify_email(email_folder, client);
 }
@@ -79,7 +79,7 @@ pub fn setup_user(client: &Client, email_folder: &PathBuf) {
 }
 
 pub fn setup_unverified_user(client: &Client, email_folder: &PathBuf) {
-    register_user(&client, UNVERIFIED_NAME, UNVERIFIED_EMAIL, UNVERIFIED_PW);
+    register_user_helper(&client, UNVERIFIED_NAME, UNVERIFIED_EMAIL, UNVERIFIED_PW);
 }
 
 pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
