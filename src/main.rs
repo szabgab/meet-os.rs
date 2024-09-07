@@ -462,7 +462,7 @@ async fn register_post(
 
     let config = get_public_config();
 
-    let name = input.name.trim();
+    let name = input.name.trim().to_owned();
     if MAX_NAME_LEN < name.len() {
         return Template::render(
             "message",
@@ -472,7 +472,7 @@ async fn register_post(
 
     let re_name = get_re_name();
 
-    if !re_name.is_match(name) {
+    if !re_name.is_match(&name) {
         return Template::render(
             "message",
             context! {title: "Invalid character", message: format!(r#"The name '{name}' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#), config, visitor},
@@ -507,8 +507,8 @@ async fn register_post(
 
     let user = User {
         uid,
-        name: input.name.to_owned(),
-        email,
+        name: name.clone(),
+        email: email.clone(),
         password: hashed_password,
         process: process.to_owned(),
         code: format!("{code}"),
@@ -550,10 +550,7 @@ async fn register_post(
         name: myconfig.from_name.clone(),
         email: myconfig.from_email.clone(),
     };
-    let to_address = &EmailAddress {
-        name: input.name.to_owned(),
-        email: input.email.to_owned(),
-    };
+    let to_address = &EmailAddress { name, email };
 
     sendmail(myconfig, &from, to_address, subject, &text).await;
     notify::admin_new_user_registered(myconfig, &user).await;
@@ -1138,8 +1135,8 @@ async fn edit_group_post(
         );
     }
 
-    let name = input.name;
-    let location = input.location;
+    let name = input.name.trim();
+    let location = input.location.trim();
     let description = input.description;
     db::update_group(dbh, gid, name, location, description)
         .await
@@ -1173,7 +1170,7 @@ async fn add_event_post(
     }
 
     let min_title_length = 10;
-    let title = input.title.to_owned();
+    let title = input.title.trim().to_owned();
     if title.len() < min_title_length {
         return Template::render(
             "message",
@@ -1185,9 +1182,9 @@ async fn add_event_post(
     let description = input.description.to_owned();
     // TODO validate the description - disable < character
 
-    let location = input.location.to_owned();
+    let location = input.location.trim().to_owned();
 
-    let date_str = input.date.to_owned();
+    let date_str = input.date.trim().to_owned();
     let offset = input.offset.to_owned();
     let mydate = format!("{date_str}:00 +00:00");
     let Ok(ts) = DateTime::parse_from_str(&mydate, "%Y-%m-%d %H:%M:%S %z") else {
@@ -1327,7 +1324,7 @@ async fn edit_event_post(
     }
 
     let min_title_length = 10;
-    let title = input.title.to_owned();
+    let title = input.title.trim().to_owned();
     if title.len() < min_title_length {
         return Template::render(
             "message",
@@ -1339,9 +1336,9 @@ async fn edit_event_post(
     let description = input.description.to_owned();
     // TODO validate the description - disable < character
 
-    let location = input.location.to_owned();
+    let location = input.location.trim().to_owned();
 
-    let date_str = input.date.to_owned();
+    let date_str = input.date.trim().to_owned();
     let offset = input.offset.to_owned();
     let mydate = format!("{date_str}:00 +00:00");
     let Ok(ts) = DateTime::parse_from_str(&mydate, "%Y-%m-%d %H:%M:%S %z") else {
@@ -1435,7 +1432,7 @@ async fn contact_members_post(
     }
 
     let min_subject_length = 5;
-    let subject = input.subject.to_owned();
+    let subject = input.subject.trim().to_owned();
     if subject.len() < min_subject_length {
         return Template::render(
             "message",
