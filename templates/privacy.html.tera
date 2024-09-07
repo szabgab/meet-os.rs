@@ -6,33 +6,54 @@
        <h1 class="title is-3">{{title}}</h1>
 
       Your privacy is important to us, but this is a public meeting place so you have to understand and accept that most of the information you share here will be public.
+      Let's see the exceptions and the details.
       <p>
 
-      <h3 class="title is-5">Email</h3>
-      When you register we ask for your email address. This information will be kept private. Only the site administrators will have access to it.
-
-      <p>
-      When you register to one of the groups you also consent to share your email address with the owner of the group and all the current and future administrators of the specific group.
+      <h3 class="title is-5">Private: Password</h3>
+      The password will be kept secret and hashed in the database. Not even the site administrators will have access to the password itself.
       <p>
 
-      <h3 class="title is-5">Password</h3>
-      That will be kept secret and hashed in the database.
+      <h3 class="title is-5">Semi-private: Email</h3>
+      When you register we ask for your email address. This information will not be public, but the site administrators will have access to it.
+
+      <p>
+      When you register to one of the groups you also consent to share your email address with the owner of the group and all the current and future administrators of that specific group.
       <p>
 
-      <h3 class="title is-5">Name</h3>
+
+      <h3 class="title is-5">Public: Name</h3>
       It will be seen publicly.
       <p>
       Your name will appear among the members of the site. If you register to a group it will be listed among the members of the group.
       If you register to an event your name will be listed among the registrants of the event.
       <p>
 
-      <h3 class="title is-5">Other information</h3>
+      <h3 class="title is-5">Public: Other information</h3>
       <p>
-      By default any other information you provide to us will be treated as public.
+      By default any other information you provide to us will be treated as public. This includes links to your other profiles, the groups you joined, the events you joined. etc.
       </p>
 
       <h2 class="title is-4">Analytics</h2>
-      We use Google Analytics to understand the behaviour of the visitors. We don't collect any personal information via Google Analytics.
+      <p>
+      We use Google Analytics to understand the behavior of the visitors.
+      </p>
+
+      <h2 class="title is-4">Cookies</h2>
+      <p>
+      <ul>
+          <li>Google Analytics sets its own cookies.</li>
+          <li>We use a cookie so once you logged in we won't have to ask for your credentials on every request.</li>
+      </ul>
+      </p>
+
+      <h2 class="title is-4">Sharing data with third-parties</h2>
+      <p>
+        We won't share your personal data with sponsors or other third party, but we will share general demographics (e.g. the number people from the USA using the site).
+      </p>
+      <p>
+        We don't have control over what and how event organizers share. In particular in certain cases event hosts explicitly ask for a list of participants (usually name, email)
+        as they need that to allow access to their facilities. In such cases the event organizers will share this information with the event host.
+      </p>
     </div>
   </div>
 </section>
