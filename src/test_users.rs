@@ -706,6 +706,23 @@ fn post_edit_profile_failures() {
             "Name is too long. Max 50 while the current name is 53 long. Please try again.",
         );
 
+        // edit profile name contains invalid character
+        let res = client
+            .post("/edit-profile")
+            .private_cookie(("meet-os", OWNER_EMAIL))
+            .header(ContentType::Form)
+            .body("name=é&github=&gitlab=&linkedin=")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid character");
+        check_html(&html, "h1", "Invalid character");
+        check_html(
+            &html,
+            "#message",
+            r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#,
+        );
+
         // TODO test the validation of the other fields as well!
     });
 }
@@ -720,7 +737,7 @@ fn post_edit_profile_works() {
             .post("/edit-profile")
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
-            .body("name= Lord 😎 Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  ")
+            .body("name= Lord Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  ")
             .dispatch();
         // &about=* text\n* more\n* [link](https://meet-os.com/)\n* <b>bold</b>\n* <a href=\"https://meet-os.com/\">bad link</a>\n"
 
@@ -730,7 +747,7 @@ fn post_edit_profile_works() {
         check_html(
             &html,
             "#message",
-            r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord 😎 Voldemort</a>"#,
+            r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord Voldemort</a>"#,
         );
 
         // Check updated profile
@@ -742,7 +759,7 @@ fn post_edit_profile_works() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Profile");
-        assert!(html.contains(r#"<h1 class="title is-3">Lord 😎 Voldemort</h1>"#));
+        assert!(html.contains(r#"<h1 class="title is-3">Lord Voldemort</h1>"#));
         assert!(html.contains(r#"<div><a href="https://github.com/alfa">GitHub</a></div>"#));
         assert!(html.contains(r#"<div><a href="https://gitlab.com/beta">GitLab</a></div>"#));
 
@@ -761,5 +778,24 @@ fn post_edit_profile_works() {
         // </ul>
         // </div>"#
         //         ));
+    });
+}
+
+#[test]
+fn post_register_with_invalid_username() {
+    run_inprocess(|email_folder, client| {
+        let res = client
+            .post("/register")
+            .header(ContentType::Form)
+            .body("name=é&email=long@meet-os.com&password=123456")
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        check_html(&html, "title", "Invalid character");
+        check_html(
+            &html,
+            "#message",
+            r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#,
+        );
     });
 }

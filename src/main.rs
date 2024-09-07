@@ -124,6 +124,10 @@ fn markdown2html(text: &str) -> Result<String, message::Message> {
     )
 }
 
+fn get_re_name() -> Regex {
+    Regex::new("^[a-zA-Z .'-]*$").unwrap()
+}
+
 #[get("/")]
 async fn index(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template {
     let config = get_public_config();
@@ -463,6 +467,15 @@ async fn register_post(
         return Template::render(
             "message",
             context! {title: "Name is too long", message: format!("Name is too long. Max {MAX_NAME_LEN} while the current name is {} long. Please try again.", name.len()), config, visitor},
+        );
+    }
+
+    let re_name = get_re_name();
+
+    if !re_name.is_match(name) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid character", message: format!(r#"The name '{name}' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#), config, visitor},
         );
     }
 
@@ -880,6 +893,15 @@ async fn edit_profile_post(
         return Template::render(
             "message",
             context! {title: "Name is too long", message: format!("Name is too long. Max {MAX_NAME_LEN} while the current name is {} long. Please try again.", name.len()), config, visitor},
+        );
+    }
+
+    let re_name = get_re_name();
+
+    if !re_name.is_match(name) {
+        return Template::render(
+            "message",
+            context! {title: "Invalid character", message: format!(r#"The name '{name}' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#), config, visitor},
         );
     }
 
