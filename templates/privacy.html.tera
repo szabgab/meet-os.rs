@@ -54,6 +54,11 @@
         We don't have control over what and how event organizers share. In particular in certain cases event hosts explicitly ask for a list of participants (usually name, email)
         as they need that to allow access to their facilities. In such cases the event organizers will share this information with the event host.
       </p>
+
+      <h2 class="title is-4">Updates</h2>
+      <p>
+      From time to time we'll revisit and updated this page. You'll be able to follow the changes in our <a href="https://github.com/szabgab/meet-os.rs/">git repository</a>.
+      </p>
     </div>
   </div>
 </section>
