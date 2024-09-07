@@ -227,7 +227,11 @@ fn get_join_group_as_user() {
         //assert_eq!(html, "");
         check_html(&html, "title", "Membership");
         check_html(&html, "h1", "Membership");
-        assert!(html.contains(r#"User removed from <a href="/group/1">group</a>"#));
+        check_html(
+            &html,
+            "#message",
+            r#"User removed from <a href="/group/1">group</a>"#,
+        );
 
         // See that user is NOT listed on the group page any more
         let res = client.get("/group/1").dispatch();
@@ -259,7 +263,7 @@ fn get_join_group_as_owner() {
         //assert_eq!(html, "");
         check_html(&html, "title", "You are the owner of this group");
         check_html(&html, "h1", "You are the owner of this group");
-        assert!(html.contains(r#"You cannot join a group you own."#));
+        check_html(&html, "#message", r#"You cannot join a group you own."#);
     });
 }
 
@@ -278,7 +282,7 @@ fn get_leave_not_existing_group() {
         //assert_eq!(html, "");
         check_html(&html, "title", "No such group");
         check_html(&html, "h1", "No such group");
-        assert!(html.contains("The group ID <b>20</b> does not exist."));
+        check_html(&html, "#message", "The group ID <b>20</b> does not exist.");
     })
 }
 
