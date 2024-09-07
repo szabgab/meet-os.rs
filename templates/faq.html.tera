@@ -40,16 +40,24 @@
         There will be companies that will want to sponsor the service, potentially to promote their job offers through the system.
       </div>
 
-      <h2 class="title is-5">Email notifications - Who can send email messages?</h2>
+      <h2 class="title is-5">Manual email notifications - Who can send email messages to whom?</h2>
       <div>
         
       <ul>
          <li>Group owner can send message to all the members.</li>
+         <li>TODO: Group owner can send message to selected members of the group.</li>
+         <li>TODO: Event organizer (currently only the group owner) can send message to people who RSVP-ed to an event.</li>
+         <li>TODO: Site admin can send message to all the users.</li>
+         <li>TODO: Site admin can send message to all the group owners.</li>
+         <li>TODO: Site admin can send message to selected list of members.</li>
+         <li>TODO: Users can send messages to Site Admin.</li>
+         <li>TODO: Guests can send messages to Site Admin.</li>
+         <li>TODO: Group members can send messages to Group owner.</li>
+         <li>TODO: Other capabilities might be added later</li>
       </ul>
       </div>
 
-
-      <h2 class="title is-5">Email notifications - What kind of automatic notifications are in the system?</h2>
+      <h2 class="title is-5">Automatic email notifications - What kind of automatic notifications are in the system?</h2>
       <ul>
         <li>When new group is create the new own receives an email.</li>
         <li>When a user joins a group the owner receives and email.</li>
@@ -60,6 +68,27 @@
       <div>
          Currently there is no way to select which kind of email notifications one receives.
          We'll have to add some way for the users to control what kind of email messages are sent to them.
+      </div>
+
+      <h2 class="title is-5">Member names</h2>
+      <div>
+      <p>
+        The primary audience of this web application is "people who work in tech". Due to the nature of tech
+        people need to be familiar with the Latin ABC (that many people refer to as the English ABC) even if their
+        native tongue uses other script. Using Latin letters in the passport of people is also seems to be standard.
+        So people are used to typing their name in Latin letter.
+      </p>
+      <p>
+      As far as I know every passport in the world has to have the name of the holder in Latin letters.
+      </p>
+      <p>
+        We would like to allow people to type in the name in their native script, but probably the best approach will be to have
+        a simplified field and then another field, (or several other fields) for the native version of the names.
+      </p>
+      <p>
+      See <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where we try to work out the details.
+      </p>
+
       </div>
 
     </div>
