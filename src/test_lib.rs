@@ -1,22 +1,11 @@
 #![allow(unused_macros, unused_imports)]
 
-use regex::Regex;
 use std::path::PathBuf;
 
+use regex::Regex;
 use rocket::http::{ContentType, Status};
 use rocket::local::blocking::{Client, LocalResponse};
 use scraper::{Html, Selector};
-
-macro_rules! params {
-    ($params:expr) => {
-        $params
-            .into_iter()
-            .map(|pair| format!("{}={}", pair.0, pair.1))
-            .collect::<Vec<_>>()
-            .join("&")
-    };
-}
-pub(crate) use params;
 
 use crate::test_helpers::ADMIN_EMAIL;
 
@@ -41,6 +30,38 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
 
     func(email_folder, client);
 }
+
+pub fn read_code_from_email(
+    email_folder: &std::path::PathBuf,
+    filename: &str,
+    prefix: &str,
+) -> (usize, String) {
+    let email_file = email_folder.join(filename);
+    let email_content = std::fs::read_to_string(email_file).unwrap();
+    // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+    let regex_string = format!("http://localhost:[0-9]+/{prefix}/([0-9]+)/([a-z0-9-]+)");
+    let re = Regex::new(&regex_string).unwrap();
+
+    //println!("email content: {email_content}");
+    let (uid, code) = match re.captures(&email_content) {
+        Some(value) => (value[1].parse::<usize>().unwrap(), value[2].to_owned()),
+        None => panic!("Code not find in email: {email_content}"),
+    };
+    println!("extract uid: {uid} code: {code} from email");
+
+    (uid, code)
+}
+
+macro_rules! params {
+    ($params:expr) => {
+        $params
+            .into_iter()
+            .map(|pair| format!("{}={}", pair.0, pair.1))
+            .collect::<Vec<_>>()
+            .join("&")
+    };
+}
+pub(crate) use params;
 
 pub fn check_profile_by_guest(client: &Client) {
     let res = client.get("/profile").dispatch();
@@ -192,24 +213,3 @@ pub(crate) use check_not_the_owner;
 //         assert_eq!(element.inner_html(), text[ix]);
 //     }
 // }
-
-pub fn read_code_from_email(
-    email_folder: &std::path::PathBuf,
-    filename: &str,
-    prefix: &str,
-) -> (usize, String) {
-    let email_file = email_folder.join(filename);
-    let email_content = std::fs::read_to_string(email_file).unwrap();
-    // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-    let regex_string = format!("http://localhost:[0-9]+/{prefix}/([0-9]+)/([a-z0-9-]+)");
-    let re = Regex::new(&regex_string).unwrap();
-
-    //println!("email content: {email_content}");
-    let (uid, code) = match re.captures(&email_content) {
-        Some(value) => (value[1].parse::<usize>().unwrap(), value[2].to_owned()),
-        None => panic!("Code not find in email: {email_content}"),
-    };
-    println!("extract uid: {uid} code: {code} from email");
-
-    (uid, code)
-}
