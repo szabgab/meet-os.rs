@@ -90,7 +90,7 @@ fn contact_members_post_user_without_gid() {
             .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .dispatch();
-        check_unprocessable(res);
+        check_unprocessable!(res);
     });
 }
 

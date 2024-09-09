@@ -136,15 +136,18 @@ macro_rules! check_unauthorized {
 }
 pub(crate) use check_unauthorized;
 
-pub fn check_unprocessable(res: LocalResponse) {
-    assert_eq!(res.status(), Status::UnprocessableEntity);
-    let html = res.into_string().unwrap();
-    check_html!(&html, "title", "422 Unprocessable Entity");
-    check_html!(&html, "h1", "422 Unprocessable Entity");
-    assert!(html.contains(
-        "The request was well-formed but was unable to be followed due to semantic errors."
-    ));
+macro_rules! check_unprocessable {
+    ($res: expr) => {{
+        assert_eq!($res.status(), Status::UnprocessableEntity);
+        let html = $res.into_string().unwrap();
+        check_html!(&html, "title", "422 Unprocessable Entity");
+        check_html!(&html, "h1", "422 Unprocessable Entity");
+        assert!(html.contains(
+            "The request was well-formed but was unable to be followed due to semantic errors."
+        ));
+    }};
 }
+pub(crate) use check_unprocessable;
 
 pub fn check_not_the_owner(res: LocalResponse) {
     assert_eq!(res.status(), Status::Ok);

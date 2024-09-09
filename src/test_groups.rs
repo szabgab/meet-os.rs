@@ -414,7 +414,7 @@ fn post_edit_group_user_missing_gid() {
             .header(ContentType::Form)
             .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
-        check_unprocessable(res);
+        check_unprocessable!(res);
     });
 }
 

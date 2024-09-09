@@ -273,7 +273,7 @@ fn post_edit_event_user_missing_data() {
             .header(ContentType::Form)
             .private_cookie(("meet-os", OWNER_EMAIL))
             .dispatch();
-        check_unprocessable(res);
+        check_unprocessable!(res);
     });
 }
 
