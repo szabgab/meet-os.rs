@@ -6,9 +6,9 @@
        <h1 class="title is-3">Login</h1>
 
         <form method="POST" action="/login">
-        Email: <input name="email" id="email" type="email">
-        Password: <input name="password" id="password" type="password">
-        <input type="submit" value="Login">
+        Email: <input name="email" class="input" id="email" type="email" placeholder="Email">
+        Password: <input name="password" class="input" id="password" type="password" placeholder=Password">
+        <input type="submit" value="Login" class="button">
         </form>
 
         <hr>

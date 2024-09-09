@@ -2,7 +2,7 @@ use crate::test_lib::{check_html, run_inprocess};
 use rocket::http::Status;
 
 #[test]
-fn register_page() {
+fn get_register_page() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/register").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -10,23 +10,25 @@ fn register_page() {
         check_html(&html, "title", "Register");
         check_html(&html, "h1", "Register");
         assert!(html.contains(
-            r#"<tr><td>Name:</td><td><input name="name" id="name" type="text"></td></tr>"#
+            r#"<input name="name" class="input" id="name" type="text" placeholder="Name">"#
         ));
         assert!(html.contains(
-            r#"<tr><td>Email:</td><td><input name="email" id="email" type="email"></td></tr>"#
+            r#"<input name="email"  class="input" id="email" type="email" placeholder="Email">"#
         ));
-        assert!(html.contains(r#"<tr><td>Password:</td><td><input name="password" id="password" type="password"></td></tr>"#));
+        assert!(html.contains(r#"<input name="password"  class="input" id="password" type="password"  placeholder="Password">"#));
     });
 }
 
 #[test]
-fn login_page() {
+fn get_login_page() {
     run_inprocess(|email_folder, client| {
         let res = client.get("/login").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_html(&html, "title", "Login");
         check_html(&html, "h1", "Login");
-        assert!(html.contains(r#"Email: <input name="email" id="email" type="email">"#));
+        assert!(html.contains(r#"Email: <input name="email" class="input" id="email" type="email" placeholder="Email">"#));
+        assert!(html.contains(r#"Password: <input name="password" class="input" id="password" type="password" placeholder=Password">"#));
+        assert!(html.contains(r#"<input type="submit" value="Login" class="button">"#));
     });
 }

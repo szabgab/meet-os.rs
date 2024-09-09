@@ -7,11 +7,11 @@
 
         <form method="POST" action="/register">
         <table>
-        <tr><td>Name:</td><td><input name="name" id="name" type="text"></td></tr>
-        <tr><td>Email:</td><td><input name="email" id="email" type="email"></td></tr>
-        <tr><td>Password:</td><td><input name="password" id="password" type="password"></td></tr>
+        <tr><td>Name:</td><td><input name="name" class="input" id="name" type="text" placeholder="Name"></td></tr>
+        <tr><td>Email:</td><td><input name="email"  class="input" id="email" type="email" placeholder="Email"></td></tr>
+        <tr><td>Password:</td><td><input name="password"  class="input" id="password" type="password"  placeholder="Password"></td></tr>
         </table>
-        <input type="submit" value="Register">
+        <input type="submit" value="Register" class="button">
         </form>
     
     </div>
