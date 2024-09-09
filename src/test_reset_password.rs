@@ -21,7 +21,7 @@ fn reset_password_full() {
             "User is logged in after calling register_user_helper"
         );
         let html = res.into_string().unwrap();
-        check_user_menu(&html);
+        check_user_menu!(&html);
 
         let res = client.get("/logout").dispatch();
         assert_eq!(res.status(), Status::Ok);
@@ -129,7 +129,7 @@ fn reset_password_full() {
 
         //assert_eq!(html, "");
         check_html!(&html, "title", "Welcome back");
-        check_user_menu(&html);
+        check_user_menu!(&html);
         check_profile_by_user!(&client, &OWNER_EMAIL, name);
 
         // Try again with the same code

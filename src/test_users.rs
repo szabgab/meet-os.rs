@@ -97,7 +97,7 @@ fn register_user() {
         check_html!(&html, "title", "Thank you for registering");
         check_html!(&html, "h1", "Thank you for registering");
         check_html!(&html, "#message", "Your email was verified.");
-        check_user_menu(&html);
+        check_user_menu!(&html);
 
         check_profile_by_user!(&client, OWNER_EMAIL, OWNER_NAME);
     });
@@ -197,7 +197,7 @@ fn post_login_regular_user() {
 
         //assert_eq!(html, "");
         check_html!(&html, "title", "Welcome back");
-        check_user_menu(&html);
+        check_user_menu!(&html);
 
         // Access the profile with the cookie
         check_profile_by_user!(&client, &OWNER_EMAIL, OWNER_NAME);
@@ -244,7 +244,7 @@ fn post_login_admin() {
 
         let html = res.into_string().unwrap();
         check_html!(&html, "title", "Welcome back");
-        check_admin_menu(&html);
+        check_admin_menu!(&html);
 
         check_profile_by_user!(&client, &ADMIN_EMAIL, ADMIN_NAME);
 

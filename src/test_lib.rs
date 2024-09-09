@@ -87,15 +87,23 @@ macro_rules! check_logged_in_menu {
 }
 pub(crate) use check_logged_in_menu;
 
-pub fn check_admin_menu(html: &str) {
-    check_logged_in_menu!(html);
-    assert!(html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+macro_rules! check_admin_menu {
+    ($html: expr) => {
+        use crate::test_lib::check_logged_in_menu;
+        check_logged_in_menu!($html);
+        assert!($html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+    };
 }
+pub(crate) use check_admin_menu;
 
-pub fn check_user_menu(html: &str) {
-    check_logged_in_menu!(html);
-    assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+macro_rules! check_user_menu {
+    ($html: expr) => {{
+        use crate::test_lib::check_logged_in_menu;
+        check_logged_in_menu!($html);
+        assert!(!$html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+    }};
 }
+pub(crate) use check_user_menu;
 
 macro_rules! check_html {
     ($html: expr, $selectors: expr, $text: expr) => {{
