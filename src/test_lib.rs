@@ -56,8 +56,8 @@ pub fn check_profile_by_user(client: &Client, email: &str, h1: &str) {
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
-    check_html(&html, "title", "Profile");
-    check_html(&html, "h1", h1);
+    check_html!(&html, "title", "Profile");
+    check_html!(&html, "h1", h1);
 }
 
 pub fn check_guest_menu(html: &str) {
@@ -88,41 +88,44 @@ pub fn check_user_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 }
 
-pub fn check_html(html: &str, selectors: &str, text: &str) {
-    let document = Html::parse_document(html);
-    let selector = Selector::parse(selectors).unwrap();
-    assert_eq!(
-        document.select(&selector).next().unwrap().inner_html(),
-        text
-    );
+macro_rules! check_html {
+    ($html: expr, $selectors: expr, $text: expr) => {{
+        let document = scraper::Html::parse_document($html);
+        let selector = scraper::Selector::parse($selectors).unwrap();
+        assert_eq!(
+            &document.select(&selector).next().unwrap().inner_html(),
+            $text
+        );
+    }};
 }
+pub(crate) use check_html;
 
 pub fn check_not_logged_in(res: LocalResponse) {
     assert_eq!(res.status(), Status::Unauthorized);
     let html = res.into_string().unwrap();
-    check_html(&html, "title", "Not logged in");
-    check_html(&html, "h1", "Not logged in");
-    check_html(&html, "#message", "You are not logged in");
+    check_html!(&html, "title", "Not logged in");
+    check_html!(&html, "h1", "Not logged in");
+    check_html!(&html, "#message", "You are not logged in");
     check_guest_menu(&html);
 }
 
 pub fn check_unauthorized(res: LocalResponse) {
     assert_eq!(res.status(), Status::Forbidden);
     let html = res.into_string().unwrap();
-    check_html(&html, "title", "Unauthorized");
-    check_html(&html, "h1", "Unauthorized");
-    check_html(
+    check_html!(&html, "title", "Unauthorized");
+    check_html!(&html, "h1", "Unauthorized");
+    check_html!(
         &html,
         "#message",
-        "You don't have the rights to access this page.",
+        "You don't have the rights to access this page."
     );
 }
 
 pub fn check_unprocessable(res: LocalResponse) {
     assert_eq!(res.status(), Status::UnprocessableEntity);
     let html = res.into_string().unwrap();
-    check_html(&html, "title", "422 Unprocessable Entity");
-    check_html(&html, "h1", "422 Unprocessable Entity");
+    check_html!(&html, "title", "422 Unprocessable Entity");
+    check_html!(&html, "h1", "422 Unprocessable Entity");
     assert!(html.contains(
         "The request was well-formed but was unable to be followed due to semantic errors."
     ));
@@ -131,16 +134,16 @@ pub fn check_unprocessable(res: LocalResponse) {
 pub fn check_not_the_owner(res: LocalResponse) {
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    check_html(&html, "title", "Not the owner");
-    check_html(&html, "h1", "Not the owner");
-    check_html(
+    check_html!(&html, "title", "Not the owner");
+    check_html!(&html, "h1", "Not the owner");
+    check_html!(
         &html,
         "#message",
-        r#"You are not the owner of the group <b>1</b>"#,
+        r#"You are not the owner of the group <b>1</b>"#
     );
 }
 
-// check_html_list(
+// check_html!_list(
 //     &html,
 //     "li",
 //     vec![
@@ -149,7 +152,7 @@ pub fn check_not_the_owner(res: LocalResponse) {
 //     ],
 // );
 
-// pub fn check_html_list(html: &str, tag: &str, text: Vec<&str>) {
+// pub fn check_html!_list(html: &str, tag: &str, text: Vec<&str>) {
 //     let document = Html::parse_document(html);
 //     let selector = Selector::parse(tag).unwrap();
 

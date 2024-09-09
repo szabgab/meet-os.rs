@@ -180,7 +180,7 @@ fn test_complex() {
         let res = client.get("/event/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", first_event_title);
+        check_html!(&html, "title", first_event_title);
         assert!(html.contains(format!(r#"<p class="title">{first_event_title}</p>"#).as_str()));
         assert!(
             html.contains(format!(r#"Organized by <a href="/group/1">{group_name}</a>."#).as_str())
@@ -190,7 +190,7 @@ fn test_complex() {
         let res = client.get("/event/2").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", second_event_title_2);
+        check_html!(&html, "title", second_event_title_2);
         assert!(html.contains(format!(r#"<p class="title">{second_event_title_2}</p>"#).as_str()));
         assert!(
             html.contains(format!(r#"Organized by <a href="/group/1">{group_name}</a>."#).as_str())

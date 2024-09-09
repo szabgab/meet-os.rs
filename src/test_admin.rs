@@ -33,8 +33,8 @@ fn admin_page_as_admin() {
         let res = client.get("/admin").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Admin");
-        check_html(&html, "h1", "Admin");
+        check_html!(&html, "title", "Admin");
+        check_html!(&html, "h1", "Admin");
         assert!(html.contains(r#"<div><a href="/admin/search">Search</a></div>"#));
         assert!(html.contains(r#"<div><a href="/admin/users">List users</a></div>"#));
         assert!(html.contains(r#"<div><a href="/admin/audit">Audit</a></div>"#));
@@ -50,8 +50,8 @@ fn admin_users_page_as_admin() {
         let res = client.get("/admin/users").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "List Users by Admin");
-        check_html(&html, "h1", "List Users by Admin");
+        check_html!(&html, "title", "List Users by Admin");
+        check_html!(&html, "h1", "List Users by Admin");
         //assert_eq!(html, "");
         let expected = format!(r#"<a href="/user/4">{OTHER_NAME}</a>"#);
         assert!(html.contains(&expected));
@@ -70,7 +70,7 @@ fn admin_search_get_as_admin() {
         let res = client.get("/admin/search").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Search");
+        check_html!(&html, "title", "Search");
         assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
     })
 }
@@ -103,7 +103,7 @@ fn admin_search_post_as_admin() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Search");
+        check_html!(&html, "title", "Search");
         assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
         assert!(html.contains(r#"<b>Total: 1</b>"#));
         assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
@@ -121,8 +121,8 @@ fn admin_audit_as_admin() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "Audit");
-        check_html(&html, "h1", "Audit");
+        check_html!(&html, "title", "Audit");
+        check_html!(&html, "h1", "Audit");
         // TODO call some method that create entries and then check entries
     })
 }

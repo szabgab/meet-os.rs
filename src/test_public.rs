@@ -7,26 +7,26 @@ fn public_pages() {
         let res = client.get("/about").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "About Meet-OS");
+        check_html!(&html, "title", "About Meet-OS");
 
         let res = client.get("/soc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Standard of Conduct");
+        check_html!(&html, "title", "Standard of Conduct");
 
         let res = client.get("/privacy").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Privacy Policy");
+        check_html!(&html, "title", "Privacy Policy");
 
         let res = client.get("/faq").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "FAQ - Frequently Asked Questions");
+        check_html!(&html, "title", "FAQ - Frequently Asked Questions");
 
         let res = client.get("/markdown").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Markdown at Meet-OS");
+        check_html!(&html, "title", "Markdown at Meet-OS");
     });
 }

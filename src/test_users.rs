@@ -81,10 +81,10 @@ fn register_user() {
         assert!(res.headers().get_one("set-cookie").is_none());
 
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "We sent you an email");
-        check_html(&html, "h1", "We sent you an email");
+        check_html!(&html, "title", "We sent you an email");
+        check_html!(&html, "h1", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
-        check_html(&html, "#message", &expected);
+        check_html!(&html, "#message", &expected);
         check_guest_menu(&html);
 
         let (uid, code) = read_code_from_email(&email_folder, "0.txt", "verify-email");
@@ -94,9 +94,9 @@ fn register_user() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Thank you for registering");
-        check_html(&html, "h1", "Thank you for registering");
-        check_html(&html, "#message", "Your email was verified.");
+        check_html!(&html, "title", "Thank you for registering");
+        check_html!(&html, "h1", "Thank you for registering");
+        check_html!(&html, "#message", "Your email was verified.");
         check_user_menu(&html);
 
         check_profile_by_user(&client, OWNER_EMAIL, OWNER_NAME);
@@ -112,8 +112,8 @@ fn get_verify_with_non_existent_id() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "Invalid id");
-        check_html(&html, "#message", "Invalid id <b>1</b>");
+        check_html!(&html, "title", "Invalid id");
+        check_html!(&html, "#message", "Invalid id <b>1</b>");
     });
 }
 
@@ -135,8 +135,8 @@ fn get_verify_email_with_bad_code() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "Invalid code");
-        check_html(&html, "#message", "Invalid code <b>abc</b>");
+        check_html!(&html, "title", "Invalid code");
+        check_html!(&html, "#message", "Invalid code <b>abc</b>");
     });
 }
 
@@ -157,9 +157,9 @@ fn post_register_duplicate_email() {
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
         check_guest_menu(&html);
-        check_html(&html, "title", "We sent you an email");
+        check_html!(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
-        check_html(&html, "#message", &expected);
+        check_html!(&html, "#message", &expected);
 
         let res = client
             .post(format!("/register"))
@@ -174,7 +174,7 @@ fn post_register_duplicate_email() {
         //println!("{:#?}", res.headers());
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Registration failed");
+        check_html!(&html, "title", "Registration failed");
         check_guest_menu(&html);
     });
 }
@@ -196,7 +196,7 @@ fn post_login_regular_user() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "Welcome back");
+        check_html!(&html, "title", "Welcome back");
         check_user_menu(&html);
 
         // Access the profile with the cookie
@@ -206,7 +206,7 @@ fn post_login_regular_user() {
         //let res = client.get("/logout").dispatch();
         // assert_eq!(res.status(), Status::Unauthorized);
         //let html = res.into_string().unwrap();
-        // check_html(&html, "title", "Not logged in");
+        // check_html!(&html, "title", "Not logged in");
         // assert!(html.contains("You are not logged in"));
 
         // logout
@@ -217,8 +217,8 @@ fn post_login_regular_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        check_html(&html, "title", "Logged out");
-        check_html(&html, "h1", "Logged out");
+        check_html!(&html, "title", "Logged out");
+        check_html!(&html, "h1", "Logged out");
         check_guest_menu(&html);
 
         // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
@@ -243,7 +243,7 @@ fn post_login_admin() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Welcome back");
+        check_html!(&html, "title", "Welcome back");
         check_admin_menu(&html);
 
         check_profile_by_user(&client, &ADMIN_EMAIL, ADMIN_NAME);
@@ -253,8 +253,8 @@ fn post_login_admin() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Logged out");
-        check_html(&html, "h1", "Logged out");
+        check_html!(&html, "title", "Logged out");
+        check_html!(&html, "h1", "Logged out");
         check_profile_by_guest(&client);
     });
 }
@@ -274,11 +274,11 @@ fn post_register_with_invalid_email_address() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid email address");
-        check_html(
+        check_html!(&html, "title", "Invalid email address");
+        check_html!(
             &html,
             "#message",
-            "Invalid email address <b>meet-os.com</b> Please try again",
+            "Invalid email address <b>meet-os.com</b> Please try again"
         );
     });
 }
@@ -293,11 +293,11 @@ fn post_register_with_too_long_username() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Name is too long");
-        check_html(
+        check_html!(&html, "title", "Name is too long");
+        check_html!(
             &html,
             "#message",
-            "Name is too long. Max 50 while the current name is 53 long. Please try again.",
+            "Name is too long. Max 50 while the current name is 53 long. Please try again."
         );
     });
 }
@@ -321,11 +321,11 @@ fn post_register_with_bad_email_address() {
 
         // TODO make these tests parse the HTML and verify the extracted title tag!
         //assert_eq!(html, "");
-        check_html(&html, "title", "Invalid email address");
-        check_html(
+        check_html!(&html, "title", "Invalid email address");
+        check_html!(
             &html,
             "#message",
-            "Invalid email address <b>meet-os.com</b> Please try again",
+            "Invalid email address <b>meet-os.com</b> Please try again"
         );
         check_guest_menu(&html);
     });
@@ -347,11 +347,11 @@ fn post_login_with_unregistered_email() {
         assert_eq!(res.status(), Status::Ok);
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "No such user");
-        check_html(
+        check_html!(&html, "title", "No such user");
+        check_html!(
             &html,
             "#message",
-            "No user with address <b>other@meet-os.com</b>. Please try again",
+            "No user with address <b>other@meet-os.com</b>. Please try again"
         );
         check_guest_menu(&html);
     });
@@ -383,8 +383,8 @@ fn post_login_with_bad_password() {
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
 
-        check_html(&html, "title", "Invalid password");
-        check_html(&html, "h1", "Invalid password");
+        check_html!(&html, "title", "Invalid password");
+        check_html!(&html, "h1", "Invalid password");
         // assert_eq!(&html, "");
         check_guest_menu(&html);
     });
@@ -417,8 +417,8 @@ fn post_login_with_unverified_email() {
 
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Unverified email");
-        check_html(&html, "#message", "Email must be verified before login.");
+        check_html!(&html, "title", "Unverified email");
+        check_html!(&html, "#message", "Email must be verified before login.");
         check_guest_menu(&html);
     });
 }
@@ -435,8 +435,8 @@ fn post_login_with_invalid_email() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "Invalid email address");
-        check_html(&html, "h1", "Invalid email address");
+        check_html!(&html, "title", "Invalid email address");
+        check_html!(&html, "h1", "Invalid email address");
     });
 }
 
@@ -456,13 +456,13 @@ fn post_register_with_short_password() {
         assert!(res.headers().get_one("set-cookie").is_none());
 
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid password");
-        check_html(&html, "h1", "Invalid password");
+        check_html!(&html, "title", "Invalid password");
+        check_html!(&html, "h1", "Invalid password");
         //assert_eq!(html, "");
-        check_html(
+        check_html!(
             &html,
             "#message",
-            "The password must be at least 6 characters long.",
+            "The password must be at least 6 characters long."
         );
         check_guest_menu(&html);
     });
@@ -482,8 +482,8 @@ fn get_edit_profile_user() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "Edit Profile");
-        check_html(&html, "h1", "Edit Profile");
+        check_html!(&html, "title", "Edit Profile");
+        check_html!(&html, "h1", "Edit Profile");
         assert!(html.contains(r#"<form method="POST" action="/edit-profile">"#));
     });
 }
@@ -499,8 +499,8 @@ fn get_register_guest() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "Register");
-        check_html(&html, "h1", "Register");
+        check_html!(&html, "title", "Register");
+        check_html!(&html, "h1", "Register");
         assert!(html.contains(r#"<form method="POST" action="/register">"#));
     });
 }
@@ -517,8 +517,8 @@ fn get_users_list_users_empty_db_guest() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "List Users");
-        check_html(&html, "h1", "List Users");
+        check_html!(&html, "title", "List Users");
+        check_html!(&html, "h1", "List Users");
         assert!(html.contains(r#"No users"#));
     });
 }
@@ -534,8 +534,8 @@ fn get_users_list_users_many_users_guest() {
         let html = res.into_string().unwrap();
 
         // assert_eq!(html, "");
-        check_html(&html, "title", "List Users");
-        check_html(&html, "h1", "List Users");
+        check_html!(&html, "title", "List Users");
+        check_html!(&html, "h1", "List Users");
         assert!(!html.contains(r#"No users"#));
 
         let expected = format!(r#"<li><a href="/user/2">{OWNER_NAME}</a></li>"#);
@@ -558,9 +558,9 @@ fn user_id_that_does_not_exist() {
         let html = res.into_string().unwrap();
 
         // assert_eq!(html, "");
-        check_html(&html, "title", "User not found");
-        check_html(&html, "h1", "User not found");
-        check_html(&html, "#message", r#"There is no user with id <b>42</b>."#);
+        check_html!(&html, "title", "User not found");
+        check_html!(&html, "h1", "User not found");
+        check_html!(&html, "#message", r#"There is no user with id <b>42</b>."#);
     });
 }
 
@@ -576,8 +576,8 @@ fn get_user_page() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", OWNER_NAME);
-        check_html(&html, "h1", OWNER_NAME);
+        check_html!(&html, "title", OWNER_NAME);
+        check_html!(&html, "h1", OWNER_NAME);
         let expected = format!(r#"<td>Name:</td><td>{OWNER_NAME}</td>"#);
         assert!(html.contains(&expected));
         assert!(html.contains(r#"<td>No GitHub provided.</td"#));
@@ -596,12 +596,12 @@ fn unverified_user_page_by_guest() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Unverified user");
-        check_html(&html, "h1", "Unverified user");
-        check_html(
+        check_html!(&html, "title", "Unverified user");
+        check_html!(&html, "h1", "Unverified user");
+        check_html!(
             &html,
             "#message",
-            "This user has not verified the email address yet.",
+            "This user has not verified the email address yet."
         );
         assert!(!html.contains(UNVERIFIED_NAME));
     });
@@ -622,8 +622,8 @@ fn unverified_user_on_user_page_by_guest() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "List Users");
-        check_html(&html, "h1", "List Users");
+        check_html!(&html, "title", "List Users");
+        check_html!(&html, "h1", "List Users");
         assert!(html.contains(r#"<a href="/user/1">Site Manager</a>"#));
         let expected = format!(r#"<a href="/user/2">{USER_NAME}</a></li>"#);
         assert!(html.contains(&expected));
@@ -647,12 +647,12 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid GitHub username");
-        check_html(&html, "h1", "Invalid GitHub username");
-        check_html(
+        check_html!(&html, "title", "Invalid GitHub username");
+        check_html!(&html, "h1", "Invalid GitHub username");
+        check_html!(
             &html,
             "#message",
-            r#"The GitHub username `szabgab*` is not valid."#,
+            r#"The GitHub username `szabgab*` is not valid."#
         );
 
         // edit profile page invalid gitlab account
@@ -664,12 +664,12 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid GitLab username");
-        check_html(&html, "h1", "Invalid GitLab username");
-        check_html(
+        check_html!(&html, "title", "Invalid GitLab username");
+        check_html!(&html, "h1", "Invalid GitLab username");
+        check_html!(
             &html,
             "#message",
-            r#"The GitLab username `foo*bar` is not valid."#,
+            r#"The GitLab username `foo*bar` is not valid."#
         );
 
         // edit profile invalid linkein
@@ -681,12 +681,12 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid LinkedIn profile link");
-        check_html(&html, "h1", "Invalid LinkedIn profile link");
-        check_html(
+        check_html!(&html, "title", "Invalid LinkedIn profile link");
+        check_html!(&html, "h1", "Invalid LinkedIn profile link");
+        check_html!(
             &html,
             "#message",
-            r#"The LinkedIn profile link `szabgab` is not valid."#,
+            r#"The LinkedIn profile link `szabgab` is not valid."#
         );
 
         // edit profile name too long
@@ -698,12 +698,12 @@ fn post_edit_profile_failures() {
                 .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Name is too long");
-        check_html(&html, "h1", "Name is too long");
-        check_html(
+        check_html!(&html, "title", "Name is too long");
+        check_html!(&html, "h1", "Name is too long");
+        check_html!(
             &html,
             "#message",
-            "Name is too long. Max 50 while the current name is 53 long. Please try again.",
+            "Name is too long. Max 50 while the current name is 53 long. Please try again."
         );
 
         // edit profile name contains invalid character
@@ -715,12 +715,12 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid character");
-        check_html(&html, "h1", "Invalid character");
-        check_html(
+        check_html!(&html, "title", "Invalid character");
+        check_html!(&html, "h1", "Invalid character");
+        check_html!(
             &html,
             "#message",
-            r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#,
+            r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#
         );
 
         // TODO test the validation of the other fields as well!
@@ -743,11 +743,11 @@ fn post_edit_profile_works() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Profile updated");
-        check_html(
+        check_html!(&html, "title", "Profile updated");
+        check_html!(
             &html,
             "#message",
-            r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord Voldemort</a>"#,
+            r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord Voldemort</a>"#
         );
 
         // Check updated profile
@@ -758,7 +758,7 @@ fn post_edit_profile_works() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Profile");
+        check_html!(&html, "title", "Profile");
         assert!(html.contains(r#"<h1 class="title is-3">Lord Voldemort</h1>"#));
         assert!(html.contains(r#"<div><a href="https://github.com/alfa">GitHub</a></div>"#));
         assert!(html.contains(r#"<div><a href="https://gitlab.com/beta">GitLab</a></div>"#));
@@ -791,11 +791,11 @@ fn post_register_with_invalid_username() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Invalid character");
-        check_html(
+        check_html!(&html, "title", "Invalid character");
+        check_html!(
             &html,
             "#message",
-            r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#,
+            r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#
         );
     });
 }

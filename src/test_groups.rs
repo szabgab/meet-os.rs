@@ -30,8 +30,8 @@ fn create_group_by_admin() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Create Group");
-        check_html(&html, "h1", "Create Group");
+        check_html!(&html, "title", "Create Group");
+        check_html!(&html, "h1", "Create Group");
 
         // Create a Group
         let res = client
@@ -57,8 +57,8 @@ fn create_group_by_admin() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
-        check_html(&html, "title", "Groups");
-        check_html(&html, "h1", "Groups");
+        check_html!(&html, "title", "Groups");
+        check_html!(&html, "h1", "Groups");
 
         let res = client
             .post("/admin/create-group")
@@ -80,8 +80,8 @@ fn create_group_by_admin() {
 
         assert!(html.contains(r#"<li><a href="/group/1">Rust Maven</a></li>"#));
         assert!(html.contains(r#"<li><a href="/group/2">Python Maven</a></li>"#));
-        check_html(&html, "title", "Groups");
-        check_html(&html, "h1", "Groups");
+        check_html!(&html, "title", "Groups");
+        check_html!(&html, "h1", "Groups");
     });
 }
 
@@ -119,16 +119,16 @@ fn create_group_guest() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         assert!(!html.contains("/group/")); // No link to any group
-        check_html(&html, "title", "Groups");
-        check_html(&html, "h1", "Groups");
+        check_html!(&html, "title", "Groups");
+        check_html!(&html, "h1", "Groups");
 
         // List the groups
         let res = client.get("/groups").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         assert!(!html.contains("/group/1"));
-        check_html(&html, "title", "Groups");
-        check_html(&html, "h1", "Groups");
+        check_html!(&html, "title", "Groups");
+        check_html!(&html, "h1", "Groups");
     });
 }
 
@@ -144,9 +144,9 @@ fn get_join_group_not_existing_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        check_html(&html, "title", "No such group");
-        check_html(&html, "h1", "No such group");
-        check_html(&html, "#message", "There is not group with id <b>20</b>");
+        check_html!(&html, "title", "No such group");
+        check_html!(&html, "h1", "No such group");
+        check_html!(&html, "#message", "There is not group with id <b>20</b>");
     })
 }
 
@@ -167,20 +167,20 @@ fn get_join_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        check_html(&html, "title", "Membership");
-        check_html(&html, "h1", "Membership");
-        check_html(
+        check_html!(&html, "title", "Membership");
+        check_html!(&html, "h1", "Membership");
+        check_html!(
             &html,
             "#message",
-            r#"User added to <a href="/group/1">group</a>"#,
+            r#"User added to <a href="/group/1">group</a>"#
         );
 
         // check if user is listed on the group page
         let res = client.get("/group/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "First Group");
-        check_html(&html, "h1", "First Group");
+        check_html!(&html, "title", "First Group");
+        check_html!(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
         let expected = format!(r#"<a href="/user/3">{USER_NAME}</a>"#);
         assert!(html.contains(&expected));
@@ -193,8 +193,8 @@ fn get_join_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "First Group");
-        check_html(&html, "h1", "First Group");
+        check_html!(&html, "title", "First Group");
+        check_html!(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
         let expected = format!(r#"<a href="/user/3">{USER_NAME}</a>"#);
         assert!(html.contains(&expected));
@@ -210,8 +210,8 @@ fn get_join_group_as_user() {
         let html = res.into_string().unwrap();
 
         // assert_eq!(html, "");
-        check_html(&html, "title", "You are already a member of this group");
-        check_html(&html, "h1", "You are already a member of this group");
+        check_html!(&html, "title", "You are already a member of this group");
+        check_html!(&html, "h1", "You are already a member of this group");
         assert!(html.contains(
             r#"You are already a member of the <a href="/group/1">First Group</a> group"#
         ));
@@ -225,12 +225,12 @@ fn get_join_group_as_user() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "Membership");
-        check_html(&html, "h1", "Membership");
-        check_html(
+        check_html!(&html, "title", "Membership");
+        check_html!(&html, "h1", "Membership");
+        check_html!(
             &html,
             "#message",
-            r#"User removed from <a href="/group/1">group</a>"#,
+            r#"User removed from <a href="/group/1">group</a>"#
         );
 
         // See that user is NOT listed on the group page any more
@@ -238,8 +238,8 @@ fn get_join_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "First Group");
-        check_html(&html, "h1", "First Group");
+        check_html!(&html, "title", "First Group");
+        check_html!(&html, "h1", "First Group");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
         assert!(!html.contains(USER_NAME));
         assert!(!html.contains("/user/3"));
@@ -261,9 +261,9 @@ fn get_join_group_as_owner() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "You are the owner of this group");
-        check_html(&html, "h1", "You are the owner of this group");
-        check_html(&html, "#message", r#"You cannot join a group you own."#);
+        check_html!(&html, "title", "You are the owner of this group");
+        check_html!(&html, "h1", "You are the owner of this group");
+        check_html!(&html, "#message", r#"You cannot join a group you own."#);
     });
 }
 
@@ -280,9 +280,9 @@ fn get_leave_not_existing_group() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "No such group");
-        check_html(&html, "h1", "No such group");
-        check_html(&html, "#message", "The group ID <b>20</b> does not exist.");
+        check_html!(&html, "title", "No such group");
+        check_html!(&html, "h1", "No such group");
+        check_html!(&html, "#message", "The group ID <b>20</b> does not exist.");
     })
 }
 
@@ -301,8 +301,8 @@ fn get_leave_group_as_owner() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "You are the owner of this group");
-        check_html(&html, "h1", "You are the owner of this group");
+        check_html!(&html, "title", "You are the owner of this group");
+        check_html!(&html, "h1", "You are the owner of this group");
         assert!(html.contains(r#"You cannot leave a group you own."#));
     });
 }
@@ -323,8 +323,8 @@ fn get_leave_group_user_does_not_belong_to() {
         let html = res.into_string().unwrap();
 
         //assert_eq!(html, "");
-        check_html(&html, "title", "You are not a member of this group");
-        check_html(&html, "h1", "You are not a member of this group");
+        check_html!(&html, "title", "You are not a member of this group");
+        check_html!(&html, "h1", "You are not a member of this group");
         assert!(html.contains(r#"You cannot leave a group where you are not a member."#));
     });
 }
@@ -342,8 +342,8 @@ fn get_edit_group_user_no_such_group() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "No such group");
-        check_html(&html, "h1", "No such group");
+        check_html!(&html, "title", "No such group");
+        check_html!(&html, "h1", "No such group");
         assert!(html.contains("Group <b>1</b> does not exist"));
     });
 }
@@ -376,8 +376,8 @@ fn get_edit_group_by_owner() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "Edit Group");
-        check_html(&html, "h1", "Edit Group");
+        check_html!(&html, "title", "Edit Group");
+        check_html!(&html, "h1", "Edit Group");
         assert!(html.contains(r#"<form method="POST" action="/edit-group">"#));
         assert!(html.contains(r#"<input type="hidden" name="gid" value="1">"#));
         assert!(
@@ -398,8 +398,8 @@ fn get_group_that_does_not_exist() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "No such group");
-        check_html(&html, "h1", "No such group");
+        check_html!(&html, "title", "No such group");
+        check_html!(&html, "h1", "No such group");
         assert!(html.contains("The group <b>42</b> does not exist."));
     });
 }
@@ -438,8 +438,8 @@ fn post_edit_group_user_no_such_group() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         //assert_eq!(html, "");
-        check_html(&html, "title", "No such group");
-        check_html(&html, "h1", "No such group");
+        check_html!(&html, "title", "No such group");
+        check_html!(&html, "h1", "No such group");
         assert!(html.contains("Group <b>1</b> does not exist"));
     });
 }
@@ -508,20 +508,20 @@ fn post_edit_group_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Group updated");
-        check_html(&html, "h1", "Group updated");
-        check_html(
+        check_html!(&html, "title", "Group updated");
+        check_html!(&html, "h1", "Group updated");
+        check_html!(
             &html,
             "#message",
-            r#"Check out the <a href="/group/1">group</a>"#,
+            r#"Check out the <a href="/group/1">group</a>"#
         );
 
         // check if the group was updated
         let res = client.get("/group/1").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html(&html, "title", "Updated name");
-        check_html(&html, "h1", "Updated name");
+        check_html!(&html, "title", "Updated name");
+        check_html!(&html, "h1", "Updated name");
         assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
         assert!(html.contains(r#"No members in this group."#));
         assert!(html.contains(r#"<p>Some group</p>"#));
