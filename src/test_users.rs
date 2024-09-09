@@ -85,7 +85,7 @@ fn register_user() {
         check_html!(&html, "h1", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
         check_html!(&html, "#message", &expected);
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
 
         let (uid, code) = read_code_from_email(&email_folder, "0.txt", "verify-email");
 
@@ -156,7 +156,7 @@ fn post_register_duplicate_email() {
         //println!("{:#?}", res.headers());
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         check_html!(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
         check_html!(&html, "#message", &expected);
@@ -175,7 +175,7 @@ fn post_register_duplicate_email() {
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
         check_html!(&html, "title", "Registration failed");
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 
@@ -219,7 +219,7 @@ fn post_login_regular_user() {
 
         check_html!(&html, "title", "Logged out");
         check_html!(&html, "h1", "Logged out");
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
 
         // TODO as the login information is only saved in the client-side cookie, if someone has the cookie they can
         // use it even the user has clicked on /logout and we have asked the browser to remove the cookie.
@@ -327,7 +327,7 @@ fn post_register_with_bad_email_address() {
             "#message",
             "Invalid email address <b>meet-os.com</b> Please try again"
         );
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 
@@ -353,7 +353,7 @@ fn post_login_with_unregistered_email() {
             "#message",
             "No user with address <b>other@meet-os.com</b>. Please try again"
         );
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 
@@ -386,7 +386,7 @@ fn post_login_with_bad_password() {
         check_html!(&html, "title", "Invalid password");
         check_html!(&html, "h1", "Invalid password");
         // assert_eq!(&html, "");
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 
@@ -419,7 +419,7 @@ fn post_login_with_unverified_email() {
         let html = res.into_string().unwrap();
         check_html!(&html, "title", "Unverified email");
         check_html!(&html, "#message", "Email must be verified before login.");
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 
@@ -464,7 +464,7 @@ fn post_register_with_short_password() {
             "#message",
             "The password must be at least 6 characters long."
         );
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 

@@ -63,15 +63,18 @@ macro_rules! check_profile_by_user {
 }
 pub(crate) use check_profile_by_user;
 
-pub fn check_guest_menu(html: &str) {
-    assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
+macro_rules! check_guest_menu {
+    ($html: expr) => {{
+        assert!(!$html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 
-    assert!(html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
-    assert!(html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
+        assert!($html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
+        assert!($html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
 
-    assert!(!html.contains(r#"<a href="/profile" class="navbar-item">Profile"#));
-    assert!(!html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+        assert!(!$html.contains(r#"<a href="/profile" class="navbar-item">Profile"#));
+        assert!(!$html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+    }};
 }
+pub(crate) use check_guest_menu;
 
 fn check_logged_in_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
@@ -109,7 +112,7 @@ pub fn check_not_logged_in(res: LocalResponse) {
     check_html!(&html, "title", "Not logged in");
     check_html!(&html, "h1", "Not logged in");
     check_html!(&html, "#message", "You are not logged in");
-    check_guest_menu(&html);
+    check_guest_menu!(&html);
 }
 
 pub fn check_unauthorized(res: LocalResponse) {

@@ -26,12 +26,12 @@ fn reset_password_full() {
         let res = client.get("/logout").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
 
         let res = client.get("/reset-password").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         check_html!(&html, "title", "Reset password");
 
         // Try with other email addredd
@@ -42,7 +42,7 @@ fn reset_password_full() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         check_html!(&html, "title", "No such user");
         check_html!(
             &html,
@@ -58,7 +58,7 @@ fn reset_password_full() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         check_html!(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please click on the link to reset your password.");
         check_html!(&html, "#message", &expected);
@@ -71,7 +71,7 @@ fn reset_password_full() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         // TODO check the form exists
         check_html!(&html, "title", "Type in your new password");
         assert!(html.contains(r#"<input name="uid" id="uid" type="hidden" value="1">"#));
@@ -90,7 +90,7 @@ fn reset_password_full() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         check_html!(&html, "title", "Invalid password");
         check_html!(&html, "h1", "Invalid password");
         check_html!(
@@ -111,7 +111,7 @@ fn reset_password_full() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
         check_html!(&html, "title", "Password updated");
         check_html!(&html, "#message", "Your password was updated.");
 

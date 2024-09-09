@@ -17,7 +17,7 @@ fn main_page_empty_db() {
         check_html!(&html, "h1", "Welcome to the Meet-OS meeting server");
         assert!(!html.contains(r#"<h2 class="title is-4">Events</h2>"#));
         assert!(!html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
     });
 }
 
@@ -38,7 +38,7 @@ fn main_page_with_data() {
         check_html!(&html, "h1", "Welcome to the Meet-OS meeting server");
         assert!(html.contains(r#"<h2 class="title is-4">Events</h2>"#));
         assert!(html.contains(r#"<h2 class="title is-4">Groups</h2>"#));
-        check_guest_menu(&html);
+        check_guest_menu!(&html);
 
         assert!(html.contains(r#"<li><a href="/event/1">First event</a></li>"#));
         assert!(html.contains(r#"<li><a href="/event/2">Second event</a></li>"#));
