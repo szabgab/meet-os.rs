@@ -47,18 +47,21 @@ pub fn check_profile_by_guest(client: &Client) {
     check_not_logged_in(res);
 }
 
-pub fn check_profile_by_user(client: &Client, email: &str, h1: &str) {
-    let res = client
-        .get("/profile")
-        .private_cookie(("meet-os", email.to_owned()))
-        .dispatch();
+macro_rules! check_profile_by_user {
+    ($client: expr, $email: expr, $h1: expr) => {{
+        let res = $client
+            .get("/profile")
+            .private_cookie(("meet-os", $email.to_owned()))
+            .dispatch();
 
-    assert_eq!(res.status(), Status::Ok);
-    let html = res.into_string().unwrap();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
 
-    check_html!(&html, "title", "Profile");
-    check_html!(&html, "h1", h1);
+        check_html!(&html, "title", "Profile");
+        check_html!(&html, "h1", $h1);
+    }};
 }
+pub(crate) use check_profile_by_user;
 
 pub fn check_guest_menu(html: &str) {
     assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));

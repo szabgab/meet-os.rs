@@ -99,7 +99,7 @@ fn register_user() {
         check_html!(&html, "#message", "Your email was verified.");
         check_user_menu(&html);
 
-        check_profile_by_user(&client, OWNER_EMAIL, OWNER_NAME);
+        check_profile_by_user!(&client, OWNER_EMAIL, OWNER_NAME);
     });
 }
 
@@ -184,7 +184,7 @@ fn post_login_regular_user() {
     run_inprocess(|email_folder, client| {
         register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 
-        check_profile_by_user(&client, &OWNER_EMAIL, OWNER_NAME);
+        check_profile_by_user!(&client, &OWNER_EMAIL, OWNER_NAME);
 
         let res = client
             .post("/login")
@@ -200,7 +200,7 @@ fn post_login_regular_user() {
         check_user_menu(&html);
 
         // Access the profile with the cookie
-        check_profile_by_user(&client, &OWNER_EMAIL, OWNER_NAME);
+        check_profile_by_user!(&client, &OWNER_EMAIL, OWNER_NAME);
 
         // TODO: logout requires a logged in user
         //let res = client.get("/logout").dispatch();
@@ -246,7 +246,7 @@ fn post_login_admin() {
         check_html!(&html, "title", "Welcome back");
         check_admin_menu(&html);
 
-        check_profile_by_user(&client, &ADMIN_EMAIL, ADMIN_NAME);
+        check_profile_by_user!(&client, &ADMIN_EMAIL, ADMIN_NAME);
 
         // logout
         let res = client.get("/logout").dispatch();

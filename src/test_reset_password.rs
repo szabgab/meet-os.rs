@@ -130,7 +130,7 @@ fn reset_password_full() {
         //assert_eq!(html, "");
         check_html!(&html, "title", "Welcome back");
         check_user_menu(&html);
-        check_profile_by_user(&client, &OWNER_EMAIL, name);
+        check_profile_by_user!(&client, &OWNER_EMAIL, name);
 
         // Try again with the same code
         // Try with id that does not exist
