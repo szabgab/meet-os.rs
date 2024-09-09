@@ -1,0 +1,8 @@
+REMOVE TABLE audit;
+REMOVE TABLE counter;
+REMOVE TABLE event;
+REMOVE TABLE group;
+REMOVE TABLE membership;
+REMOVE TABLE rsvp;
+REMOVE TABLE user;
+
