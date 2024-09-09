@@ -44,7 +44,7 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
 
 pub fn check_profile_by_guest(client: &Client) {
     let res = client.get("/profile").dispatch();
-    check_not_logged_in(res);
+    check_not_logged_in!(res);
 }
 
 macro_rules! check_profile_by_user {
@@ -109,14 +109,17 @@ macro_rules! check_html {
 }
 pub(crate) use check_html;
 
-pub fn check_not_logged_in(res: LocalResponse) {
-    assert_eq!(res.status(), Status::Unauthorized);
-    let html = res.into_string().unwrap();
-    check_html!(&html, "title", "Not logged in");
-    check_html!(&html, "h1", "Not logged in");
-    check_html!(&html, "#message", "You are not logged in");
-    check_guest_menu!(&html);
+macro_rules! check_not_logged_in {
+    ($res: expr) => {{
+        assert_eq!($res.status(), Status::Unauthorized);
+        let html = $res.into_string().unwrap();
+        check_html!(&html, "title", "Not logged in");
+        check_html!(&html, "h1", "Not logged in");
+        check_html!(&html, "#message", "You are not logged in");
+        check_guest_menu!(&html);
+    }};
 }
+pub(crate) use check_not_logged_in;
 
 pub fn check_unauthorized(res: LocalResponse) {
     assert_eq!(res.status(), Status::Forbidden);

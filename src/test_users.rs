@@ -30,7 +30,7 @@ fn protected_pages_as_guest() {
             "/profile",
         ] {
             let res = client.get(path).dispatch();
-            check_not_logged_in(res);
+            check_not_logged_in!(res);
         }
     });
 }
@@ -48,7 +48,7 @@ fn protected_post_requests_as_guest() {
         ] {
             let res = client.post(path).header(ContentType::Form).dispatch();
 
-            check_not_logged_in(res);
+            check_not_logged_in!(res);
         }
 
         // Create group should fail even if we have the parameters
@@ -61,7 +61,7 @@ fn protected_post_requests_as_guest() {
                 ("owner", "1"),
             ]))
             .dispatch();
-        check_not_logged_in(res);
+        check_not_logged_in!(res);
     });
 }
 
