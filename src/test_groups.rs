@@ -357,7 +357,7 @@ fn get_edit_group_user_is_not_the_owner() {
             .get("/edit-group?gid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 
@@ -461,7 +461,7 @@ fn post_edit_group_by_user_not_owner() {
             ]))
             .dispatch();
 
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 
@@ -481,7 +481,7 @@ fn post_edit_group_user_not_owner() {
                 ("description", "Some group"),
             ]))
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 

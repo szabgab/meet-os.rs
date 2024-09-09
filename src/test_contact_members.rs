@@ -73,7 +73,7 @@ fn contact_members_get_user_not_owner() {
             .get("/contact-members?gid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 
@@ -165,6 +165,6 @@ fn contact_members_post_user_who_is_not_the_owner() {
             ]))
             .header(ContentType::Form)
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }

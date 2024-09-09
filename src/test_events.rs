@@ -325,7 +325,7 @@ fn post_edit_event_user_not_the_owner() {
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
 
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 
@@ -512,7 +512,7 @@ fn get_add_event_user_not_the_owner() {
             .get("/add-event?gid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 
@@ -557,7 +557,7 @@ fn post_add_event_user_not_owner() {
                 ("gid", "1"),
             ]))
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 
@@ -747,7 +747,7 @@ fn get_edit_event_as_user_but_not_owner() {
             .get("/edit-event?eid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-        check_not_the_owner(res);
+        check_not_the_owner!(res);
     });
 }
 #[test]
