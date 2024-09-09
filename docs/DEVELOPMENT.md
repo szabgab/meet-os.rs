@@ -5,7 +5,7 @@
 
 ```
 docker volume create my-surreal-db
-docker run -v$(pwd):/external --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:latest start --log trace file://database
+docker run -v$(pwd):/external --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:v1.5.4 start --log trace file://database
 ```
 
 * Note: At the end of the development session you might want to stop the docker container.
@@ -149,4 +149,25 @@ Then run the test with these flags:
 ```
 cargo +nightly test -- -Z unstable-options --report-time
 ```
+
+## SurrealDB cleanup (regular and for upgrade)
+
+* Due to [a bug](https://github.com/surrealdb/surrealdb/issues/3904) or  [two](https://github.com/surrealdb/surrealdb/issues/3903)
+we don't remove the namespaces and databases that we create during testing. It seems that many such entries might cause connection
+failures for SurrealDB so once in a while we might want to clean up the database.
+
+* When changing schema (which we don't strictly defined yet) we will have some code that makes changes to the database.
+In order to be able to practice this we might want to remove the whole database once in a while.
+
+Here is the procedure for the local development setup.
+
+* Export the data from the database (before trying to upgrade)
+* Stop the web application
+* Stop the docker container with SurrealDB
+* Remove the container `docker container rm surreal`
+* Remove the Docker volume
+* Create the Docker volume
+* Start a new container
+* Import the data
+* Start the web application
 
