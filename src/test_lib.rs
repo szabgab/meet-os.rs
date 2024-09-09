@@ -76,21 +76,24 @@ macro_rules! check_guest_menu {
 }
 pub(crate) use check_guest_menu;
 
-fn check_logged_in_menu(html: &str) {
-    assert!(!html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
-    assert!(!html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
+macro_rules! check_logged_in_menu {
+    ($html: expr) => {{
+        assert!(!$html.contains(r#"<a href="/register" class="navbar-item">Register</a>"#));
+        assert!(!$html.contains(r#"<a href="/login" class="navbar-item">Login</a>"#));
 
-    assert!(html.contains(r#"<a href="/profile" class="navbar-item">Profile"#));
-    assert!(html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+        assert!($html.contains(r#"<a href="/profile" class="navbar-item">Profile"#));
+        assert!($html.contains(r#"<a href="/logout" class="navbar-item">Logout</a>"#));
+    }};
 }
+pub(crate) use check_logged_in_menu;
 
 pub fn check_admin_menu(html: &str) {
-    check_logged_in_menu(html);
+    check_logged_in_menu!(html);
     assert!(html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 }
 
 pub fn check_user_menu(html: &str) {
-    check_logged_in_menu(html);
+    check_logged_in_menu!(html);
     assert!(!html.contains(r#"<a href="/admin" class="navbar-item">Admin</a>"#));
 }
 
