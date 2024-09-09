@@ -255,7 +255,7 @@ fn post_login_admin() {
         let html = res.into_string().unwrap();
         check_html!(&html, "title", "Logged out");
         check_html!(&html, "h1", "Logged out");
-        check_profile_by_guest(&client);
+        check_profile_by_guest!(&client);
     });
 }
 

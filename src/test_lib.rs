@@ -63,10 +63,13 @@ macro_rules! params {
 }
 pub(crate) use params;
 
-pub fn check_profile_by_guest(client: &Client) {
-    let res = client.get("/profile").dispatch();
-    check_not_logged_in!(res);
+macro_rules! check_profile_by_guest {
+    ($client: expr) => {{
+        let res = $client.get("/profile").dispatch();
+        check_not_logged_in!(res);
+    }};
 }
+pub(crate) use check_profile_by_guest;
 
 macro_rules! check_profile_by_user {
     ($client: expr, $email: expr, $h1: expr) => {{
