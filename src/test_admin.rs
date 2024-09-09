@@ -13,14 +13,14 @@ fn admin_pages_as_user() {
 
         for path in ["/admin", "/admin/users", "/admin/audit", "/admin/search"] {
             let res = client.get(path).dispatch();
-            check_unauthorized(res);
+            check_unauthorized!(res);
         }
 
         let res = client
             .post("/admin/search")
             .header(ContentType::Form)
             .dispatch();
-        check_unauthorized(res);
+        check_unauthorized!(res);
     })
 }
 

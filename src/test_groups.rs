@@ -95,7 +95,7 @@ fn create_group_unauthorized() {
             .get("/admin/create-group?uid=1")
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-        check_unauthorized(res);
+        check_unauthorized!(res);
 
         // Create group should fail
         let res = client
@@ -108,7 +108,7 @@ fn create_group_unauthorized() {
             ]))
             .private_cookie(("meet-os", USER_EMAIL))
             .dispatch();
-        check_unauthorized(res);
+        check_unauthorized!(res);
     });
 }
 

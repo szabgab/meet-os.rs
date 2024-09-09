@@ -121,17 +121,20 @@ macro_rules! check_not_logged_in {
 }
 pub(crate) use check_not_logged_in;
 
-pub fn check_unauthorized(res: LocalResponse) {
-    assert_eq!(res.status(), Status::Forbidden);
-    let html = res.into_string().unwrap();
-    check_html!(&html, "title", "Unauthorized");
-    check_html!(&html, "h1", "Unauthorized");
-    check_html!(
-        &html,
-        "#message",
-        "You don't have the rights to access this page."
-    );
+macro_rules! check_unauthorized {
+    ($res: expr) => {{
+        assert_eq!($res.status(), Status::Forbidden);
+        let html = $res.into_string().unwrap();
+        check_html!(&html, "title", "Unauthorized");
+        check_html!(&html, "h1", "Unauthorized");
+        check_html!(
+            &html,
+            "#message",
+            "You don't have the rights to access this page."
+        );
+    }};
 }
+pub(crate) use check_unauthorized;
 
 pub fn check_unprocessable(res: LocalResponse) {
     assert_eq!(res.status(), Status::UnprocessableEntity);
