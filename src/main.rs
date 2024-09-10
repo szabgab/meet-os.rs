@@ -304,7 +304,6 @@ async fn reset_password_post(
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything...
-    ";
     "#
     );
 
@@ -542,7 +541,6 @@ async fn register_post(
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything. We'll discard your registration if it is not validated.
-    ";
     "#
     );
 

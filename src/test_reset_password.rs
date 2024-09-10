@@ -33,6 +33,8 @@ fn reset_password_full() {
         let html = res.into_string().unwrap();
         check_guest_menu!(&html);
         check_html!(&html, "title", "Reset password");
+        assert!(html.contains(r#"Email: <input name="email" class="input" id="email" type="email" placeholder="Email">"#));
+        assert!(html.contains(r#"<input type="submit" class="button" value="Send code">"#));
 
         // Try with other email addredd
         let res = client
@@ -77,6 +79,8 @@ fn reset_password_full() {
         assert!(html.contains(r#"<input name="uid" id="uid" type="hidden" value="1">"#));
         let expected = format!(r#"<input name="code" id="code" type="hidden" value="{code}">"#);
         assert!(html.contains(&expected));
+        assert!(html.contains(r#"Password: <input name="password" class="input" id="password" type="password" placeholder="Password">"#));
+        assert!(html.contains(r#"<input type="submit" value="Save" class="button">"#));
 
         // Cannot save invalid password (too short)
         let res = client
