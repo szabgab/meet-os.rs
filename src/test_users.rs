@@ -1,7 +1,7 @@
 use crate::test_helpers::{
     logout, register_and_verify_user, setup_admin, setup_many_users, setup_owner,
     setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL,
-    OWNER_NAME, OWNER_PW, UNVERIFIED_NAME, USER_NAME,
+    OWNER_NAME, OWNER_PW, UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
 };
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_not_logged_in, check_profile_by_guest,
@@ -360,23 +360,13 @@ fn post_login_with_unregistered_email() {
 #[test]
 fn post_login_with_bad_password() {
     run_inprocess(|email_folder, client| {
-        register_and_verify_user(
-            &client,
-            "Foo Bar",
-            "foo@meet-os.com",
-            "123456",
-            &email_folder,
-        );
-
+        setup_user(&client, &email_folder);
         logout(&client);
 
         let res = client
             .post("/login")
             .header(ContentType::Form)
-            .body(params!([
-                ("email", "foo@meet-os.com"),
-                ("password", "123457")
-            ]))
+            .body(params!([("email", USER_EMAIL), ("password", OWNER_PW)]))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -385,7 +375,6 @@ fn post_login_with_bad_password() {
 
         check_html!(&html, "title", "Invalid password");
         check_html!(&html, "h1", "Invalid password");
-        // assert_eq!(&html, "");
         check_guest_menu!(&html);
     });
 }
