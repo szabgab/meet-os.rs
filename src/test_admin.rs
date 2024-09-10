@@ -1,5 +1,6 @@
 use crate::test_helpers::{
-    login_admin, login_owner, setup_admin, setup_all, setup_owner, ADMIN_NAME, OTHER_NAME,
+    login_admin, login_owner, setup_admin, setup_all, setup_owner, ADMIN_EMAIL, ADMIN_NAME,
+    OTHER_NAME,
 };
 use crate::test_lib::{check_html, check_unauthorized, params, run_inprocess};
 
@@ -107,7 +108,8 @@ fn admin_search_post_as_admin() {
         assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
         assert!(html.contains(r#"<b>Total: 1</b>"#));
         assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
-        assert!(html.contains(r#"<td>admin@meet-os.com</td>"#));
+        let expect = format!(r#"<td>{ADMIN_EMAIL}</td>"#);
+        assert!(html.contains(expect));
     })
 }
 
