@@ -109,7 +109,7 @@ fn admin_search_post_as_admin() {
         assert!(html.contains(r#"<b>Total: 1</b>"#));
         assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
         let expect = format!(r#"<td>{ADMIN_EMAIL}</td>"#);
-        assert!(html.contains(expect));
+        assert!(html.contains(&expect));
     })
 }
 
