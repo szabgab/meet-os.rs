@@ -14,6 +14,7 @@ pub(crate) mod web;
 
 mod notify;
 const MAX_NAME_LEN: usize = 50;
+const MIN_PASSWORD_LENGTH: usize = 6;
 
 use chrono::{DateTime, Duration, Utc};
 
@@ -390,11 +391,10 @@ async fn save_password_post(
     }
 
     let password = input.password.trim().as_bytes();
-    let pw_min_length = 6;
-    if password.len() < pw_min_length {
+    if password.len() < MIN_PASSWORD_LENGTH {
         return Template::render(
             "message",
-            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, visitor},
+            context! {title: "Invalid password", message: format!("The password must be at least {MIN_PASSWORD_LENGTH} characters long."), config, visitor},
         );
     }
     let process = "register";
@@ -446,6 +446,7 @@ fn register_get(visitor: Visitor) -> Template {
             title: "Register",
             config,
             visitor,
+            min_password_length: MIN_PASSWORD_LENGTH,
         },
     )
 }
@@ -489,11 +490,10 @@ async fn register_post(
     }
 
     let password = input.password.trim().as_bytes();
-    let pw_min_length = 6;
-    if password.len() < pw_min_length {
+    if password.len() < MIN_PASSWORD_LENGTH {
         return Template::render(
             "message",
-            context! {title: "Invalid password", message: format!("The password must be at least {pw_min_length} characters long."), config, visitor},
+            context! {title: "Invalid password", message: format!("The password must be at least {MIN_PASSWORD_LENGTH} characters long."), config, visitor},
         );
     }
     let process = "register";
