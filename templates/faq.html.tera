@@ -16,6 +16,12 @@
        to <a href="https://szabgab.com/contact">Gabor</a> to apply for a group. Please send the name of the group and describe its planned activities.
        </div>
 
+
+       <h2 class="title is-5">Who can create an event?</h2>
+       <div>
+       Only group owners can create events.
+       </div>
+
       <h2 class="title is-5">Fees, how much does it cost to use Meet-OS?</h2>
       <div>
          The organizations that I invite initially will get a <b>lifetime free hosting</b>. This will include some sponsored links. e.g. links to <a href="https://szabgab.com/">Rust, Python, etc. courses</a>, job offers of sponsors, other messages of sponsors.

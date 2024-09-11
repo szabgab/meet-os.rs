@@ -15,7 +15,7 @@
         </form>
         <ul>
           <li>Currently the name can contain only Latin letters, dot, dash, and space: <b>a-zA-Z. -.</b>. Later we'll relax some of these limitations. See the <a href="/faq">FAQ</a>.</li>
-          <li>The password must be at least {{min_password_length}} characters long. The longer the better. Use a quote from the lyrics of your favorite song.</li>
+          <li>The password must be at least {{min_password_length}} characters long. The longer the better. Use a quote from the lyrics of your favorite song. Mix the case and add a few special characters.</li>
         </ul>
     
     </div>
