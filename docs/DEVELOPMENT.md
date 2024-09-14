@@ -5,7 +5,7 @@
 
 ```
 docker volume create my-surreal-db
-docker run -v$(pwd):/external --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:v1.5.4 start --log trace file://database
+docker run --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v$(pwd):/external -v my-surreal-db:/database surrealdb/surrealdb:v1.5.5 start --user root --pass root --log trace file://database
 ```
 
 * Note: At the end of the development session you might want to stop the docker container.
