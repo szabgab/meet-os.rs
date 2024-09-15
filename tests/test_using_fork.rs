@@ -49,7 +49,7 @@ pub fn run_external(func: fn(&str, std::path::PathBuf)) {
 
     let rocket_toml = std::fs::read_to_string("Rocket.skeleton.toml").unwrap();
     let db_name = format!("test-name-{}", rand::random::<f64>());
-    let db_namespace = format!("test-namespace-{}", rand::random::<f64>());
+    let db_namespace = "test-namespace-for-meet-os";
     let rocket_toml = rocket_toml.replace("meet-os-local-db", &db_name);
     let rocket_toml = rocket_toml.replace("meet-os-local-ns", &db_namespace);
     let rocket_toml = rocket_toml.replace("Sendgrid | Folder", "Folder");

@@ -34,7 +34,7 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     println!("tmp_dir: {:?}", tmp_dir);
     let email_folder = tmp_dir.path().join("emails");
     let db_name = format!("test-name-{}", rand::random::<f64>());
-    let db_namespace = "test-meet-os";
+    let db_namespace = "test-namespace-for-meet-os";
 
     let provider = Config::figment()
         .merge(("database_namespace", &db_namespace))

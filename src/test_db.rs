@@ -6,7 +6,7 @@ use meetings::{Group, User};
 #[async_test]
 async fn test_db_get_empty_lists() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = format!("test-namespace-{}", rand::random::<f64>());
+    let database_namespace = "test-namespace-for-meet-os";
 
     let dbh = db::get_database(&database_name, &database_namespace).await;
 
@@ -23,7 +23,7 @@ async fn test_db_get_empty_lists() {
 #[async_test]
 async fn test_db_get_none() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = format!("test-namespace-{}", rand::random::<f64>());
+    let database_namespace = "test-namespace-for-meet-os";
 
     let dbh = db::get_database(&database_name, &database_namespace).await;
 
@@ -45,7 +45,7 @@ async fn test_db_get_none() {
 #[async_test]
 async fn test_db_user() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = format!("test-namespace-{}", rand::random::<f64>());
+    let database_namespace = "test-namespace-for-meet-os";
 
     let dbh = db::get_database(&database_name, &database_namespace).await;
 
