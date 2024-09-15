@@ -1,9 +1,7 @@
-use crate::test_helpers::{
-    logout, setup_unverified_user, setup_user, UNVERIFIED_EMAIL, UNVERIFIED_NAME, USER_EMAIL,
-};
 use crate::test_lib::{
-    check_html, check_only_guest, check_profile_by_user, check_user_menu, params,
-    read_code_from_email, run_inprocess,
+    check_html, check_only_guest, check_profile_by_user, check_user_menu, logout, params,
+    read_code_from_email, run_inprocess, setup_unverified_user, setup_user, UNVERIFIED_EMAIL,
+    UNVERIFIED_NAME, USER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};

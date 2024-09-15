@@ -1,5 +1,4 @@
-use crate::test_helpers::setup_all;
-use crate::test_lib::{check_guest_menu, check_html, run_inprocess};
+use crate::test_lib::{check_guest_menu, check_html, run_inprocess, setup_all};
 use rocket::http::Status;
 
 #[test]

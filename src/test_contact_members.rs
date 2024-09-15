@@ -1,6 +1,6 @@
-use crate::test_helpers::{setup_all, setup_for_groups, setup_many_users, OWNER_EMAIL, USER_EMAIL};
 use crate::test_lib::{
-    check_html, check_not_the_owner, check_unprocessable, params, run_inprocess,
+    check_html, check_not_the_owner, check_unprocessable, params, run_inprocess, setup_all,
+    setup_for_groups, setup_many_users, OWNER_EMAIL, USER_EMAIL,
 };
 use rocket::http::{ContentType, Status};
 

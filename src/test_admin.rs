@@ -1,8 +1,7 @@
-use crate::test_helpers::{
-    login_admin, login_owner, setup_admin, setup_all, setup_owner, ADMIN_EMAIL, ADMIN_NAME,
-    OTHER_NAME,
+use crate::test_lib::{
+    check_html, check_unauthorized, login_admin, login_owner, params, run_inprocess, setup_admin,
+    setup_all, setup_owner, ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
 };
-use crate::test_lib::{check_html, check_unauthorized, params, run_inprocess};
 
 use rocket::http::{ContentType, Status};
 

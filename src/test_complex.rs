@@ -1,5 +1,6 @@
-use crate::test_helpers::{setup_admin, setup_owner, ADMIN_EMAIL, OWNER_EMAIL};
-use crate::test_lib::{check_html, params, run_inprocess};
+use crate::test_lib::{
+    check_html, params, run_inprocess, setup_admin, setup_owner, ADMIN_EMAIL, OWNER_EMAIL,
+};
 
 use rocket::http::{ContentType, Status};
 

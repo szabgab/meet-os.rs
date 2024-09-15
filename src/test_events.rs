@@ -1,9 +1,7 @@
-use crate::test_helpers::{
-    create_group_helper, logout, setup_admin, setup_for_events, setup_owner, setup_user,
-    OWNER_EMAIL, USER_EMAIL, USER_NAME,
-};
 use crate::test_lib::{
-    check_html, check_not_the_owner, check_unprocessable, params, run_inprocess,
+    check_html, check_not_the_owner, check_unprocessable, create_group_helper, logout, params,
+    run_inprocess, setup_admin, setup_for_events, setup_owner, setup_user, OWNER_EMAIL, USER_EMAIL,
+    USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
