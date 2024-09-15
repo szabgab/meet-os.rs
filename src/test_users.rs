@@ -1,9 +1,9 @@
 use crate::test_lib::{
-    check_admin_menu, check_guest_menu, check_html, check_not_logged_in, check_profile_by_guest,
-    check_profile_by_user, check_user_menu, logout, params, read_code_from_email,
-    register_and_verify_user, run_inprocess, setup_admin, setup_many_users, setup_owner,
-    setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL,
-    OWNER_NAME, OWNER_PW, UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
+    check_admin_menu, check_guest_menu, check_html, check_message, check_not_logged_in,
+    check_profile_by_guest, check_profile_by_user, check_user_menu, logout, params,
+    read_code_from_email, register_and_verify_user, run_inprocess, setup_admin, setup_many_users,
+    setup_owner, setup_unverified_user, setup_user, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME,
+    OWNER_EMAIL, OWNER_NAME, OWNER_PW, UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 

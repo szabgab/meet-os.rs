@@ -159,13 +159,20 @@ macro_rules! check_html {
 }
 pub(crate) use check_html;
 
+macro_rules! check_message {
+    ($html: expr, $title: expr, $message: expr) => {{
+        check_html!($html, "title", $title);
+        check_html!($html, "h1", $title);
+        check_html!($html, "#message", $message);
+    }};
+}
+pub(crate) use check_message;
+
 macro_rules! check_not_logged_in {
     ($res: expr) => {{
         assert_eq!($res.status(), Status::Unauthorized);
         let html = $res.into_string().unwrap();
-        check_html!(&html, "title", "Not logged in");
-        check_html!(&html, "h1", "Not logged in");
-        check_html!(&html, "#message", "You are not logged in");
+        check_message!(&html, "Not logged in", "You are not logged in");
         check_guest_menu!(&html);
     }};
 }
@@ -175,13 +182,11 @@ macro_rules! check_unauthorized {
     ($res: expr) => {{
         assert_eq!($res.status(), Status::Forbidden);
         let html = $res.into_string().unwrap();
-        check_html!(&html, "title", "Unauthorized");
-        check_html!(&html, "h1", "Unauthorized");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Unauthorized",
             "You don't have the rights to access this page."
-        );
+        )
     }};
 }
 pub(crate) use check_unauthorized;
@@ -190,11 +195,11 @@ macro_rules! check_unprocessable {
     ($res: expr) => {{
         assert_eq!($res.status(), Status::UnprocessableEntity);
         let html = $res.into_string().unwrap();
-        check_html!(&html, "title", "422 Unprocessable Entity");
-        check_html!(&html, "h1", "422 Unprocessable Entity");
-        assert!(html.contains(
+        check_message!(
+            &html,
+            "422 Unprocessable Entity",
             "The request was well-formed but was unable to be followed due to semantic errors."
-        ));
+        );
     }};
 }
 pub(crate) use check_unprocessable;
@@ -203,11 +208,9 @@ macro_rules! check_not_the_owner {
     ($res: expr) => {{
         assert_eq!($res.status(), Status::Ok);
         let html = $res.into_string().unwrap();
-        check_html!(&html, "title", "Not the owner");
-        check_html!(&html, "h1", "Not the owner");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Not the owner",
             r#"You are not the owner of the group <b>1</b>"#
         );
     }};
