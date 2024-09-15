@@ -23,12 +23,9 @@ fn leave_event_before_joining_it() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "You were not registered to the event");
-        check_html!(&html, "h1", "You were not registered to the event");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "You were not registered to the event",
             r#"You were not registered to the <a href="/event/1">event</a>"#
         );
     });
@@ -76,11 +73,9 @@ fn join_event() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "RSVPed to event");
-        check_html!(&html, "h1", "RSVPed to event");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "RSVPed to event",
             r#"User RSVPed to <a href="/event/1">event</a>"#
         );
 
@@ -118,11 +113,9 @@ fn join_event() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Not attending");
-        check_html!(&html, "h1", "Not attending");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Not attending",
             r#"User not attending <a href="/event/1">event</a>"#
         );
 
@@ -133,7 +126,6 @@ fn join_event() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html!(&html, "title", "First event");
         check_html!(&html, "h1", "First event");
 
@@ -161,12 +153,9 @@ fn join_event() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "RSVPed to event");
-        check_html!(&html, "h1", "RSVPed to event");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "RSVPed to event",
             r#"User RSVPed to <a href="/event/1">event</a>"#
         );
 
@@ -195,9 +184,7 @@ fn join_event() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "You were already RSVPed");
-        check_html!(&html, "h1", "You were already RSVPed");
-        check_html!(&html, "#message", "You were already RSVPed");
+        check_message!(&html, "You were already RSVPed", "You were already RSVPed");
     })
 }
 
@@ -213,9 +200,7 @@ fn join_not_existing_event() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "No such event");
-        check_html!(&html, "h1", "No such event");
-        check_html!(&html, "#message", "No such event");
+        check_message!(&html, "No such event", "No such event");
     })
 }
 
@@ -230,10 +215,7 @@ fn leave_not_existing_event() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "No such event");
-        check_html!(&html, "h1", "No such event");
-        check_html!(&html, "#message", "No such event")
+        check_message!(&html, "No such event", "No such event");
     })
 }
 
@@ -249,13 +231,9 @@ fn join_event_by_group_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "You are the owner of this group");
-        check_html!(&html, "h1", "You are the owner of this group");
-
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "You are the owner of this group",
             "You cannot join an event in a group you own."
         );
     });
@@ -297,9 +275,11 @@ fn post_edit_event_user_no_such_event() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "No such event");
-        check_html!(&html, "h1", "No such event");
-        check_html!(&html, "#message", "The event id <b>1</b> does not exist.");
+        check_message!(
+            &html,
+            "No such event",
+            "The event id <b>1</b> does not exist."
+        );
     });
 }
 
@@ -350,11 +330,9 @@ fn post_edit_event_owner_title_too_short() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Too short a title");
-        check_html!(&html, "h1", "Too short a title");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Too short a title",
             r#"Minimal title length 10 Current title len: 3"#
         );
     });
@@ -383,11 +361,9 @@ fn post_edit_event_owner_invalid_date() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid date");
-        check_html!(&html, "h1", "Invalid date");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid date",
             r#"Invalid date '2030-13-10 08:00' offset '-180'"#
         );
     });
@@ -416,11 +392,9 @@ fn post_edit_event_owner_date_in_the_past() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Can't schedule event to the past");
-        check_html!(&html, "h1", "Can't schedule event to the past");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Can't schedule event to the past",
             r#"Can't schedule event to the past '2020-10-10 05:00:00 UTC'"#
         );
     });
@@ -436,7 +410,6 @@ fn post_edit_event_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html!(&html, "title", "First event");
         check_html!(&html, "h1", "First event");
         assert!(html.contains("Virtual"));
@@ -460,11 +433,9 @@ fn post_edit_event_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Event udapted");
-        check_html!(&html, "h1", "Event udapted");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Event udapted",
             r#"Event updated: <a href="/event/1">The new title</a>"#
         );
 
@@ -473,7 +444,6 @@ fn post_edit_event_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html!(&html, "title", "The new title");
         check_html!(&html, "h1", "The new title");
         assert!(!html.contains("Virtual"));
@@ -495,9 +465,7 @@ fn get_add_event_user_missing_gid() {
         assert_eq!(res.status(), Status::NotFound);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "404 Not Found");
-        check_html!(&html, "h1", "404 Not Found");
-        check_html!(&html, "#message", "404 Not Found");
+        check_message!(&html, "404 Not Found", "404 Not Found");
     });
 }
 
@@ -527,7 +495,6 @@ fn get_add_event_user_is_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
         check_html!(&html, "title", "Add event to the 'First Group' group");
         check_html!(&html, "h1", "Add event to the 'First Group' group");
         assert!(html.contains(r#"<form method="POST" action="/add-event" id="add-event">"#));
@@ -585,11 +552,9 @@ fn post_add_event_owner_title_too_short() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Too short a title");
-        check_html!(&html, "h1", "Too short a title");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Too short a title",
             r#"Minimal title length 10 Current title len: 2"#
         );
     });
@@ -621,11 +586,9 @@ fn post_add_event_owner_invalid_date() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid date");
-        check_html!(&html, "h1", "Invalid date");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid date",
             r#"Invalid date '2030-02-30 08:00' offset '-180'"#
         );
     });
@@ -657,11 +620,9 @@ fn post_add_event_owner_event_in_the_past() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Can't schedule event to the past");
-        check_html!(&html, "h1", "Can't schedule event to the past");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Can't schedule event to the past",
             r#"Can't schedule event to the past '2020-02-10 05:00:00 UTC'"#
         );
     });
@@ -693,11 +654,9 @@ fn post_add_event_owner() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Event added");
-        check_html!(&html, "h1", "Event added");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Event added",
             r#"Event added: <a href="/event/1">Event title</a>"#
         );
     });
@@ -730,9 +689,7 @@ fn get_edit_event_as_user_no_eid() {
         assert_eq!(res.status(), Status::NotFound);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "404 Not Found");
-        check_html!(&html, "h1", "404 Not Found");
-        check_html!(&html, "#message", "404 Not Found");
+        check_message!(&html, "404 Not Found", "404 Not Found");
     });
 }
 

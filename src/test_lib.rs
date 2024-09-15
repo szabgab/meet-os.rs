@@ -221,9 +221,7 @@ macro_rules! check_only_guest {
     ($res: expr) => {{
         assert_eq!($res.status(), Status::Ok);
         let html = $res.into_string().unwrap();
-        check_html!(&html, "title", "Logged in");
-        check_html!(&html, "h1", "Logged in");
-        check_html!(&html, "#message", r#"Logged in users cannot access this page. Please, <a href="/logout">logout</a> and try again!"#);
+        check_message!(&html, "Logged in", r#"Logged in users cannot access this page. Please, <a href="/logout">logout</a> and try again!"#);
         check_user_menu!(&html);
     }};
 }

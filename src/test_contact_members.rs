@@ -17,9 +17,7 @@ fn contact_members_get_user_without_gid() {
         assert_eq!(res.status(), Status::NotFound);
         let html = res.into_string().unwrap();
 
-        check_html!(&html, "title", "404 Not Found");
-        check_html!(&html, "h1", "404 Not Found");
-        check_html!(&html, "#message", "404 Not Found");
+        check_message!(&html, "404 Not Found", "404 Not Found");
     });
 }
 
@@ -35,10 +33,7 @@ fn contact_members_get_user_with_invalid_gid() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-
-        check_html!(&html, "title", "No such group");
-        check_html!(&html, "h1", "No such group");
-        check_html!(&html, "#message", "Group <b>1</b> does not exist");
+        check_message!(&html, "No such group", "Group <b>1</b> does not exist");
     });
 }
 
@@ -113,9 +108,7 @@ fn contact_members_post_user_with_all() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        check_html!(&html, "title", "Message sent");
-        check_html!(&html, "h1", "Message sent");
-        check_html!(&html, "#message", "Message sent");
+        check_message!(&html, "Message sent", "Message sent");
         // TODO read email file
         // TODO check who was this message sent to
     });
@@ -139,12 +132,9 @@ fn contact_members_post_user_subject_too_short() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-
-        check_html!(&html, "title", "Too short a subject");
-        check_html!(&html, "h1", "Too short a subject");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Too short a subject",
             r#"Minimal subject length 5 Current subject len: 4"#
         );
     });
