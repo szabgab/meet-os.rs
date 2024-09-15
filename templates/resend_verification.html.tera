@@ -5,7 +5,7 @@
     <div class="content">
        <h1 class="title is-3">{{title}}</h1>
 
-        <form method="POST" action="/resend-verification">
+        <form method="POST" action="/resend-email-verification-code">
         Email: <input name="email" class="input" id="email" type="email" placeholder="Email">
         <input type="submit" class="button" value="Send code">
         </form>

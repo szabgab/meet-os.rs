@@ -30,5 +30,9 @@ fn get_login_page() {
         assert!(html.contains(r#"Email: <input name="email" class="input" id="email" type="email" placeholder="Email">"#));
         assert!(html.contains(r#"Password: <input name="password" class="input" id="password" type="password" placeholder=Password">"#));
         assert!(html.contains(r#"<input type="submit" value="Login" class="button">"#));
+        assert!(html.contains(r#"<a href="/reset-password">Reset password</a><br>"#));
+        assert!(html.contains(
+            r#"<a href="/resend-email-verification-code">Resend e-mail verification</a><br>"#
+        ));
     });
 }

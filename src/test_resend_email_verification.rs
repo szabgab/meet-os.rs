@@ -16,7 +16,7 @@ fn get_resend_email_verification_guest() {
         let html = res.into_string().unwrap();
         check_html!(&html, "title", "Resend code for email verification");
         check_html!(&html, "h1", "Resend code for email verification");
-        assert!(html.contains(r#"<form method="POST" action="/resend-verification">"#));
+        assert!(html.contains(r#"<form method="POST" action="/resend-email-verification-code">"#));
         assert!(html.contains(r#"Email: <input name="email" class="input" id="email" type="email" placeholder="Email">"#));
         assert!(html.contains(r#"<input type="submit" class="button" value="Send code">"#));
     });
