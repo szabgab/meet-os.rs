@@ -142,9 +142,11 @@ fn get_join_group_not_existing_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        check_html!(&html, "title", "No such group");
-        check_html!(&html, "h1", "No such group");
-        check_html!(&html, "#message", "There is not group with id <b>20</b>");
+        check_message!(
+            &html,
+            "No such group",
+            "There is not group with id <b>20</b>"
+        );
     })
 }
 
@@ -165,11 +167,9 @@ fn get_join_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        check_html!(&html, "title", "Membership");
-        check_html!(&html, "h1", "Membership");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Membership",
             r#"User added to <a href="/group/1">group</a>"#
         );
 
@@ -222,12 +222,9 @@ fn get_join_group_as_user() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "Membership");
-        check_html!(&html, "h1", "Membership");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Membership",
             r#"User removed from <a href="/group/1">group</a>"#
         );
 
@@ -257,11 +254,11 @@ fn get_join_group_as_owner() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "You are the owner of this group");
-        check_html!(&html, "h1", "You are the owner of this group");
-        check_html!(&html, "#message", r#"You cannot join a group you own."#);
+        check_message!(
+            &html,
+            "You are the owner of this group",
+            r#"You cannot join a group you own."#
+        );
     });
 }
 
@@ -277,10 +274,11 @@ fn get_leave_not_existing_group() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "No such group");
-        check_html!(&html, "h1", "No such group");
-        check_html!(&html, "#message", "The group ID <b>20</b> does not exist.");
+        check_message!(
+            &html,
+            "No such group",
+            "The group ID <b>20</b> does not exist."
+        );
     })
 }
 
@@ -506,11 +504,9 @@ fn post_edit_group_owner() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Group updated");
-        check_html!(&html, "h1", "Group updated");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Group updated",
             r#"Check out the <a href="/group/1">group</a>"#
         );
 

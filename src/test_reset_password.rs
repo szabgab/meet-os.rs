@@ -1,7 +1,7 @@
 use crate::test_lib::{
-    check_guest_menu, check_html, check_profile_by_user, check_user_menu, logout, params,
-    read_code_from_email, register_and_verify_user, run_inprocess, setup_admin, setup_owner,
-    OWNER_EMAIL,
+    check_guest_menu, check_html, check_message, check_profile_by_user, check_user_menu, logout,
+    params, read_code_from_email, register_and_verify_user, run_inprocess, setup_admin,
+    setup_owner, OWNER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -43,10 +43,9 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu!(&html);
-        check_html!(&html, "title", "No such user");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "No such user",
             "No user with address <b>peter@meet-os.com</b>. Please try again"
         );
 
@@ -59,9 +58,8 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu!(&html);
-        check_html!(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please click on the link to reset your password.");
-        check_html!(&html, "#message", &expected);
+        check_message!(&html, "We sent you an email", &expected);
 
         // get code from email
         let (uid, code) = read_code_from_email(&email_folder, "3.txt", "save-password");
@@ -93,11 +91,9 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu!(&html);
-        check_html!(&html, "title", "Invalid password");
-        check_html!(&html, "h1", "Invalid password");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid password",
             "The password must be at least 6 characters long."
         );
 
@@ -114,8 +110,7 @@ fn reset_password_full() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
         check_guest_menu!(&html);
-        check_html!(&html, "title", "Password updated");
-        check_html!(&html, "#message", "Your password was updated.");
+        check_message!(&html, "Password updated", "Your password was updated.");
 
         // Try to login
         let res = client
@@ -146,8 +141,7 @@ fn save_password_get_invalid_uid() {
         let res = client.get("/save-password/42/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid id");
-        check_html!(&html, "#message", "Invalid id <b>42</b>");
+        check_message!(&html, "Invalid id", "Invalid id <b>42</b>");
     });
 }
 
@@ -161,8 +155,7 @@ fn save_password_get_invalid_code() {
         let res = client.get("/save-password/2/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid code");
-        check_html!(&html, "#message", "Invalid code <b>abc</b>");
+        check_message!(&html, "Invalid code", "Invalid code <b>abc</b>");
     });
 }
 
@@ -181,9 +174,7 @@ fn save_password_post_invalid_uid() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid userid");
-        check_html!(&html, "h1", "Invalid userid");
-        check_html!(&html, "#message", "Invalid userid <b>42</b>.");
+        check_message!(&html, "Invalid userid", "Invalid userid <b>42</b>.");
     });
 }
 
@@ -206,8 +197,6 @@ fn save_password_post_invalid_code() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid code");
-        check_html!(&html, "h1", "Invalid code");
-        check_html!(&html, "#message", "Invalid code <b>abc</b>.");
+        check_message!(&html, "Invalid code", "Invalid code <b>abc</b>.");
     });
 }

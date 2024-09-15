@@ -55,11 +55,9 @@ fn post_resend_email_verification_verified_email() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Already verified");
-        check_html!(&html, "h1", "Already verified");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Already verified",
             r#"This email address is already verified. Try to <a href="/login">login</a>."#
         );
     });
@@ -78,11 +76,9 @@ fn post_resend_email_verification_unverified_email() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "We sent you an email");
-        check_html!(&html, "h1", "We sent you an email");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "We sent you an email",
             r#"We sent you an email to <b>unverified@meet-os.com</b> Please click on the link to reset your password."#
         );
 
@@ -95,9 +91,11 @@ fn post_resend_email_verification_unverified_email() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Thank you for registering");
-        check_html!(&html, "h1", "Thank you for registering");
-        check_html!(&html, "#message", "Your email was verified.");
+        check_message!(
+            &html,
+            "Thank you for registering",
+            "Your email was verified."
+        );
         check_user_menu!(&html);
 
         check_profile_by_user!(&client, UNVERIFIED_EMAIL, UNVERIFIED_NAME);

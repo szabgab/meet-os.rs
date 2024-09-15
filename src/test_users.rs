@@ -79,10 +79,8 @@ fn register_user() {
         assert!(res.headers().get_one("set-cookie").is_none());
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "We sent you an email");
-        check_html!(&html, "h1", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
-        check_html!(&html, "#message", &expected);
+        check_message!(&html, "We sent you an email", &expected);
         check_guest_menu!(&html);
 
         let (uid, code) = read_code_from_email(&email_folder, "0.txt", "verify-email");
@@ -92,16 +90,16 @@ fn register_user() {
         assert_eq!(res.status(), Status::Ok);
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Thank you for registering");
-        check_html!(&html, "h1", "Thank you for registering");
-        check_html!(&html, "#message", "Your email was verified.");
+        check_message!(
+            &html,
+            "Thank you for registering",
+            "Your email was verified."
+        );
         check_user_menu!(&html);
 
         check_profile_by_user!(&client, OWNER_EMAIL, OWNER_NAME);
     });
 }
-
-// TODO resend code?
 
 #[test]
 fn get_verify_with_non_existent_id() {
@@ -109,9 +107,7 @@ fn get_verify_with_non_existent_id() {
         let res = client.get(format!("/verify-email/1/abc")).dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "Invalid id");
-        check_html!(&html, "#message", "Invalid id <b>1</b>");
+        check_message!(&html, "Invalid id", "Invalid id <b>1</b>");
     });
 }
 
