@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 use rocket::fairing::AdHoc;
 use surrealdb::engine::remote::ws::Client;
@@ -18,6 +19,7 @@ pub fn fairing() -> AdHoc {
         let config = rocket.state::<MyConfig>().unwrap();
 
         let dbh = get_database(&config.database_name, &config.database_namespace).await;
+
         rocket.manage(dbh)
     })
 }
@@ -29,7 +31,29 @@ pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> 
     let address = "127.0.0.1:8000";
     let dbh = Surreal::new::<Ws>(address).await.unwrap();
     dbh.use_ns(db_namespace).use_db(db_name).await.unwrap();
-    // TODO: do this only when we create the database
+
+    upgrade(&dbh).await.unwrap();
+
+    dbh
+}
+
+/// # Panics
+///
+/// Panics when there is an error
+pub async fn upgrade(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
+    let version = get_schema_version(dbh).await.unwrap();
+
+    if version == 0 {
+        upgrade_to_1(dbh).await?;
+    }
+
+    Ok(())
+}
+
+/// # Panics
+///
+/// Panics when there is an error
+pub async fn upgrade_to_1(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
     dbh.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
         .await
         .unwrap()
@@ -66,8 +90,38 @@ pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> 
         .check()
         .unwrap();
 
-    dbh
+    create_schema_version(dbh).await?;
+    Ok(())
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Schema {
+    version: u64,
+}
+
+async fn get_schema_version(dbh: &Surreal<Client>) -> surrealdb::Result<u64> {
+    let mut response = dbh.query("SELECT * from schema").await?;
+    let versions: Vec<Schema> = response.take(0)?;
+    if let Some(schema) = versions.first() {
+        return Ok(schema.version);
+    }
+
+    Ok(0)
+}
+
+async fn create_schema_version(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
+    let _created: Vec<Schema> = dbh.create("schema").content(Schema { version: 1 }).await?;
+
+    Ok(())
+}
+
+// async fn update_schema_version(dbh: &Surreal<Client>, version: u64) -> surrealdb::Result<()> {
+//     dbh.query("UPDATE schema SET version=$version")
+//         .bind(("version", version))
+//         .await?;
+
+//     Ok(())
+// }
 
 pub async fn add_user(dbh: &Surreal<Client>, user: &User) -> surrealdb::Result<()> {
     rocket::info!("add user email: '{}' code: '{}'", user.email, user.code);
