@@ -111,6 +111,10 @@ pub fn login_owner(client: &Client) {
     login_helper(client, OWNER_EMAIL, OWNER_PW);
 }
 
+// pub fn login_user(client: &Client) {
+//     login_helper(client, USER_EMAIL, USER_PW);
+// }
+
 fn login_helper(client: &Client, email: &str, password: &str) {
     let res = client
         .post("/login")

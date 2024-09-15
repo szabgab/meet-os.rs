@@ -12,7 +12,8 @@
         </form>
 
         <hr>
-        <a href="/reset-password">Reset password</a>
+        <a href="/reset-password">Reset password</a><br>
+        <a href="/resend-email-verification-code">Resend e-mail verification</a><br>
 
     
     </div>

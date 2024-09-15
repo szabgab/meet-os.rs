@@ -569,7 +569,7 @@ async fn verify_email(
     uid: usize,
     code: &str,
 ) -> Template {
-    rocket::info!("verify-email of uid={uid} using code: {code}");
+    rocket::info!("verify-email of uid='{uid}' using code='{code}'");
 
     let config = get_public_config();
 
@@ -581,6 +581,7 @@ async fn verify_email(
     };
 
     if code != user.code {
+        rocket::warn!("Received code='{code}' Expected code='{}'", user.code);
         return Template::render(
             "message",
             context! {title: "Invalid code", message: format!("Invalid code <b>{code}</b>"), config, visitor},
@@ -590,7 +591,7 @@ async fn verify_email(
     db::set_user_verified(dbh, user.uid).await.unwrap();
     db::remove_code(dbh, user.uid).await.unwrap();
 
-    rocket::info!("verified code for {}", user.email);
+    rocket::info!("verified code for '{}'", user.email);
     cookies.add_private(("meet-os", user.email.clone())); // TODO this should be the user ID, right?
     notify::admin_new_user_verified(myconfig, &user).await;
 
@@ -1451,6 +1452,101 @@ async fn contact_members_post(
     )
 }
 
+#[get("/resend-email-verification-code")]
+fn get_resend_email_verification_code(visitor: Visitor) -> Template {
+    let config = get_public_config();
+
+    if visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Logged in", message: r#"Logged in users cannot access this page. Please, <a href="/logout">logout</a> and try again!"#, config, visitor},
+        );
+    }
+
+    Template::render(
+        "resend_verification",
+        context! {
+            title: "Resend code for email verification",
+            config,
+            visitor,
+        },
+    )
+}
+
+#[post("/resend-email-verification-code", data = "<input>")]
+async fn post_resend_email_verification_code(
+    dbh: &State<Surreal<Client>>,
+    myconfig: &State<MyConfig>,
+    visitor: Visitor,
+    input: Form<ResetPasswordForm<'_>>,
+) -> Template {
+    rocket::info!("resend email for: {:?}", input.email);
+    let config = get_public_config();
+
+    if visitor.logged_in {
+        return Template::render(
+            "message",
+            context! {title: "Logged in", message: r#"Logged in users cannot access this page. Please, <a href="/logout">logout</a> and try again!"#, config, visitor},
+        );
+    }
+
+    let email = input.email.to_lowercase().trim().to_owned();
+
+    let Some(user) = db::get_user_by_email(dbh, &email).await.unwrap() else {
+        // TODO: we should probably limit the number of such request from the same visitor so a bot won't be able to try to guess email addresses
+        return Template::render(
+            "message",
+            context! {title: "No such user", message: format!("No user with address <b>{}</b>. Please try again", input.email), config, visitor},
+        );
+    };
+
+    if user.verified {
+        return Template::render(
+            "message",
+            context! {title: "Already verified", message: r#"This email address is already verified. Try to <a href="/login">login</a>."#, config, visitor},
+        );
+    }
+
+    let process = "resetxxx";
+    let code = Uuid::new_v4();
+    let uid = user.uid;
+
+    db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str())
+        .await
+        .unwrap();
+
+    let base_url = &myconfig.base_url;
+
+    let subject = "Verify your email for Meet-OS!";
+    let text = format!(
+        r#"Hi,
+    <p>
+    Someone registered your email address on the Meet-OS web site and then asked us to send a new email verification code.
+    If it was you, please <a href="{base_url}/verify-email/{uid}/{code}">click on this link</a> to verify your email address.
+    <p>
+    <p>
+    If it was not you, we would like to apologize. You don't need to do anything. If the address is not verified soon, we'll remove it from our database.
+    "#
+    );
+
+    let from = EmailAddress {
+        name: myconfig.from_name.clone(),
+        email: myconfig.from_email.clone(),
+    };
+    let to_address = &EmailAddress {
+        name: user.name.clone(),
+        email: user.email.clone(),
+    };
+
+    sendmail(myconfig, &from, to_address, subject, &text).await;
+    //notify::admin_user_asked_to_reset_password(myconfig, &user).await;
+
+    Template::render(
+        "message",
+        context! {title: "We sent you an email", message: format!("We sent you an email to <b>{}</b> Please click on the link to reset your password.", to_address.email), config, visitor},
+    )
+}
+
 #[catch(401)]
 async fn http_401(request: &Request<'_>) -> Template {
     let cookies = request.cookies();
@@ -1560,6 +1656,8 @@ fn rocket() -> _ {
                 rsvp_no_event_get,
                 show_profile,
                 user,
+                get_resend_email_verification_code,
+                post_resend_email_verification_code,
                 verify_email
             ],
         )
@@ -1611,3 +1709,6 @@ mod test_events;
 
 #[cfg(test)]
 mod test_contact_members;
+
+#[cfg(test)]
+mod test_resend_email_verification;
