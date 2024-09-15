@@ -49,6 +49,13 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     func(email_folder, client);
 }
 
+pub fn clean_emails(email_folder: &std::path::PathBuf) {
+    for entry in email_folder.read_dir().unwrap() {
+        let entry = entry.unwrap();
+        std::fs::remove_file(entry.path()).unwrap();
+    }
+}
+
 pub fn read_code_from_email(
     email_folder: &std::path::PathBuf,
     filename: &str,
