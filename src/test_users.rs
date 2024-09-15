@@ -128,9 +128,7 @@ fn get_verify_email_with_bad_code() {
         let res = client.get(format!("/verify-email/1/abc")).dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "Invalid code");
-        check_html!(&html, "#message", "Invalid code <b>abc</b>");
+        check_message!(&html, "Invalid code", "Invalid code <b>abc</b>");
     });
 }
 
@@ -151,9 +149,8 @@ fn post_register_duplicate_email() {
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
         check_guest_menu!(&html);
-        check_html!(&html, "title", "We sent you an email");
         let expected = format!("We sent you an email to <b>{OWNER_EMAIL}</b> Please check your inbox and verify your email address.");
-        check_html!(&html, "#message", &expected);
+        check_message!(&html, "We sent you an email", &expected);
 
         let res = client
             .post(format!("/register"))
@@ -268,10 +265,9 @@ fn post_register_with_invalid_email_address() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid email address");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid email address",
             "Invalid email address <b>meet-os.com</b> Please try again"
         );
     });
@@ -287,10 +283,9 @@ fn post_register_with_too_long_username() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Name is too long");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Name is too long",
             "Name is too long. Max 50 while the current name is 53 long. Please try again."
         );
     });
@@ -312,13 +307,9 @@ fn post_register_with_bad_email_address() {
         // TODO should this stay 200 OK?
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-
-        // TODO make these tests parse the HTML and verify the extracted title tag!
-        //assert_eq!(html, "");
-        check_html!(&html, "title", "Invalid email address");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid email address",
             "Invalid email address <b>meet-os.com</b> Please try again"
         );
         check_guest_menu!(&html);
@@ -341,10 +332,9 @@ fn post_login_with_unregistered_email() {
         assert_eq!(res.status(), Status::Ok);
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "No such user");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "No such user",
             "No user with address <b>other@meet-os.com</b>. Please try again"
         );
         check_guest_menu!(&html);
@@ -400,8 +390,11 @@ fn post_login_with_unverified_email() {
 
         assert!(res.headers().get_one("set-cookie").is_none());
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Unverified email");
-        check_html!(&html, "#message", "Email must be verified before login.");
+        check_message!(
+            &html,
+            "Unverified email",
+            "Email must be verified before login."
+        );
         check_guest_menu!(&html);
     });
 }
@@ -439,12 +432,9 @@ fn post_register_with_short_password() {
         assert!(res.headers().get_one("set-cookie").is_none());
 
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid password");
-        check_html!(&html, "h1", "Invalid password");
-        //assert_eq!(html, "");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid password",
             "The password must be at least 6 characters long."
         );
         check_guest_menu!(&html);
@@ -540,10 +530,11 @@ fn user_id_that_does_not_exist() {
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
 
-        // assert_eq!(html, "");
-        check_html!(&html, "title", "User not found");
-        check_html!(&html, "h1", "User not found");
-        check_html!(&html, "#message", r#"There is no user with id <b>42</b>."#);
+        check_message!(
+            &html,
+            "User not found",
+            r#"There is no user with id <b>42</b>."#
+        );
     });
 }
 
@@ -579,11 +570,9 @@ fn unverified_user_page_by_guest() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Unverified user");
-        check_html!(&html, "h1", "Unverified user");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Unverified user",
             "This user has not verified the email address yet."
         );
         assert!(!html.contains(UNVERIFIED_NAME));
@@ -630,11 +619,9 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid GitHub username");
-        check_html!(&html, "h1", "Invalid GitHub username");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid GitHub username",
             r#"The GitHub username `szabgab*` is not valid."#
         );
 
@@ -647,11 +634,9 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid GitLab username");
-        check_html!(&html, "h1", "Invalid GitLab username");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid GitLab username",
             r#"The GitLab username `foo*bar` is not valid."#
         );
 
@@ -664,11 +649,9 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid LinkedIn profile link");
-        check_html!(&html, "h1", "Invalid LinkedIn profile link");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid LinkedIn profile link",
             r#"The LinkedIn profile link `szabgab` is not valid."#
         );
 
@@ -681,11 +664,9 @@ fn post_edit_profile_failures() {
                 .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Name is too long");
-        check_html!(&html, "h1", "Name is too long");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Name is too long",
             "Name is too long. Max 50 while the current name is 53 long. Please try again."
         );
 
@@ -698,11 +679,9 @@ fn post_edit_profile_failures() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid character");
-        check_html!(&html, "h1", "Invalid character");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid character",
             r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#
         );
 
@@ -726,10 +705,9 @@ fn post_edit_profile_works() {
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Profile updated");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Profile updated",
             r#"Check out the <a href="/profile">profile</a> and how others see it <a href="/user/1">Lord Voldemort</a>"#
         );
 
@@ -774,10 +752,9 @@ fn post_register_with_invalid_username() {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
-        check_html!(&html, "title", "Invalid character");
-        check_html!(
+        check_message!(
             &html,
-            "#message",
+            "Invalid character",
             r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#
         );
     });
