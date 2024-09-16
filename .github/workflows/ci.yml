@@ -103,7 +103,7 @@ jobs:
       run: |
         cp Rocket.skeleton.toml Rocket.toml
         cargo install cargo-tarpaulin
-        rm -rf tests
+        rm -f tests/*.rs
         time cargo tarpaulin --ignore-tests -o Html -o Lcov --timeout 240 --engine llvm
 
     - name: Coveralls
