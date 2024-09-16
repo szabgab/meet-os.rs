@@ -5,4 +5,4 @@ filename=$(date +%F_%H%M%S)
 echo $namespace
 echo $database
 echo $filename
-docker exec -it surreal /surreal export -e http://localhost:8000 --ns $namespace --db $database > backup/backup-$filename.sql
+docker exec -it surrealdb /surreal export -e http://localhost:8000 --ns $namespace --db $database > backup/backup-$filename.sql

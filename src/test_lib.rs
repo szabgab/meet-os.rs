@@ -39,34 +39,21 @@ pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
 
     if !filename.is_empty() {
         let path = format!("/external/tests/{filename}");
-        let result = match std::env::var("CI") {
-            Ok(_) => std::process::Command::new("surreal")
-                .arg("import")
-                .arg("-e")
-                .arg("http://localhost:8000")
-                .arg("--namespace")
-                .arg(&db_namespace)
-                .arg("--database")
-                .arg(&db_name)
-                .arg(&path)
-                .output()
-                .unwrap(),
 
-            Err(_) => std::process::Command::new("/usr/bin/docker")
-                .arg("exec")
-                .arg("surreal")
-                .arg("/surreal")
-                .arg("import")
-                .arg("-e")
-                .arg("http://localhost:8000")
-                .arg("--namespace")
-                .arg(&db_namespace)
-                .arg("--database")
-                .arg(&db_name)
-                .arg(&path)
-                .output()
-                .unwrap(),
-        };
+        let result = std::process::Command::new("/usr/bin/docker")
+            .arg("exec")
+            .arg("surrealdb")
+            .arg("/surreal")
+            .arg("import")
+            .arg("-e")
+            .arg("http://localhost:8000")
+            .arg("--namespace")
+            .arg(&db_namespace)
+            .arg("--database")
+            .arg(&db_name)
+            .arg(&path)
+            .output()
+            .unwrap();
 
         println!("result.status: {}", result.status);
         println!("STDOUT: {:?}", std::str::from_utf8(&result.stdout));
