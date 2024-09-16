@@ -44,6 +44,7 @@ jobs:
           df -h
           du -hs ~/.cargo
           du -hs *
+          docker ps
           which surreal || echo "no surreal"
           which surrealdb || echo "no surrealdb"
           printenv | sort
