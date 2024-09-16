@@ -16,6 +16,8 @@ jobs:
 
     - name: Start SurrealDB
       run: |
+        pwd
+        ls -l
         docker volume create my-surreal-db
         docker run --detach --restart always --name surrealdb -p 127.0.0.1:8000:8000 --user root -v$(pwd):/external -v my-surreal-db:/database surrealdb/surrealdb:v1.5.5 start --user root --pass root --log trace file://database
       #uses: surrealdb/setup-surreal@v1
@@ -61,9 +63,6 @@ jobs:
     - name: Clippy stop at any warning
       run: cargo clippy -- --deny warnings --no-deps
 
-        #    - name: Build debug version
-        #      run: cargo build --verbose
-
     - name: Lists tests
       run: cargo test -- --list
 
@@ -72,6 +71,8 @@ jobs:
         RUST_BACKTRACE: 1
         RUN_EXTERNAL: 1
       run: |
+        pwd
+        ls -l
         cp Rocket.skeleton.toml Rocket.toml
         cargo test --verbose
 
