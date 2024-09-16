@@ -78,9 +78,12 @@ sudo systemctl start dev.meet-os.com.service
 
 ### Upgrade the development and testing service
 
-```
-cd ~/work/dev.meet-os.com
-git pull
-cargo build --release
-sudo systemctl restart dev.meet-os.com.service
-```
+* `cd ~/work/dev.meet-os.com`
+* Stop the application: `sudo systemctl stop dev.meet-os.com.service`
+* TODO: setup some placeholder so visitors will know we are upgrading
+* Dump (export) the database `./export.sh`
+* `git pull`
+* `cargo build --release`
+* Start the application: `sudo systemctl start dev.meet-os.com.service`
+
+TODO: Improve this process so we won't need to shut down the service while rebuilding
