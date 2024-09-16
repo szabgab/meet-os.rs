@@ -6,7 +6,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn contact_members_get_user_without_gid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_many_users(&client, &email_folder);
 
         let res = client
@@ -23,7 +23,7 @@ fn contact_members_get_user_without_gid() {
 
 #[test]
 fn contact_members_get_user_with_invalid_gid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_many_users(&client, &email_folder);
 
         let res = client
@@ -39,7 +39,7 @@ fn contact_members_get_user_with_invalid_gid() {
 
 #[test]
 fn contact_members_get_owner_with_gid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_all(&client, &email_folder);
 
         let res = client
@@ -61,7 +61,7 @@ fn contact_members_get_owner_with_gid() {
 
 #[test]
 fn contact_members_get_user_not_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_groups(&client, &email_folder);
 
         let res = client
@@ -77,7 +77,7 @@ fn contact_members_get_user_not_owner() {
 
 #[test]
 fn contact_members_post_user_without_gid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_all(&client, &email_folder);
 
         let res = client
@@ -91,7 +91,7 @@ fn contact_members_post_user_without_gid() {
 
 #[test]
 fn contact_members_post_user_with_all() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_all(&client, &email_folder);
 
         let res = client
@@ -116,7 +116,7 @@ fn contact_members_post_user_with_all() {
 
 #[test]
 fn contact_members_post_user_subject_too_short() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_all(&client, &email_folder);
 
         let res = client
@@ -142,7 +142,7 @@ fn contact_members_post_user_subject_too_short() {
 
 #[test]
 fn contact_members_post_user_who_is_not_the_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_groups(&client, &email_folder);
 
         let res = client

@@ -14,7 +14,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn leave_event_before_joining_it() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -33,7 +33,7 @@ fn leave_event_before_joining_it() {
 
 #[test]
 fn join_event() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         // event page before
@@ -190,7 +190,7 @@ fn join_event() {
 
 #[test]
 fn join_not_existing_event() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -206,7 +206,7 @@ fn join_not_existing_event() {
 
 #[test]
 fn leave_not_existing_event() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -221,7 +221,7 @@ fn leave_not_existing_event() {
 
 #[test]
 fn join_event_by_group_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -241,7 +241,7 @@ fn join_event_by_group_owner() {
 
 #[test]
 fn post_edit_event_user_missing_data() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         let res = client
@@ -255,7 +255,7 @@ fn post_edit_event_user_missing_data() {
 
 #[test]
 fn post_edit_event_user_no_such_event() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         let res = client
@@ -285,7 +285,7 @@ fn post_edit_event_user_no_such_event() {
 
 #[test]
 fn post_edit_event_user_not_the_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         // update
@@ -309,7 +309,7 @@ fn post_edit_event_user_not_the_owner() {
 
 #[test]
 fn post_edit_event_owner_title_too_short() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         // update
@@ -340,7 +340,7 @@ fn post_edit_event_owner_title_too_short() {
 
 #[test]
 fn post_edit_event_owner_invalid_date() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         // update
@@ -371,7 +371,7 @@ fn post_edit_event_owner_invalid_date() {
 
 #[test]
 fn post_edit_event_owner_date_in_the_past() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         // update
@@ -402,7 +402,7 @@ fn post_edit_event_owner_date_in_the_past() {
 
 #[test]
 fn post_edit_event_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         // check the event page before the update
@@ -454,7 +454,7 @@ fn post_edit_event_owner() {
 
 #[test]
 fn get_add_event_user_missing_gid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         let res = client
@@ -471,7 +471,7 @@ fn get_add_event_user_missing_gid() {
 
 #[test]
 fn get_add_event_user_not_the_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -484,7 +484,7 @@ fn get_add_event_user_not_the_owner() {
 
 #[test]
 fn get_add_event_user_is_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -506,7 +506,7 @@ fn get_add_event_user_is_owner() {
 
 #[test]
 fn post_add_event_user_not_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -528,7 +528,7 @@ fn post_add_event_user_not_owner() {
 
 #[test]
 fn post_add_event_owner_title_too_short() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
         setup_user(&client, &email_folder);
@@ -562,7 +562,7 @@ fn post_add_event_owner_title_too_short() {
 
 #[test]
 fn post_add_event_owner_invalid_date() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
         setup_user(&client, &email_folder);
@@ -596,7 +596,7 @@ fn post_add_event_owner_invalid_date() {
 
 #[test]
 fn post_add_event_owner_event_in_the_past() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
         //setup_user(&client, &email_folder);
@@ -630,7 +630,7 @@ fn post_add_event_owner_event_in_the_past() {
 
 #[test]
 fn post_add_event_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
         setup_user(&client, &email_folder);
@@ -664,7 +664,7 @@ fn post_add_event_owner() {
 
 #[test]
 fn get_event_as_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client.get("/event/1").dispatch();
@@ -678,7 +678,7 @@ fn get_event_as_guest() {
 
 #[test]
 fn get_edit_event_as_user_no_eid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         let res = client
@@ -695,7 +695,7 @@ fn get_edit_event_as_user_no_eid() {
 
 #[test]
 fn get_edit_event_as_user_but_not_owner() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client
@@ -707,7 +707,7 @@ fn get_edit_event_as_user_but_not_owner() {
 }
 #[test]
 fn get_edit_event_as_owner_with_eid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_for_events(&client, &email_folder);
 
         let res = client

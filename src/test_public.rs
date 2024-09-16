@@ -3,7 +3,7 @@ use rocket::http::Status;
 
 #[test]
 fn public_pages() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/about").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();

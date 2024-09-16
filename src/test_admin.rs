@@ -7,7 +7,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn admin_pages_as_user() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
         login_owner(&client);
 
@@ -26,7 +26,7 @@ fn admin_pages_as_user() {
 
 #[test]
 fn admin_page_as_admin() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         login_admin(&client);
 
@@ -43,7 +43,7 @@ fn admin_page_as_admin() {
 
 #[test]
 fn admin_users_page_as_admin() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_all(&client, &email_folder);
         login_admin(&client);
 
@@ -63,7 +63,7 @@ fn admin_users_page_as_admin() {
 
 #[test]
 fn admin_search_get_as_admin() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         login_admin(&client);
 
@@ -77,7 +77,7 @@ fn admin_search_get_as_admin() {
 
 #[test]
 fn admin_search_post_as_admin() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_all(&client, &email_folder);
         login_admin(&client);
 
@@ -114,7 +114,7 @@ fn admin_search_post_as_admin() {
 
 #[test]
 fn admin_audit_as_admin() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         login_admin(&client);
 

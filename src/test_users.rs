@@ -9,7 +9,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn protected_pages_as_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         for path in [
             "/admin",
             "/admin/audit",
@@ -35,7 +35,7 @@ fn protected_pages_as_guest() {
 
 #[test]
 fn protected_post_requests_as_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         for path in [
             "/contact-members",
             "/add-event",
@@ -65,7 +65,7 @@ fn protected_post_requests_as_guest() {
 
 #[test]
 fn register_user() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
@@ -103,7 +103,7 @@ fn register_user() {
 
 #[test]
 fn get_verify_with_non_existent_id() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get(format!("/verify-email/1/abc")).dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -113,7 +113,7 @@ fn get_verify_with_non_existent_id() {
 
 #[test]
 fn get_verify_email_with_bad_code() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
@@ -134,7 +134,7 @@ fn get_verify_email_with_bad_code() {
 
 #[test]
 fn post_register_duplicate_email() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
@@ -172,7 +172,7 @@ fn post_register_duplicate_email() {
 
 #[test]
 fn post_login_regular_user() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
 
         check_profile_by_user!(&client, &OWNER_EMAIL, OWNER_NAME);
@@ -221,7 +221,7 @@ fn post_login_regular_user() {
 
 #[test]
 fn post_login_admin() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         logout(&client);
 
@@ -252,7 +252,7 @@ fn post_login_admin() {
 
 #[test]
 fn post_register_with_invalid_email_address() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         //"name=Foo Bar&email=meet-os.com&password=123456"
         let res = client
             .post("/register")
@@ -275,7 +275,7 @@ fn post_register_with_invalid_email_address() {
 
 #[test]
 fn post_register_with_too_long_username() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post("/register")
             .header(ContentType::Form)
@@ -293,7 +293,7 @@ fn post_register_with_too_long_username() {
 
 #[test]
 fn post_register_with_bad_email_address() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         // register new user
         let res = client
             .post("/register")
@@ -320,7 +320,7 @@ fn post_register_with_bad_email_address() {
 
 #[test]
 fn post_login_with_unregistered_email() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post("/login")
             .header(ContentType::Form)
@@ -343,7 +343,7 @@ fn post_login_with_unregistered_email() {
 
 #[test]
 fn post_login_with_bad_password() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_user(&client, &email_folder);
         logout(&client);
 
@@ -365,7 +365,7 @@ fn post_login_with_bad_password() {
 
 #[test]
 fn post_login_with_unverified_email() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post("/register")
             .header(ContentType::Form)
@@ -401,7 +401,7 @@ fn post_login_with_unverified_email() {
 
 #[test]
 fn post_login_with_invalid_email() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         // no actual user needed in the system for this to work
         let res = client
             .post("/login")
@@ -418,7 +418,7 @@ fn post_login_with_invalid_email() {
 
 #[test]
 fn post_register_with_short_password() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post(format!("/register"))
             .header(ContentType::Form)
@@ -443,7 +443,7 @@ fn post_register_with_short_password() {
 
 #[test]
 fn get_edit_profile_user() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         let res = client
@@ -465,7 +465,7 @@ fn get_edit_profile_user() {
 
 #[test]
 fn get_register_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/register").dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -483,7 +483,7 @@ fn get_register_guest() {
 //
 #[test]
 fn get_users_list_users_empty_db_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/users").dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -498,7 +498,7 @@ fn get_users_list_users_empty_db_guest() {
 
 #[test]
 fn get_users_list_users_many_users_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_many_users(&client, &email_folder);
 
         let res = client.get("/users").dispatch();
@@ -524,7 +524,7 @@ fn get_users_list_users_many_users_guest() {
 
 #[test]
 fn user_id_that_does_not_exist() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/user/42").dispatch();
 
         assert_eq!(res.status(), Status::Ok);
@@ -540,7 +540,7 @@ fn user_id_that_does_not_exist() {
 
 #[test]
 fn get_user_page() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
 
@@ -562,7 +562,7 @@ fn get_user_page() {
 
 #[test]
 fn unverified_user_page_by_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_unverified_user(&client, &email_folder);
         logout(&client);
 
@@ -583,7 +583,7 @@ fn unverified_user_page_by_guest() {
 
 #[test]
 fn unverified_user_on_user_page_by_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_user(&client, &email_folder);
         setup_unverified_user(&client, &email_folder);
@@ -607,7 +607,7 @@ fn unverified_user_on_user_page_by_guest() {
 
 #[test]
 fn post_edit_profile_failures() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         // edit profile page invalid github account
@@ -691,7 +691,7 @@ fn post_edit_profile_failures() {
 
 #[test]
 fn post_edit_profile_works() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_owner(&client, &email_folder);
 
         // verify that if we submit html tags to the about field, those are properly escaped in the result
@@ -744,7 +744,7 @@ fn post_edit_profile_works() {
 
 #[test]
 fn post_register_with_invalid_username() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post("/register")
             .header(ContentType::Form)

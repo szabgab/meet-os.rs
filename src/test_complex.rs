@@ -6,7 +6,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn test_complex() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
 

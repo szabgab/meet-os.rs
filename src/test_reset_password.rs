@@ -8,7 +8,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn reset_password_full() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let name = "Foo Bar";
         register_and_verify_user(&client, name, OWNER_EMAIL, "123456", &email_folder);
 
@@ -138,7 +138,7 @@ fn reset_password_full() {
 
 #[test]
 fn save_password_get_invalid_uid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/save-password/42/abc").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -148,7 +148,7 @@ fn save_password_get_invalid_uid() {
 
 #[test]
 fn save_password_get_invalid_code() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
         logout(&client);
@@ -162,7 +162,7 @@ fn save_password_get_invalid_code() {
 
 #[test]
 fn save_password_post_invalid_uid() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client
             .post("/save-password")
             .header(ContentType::Form)
@@ -181,7 +181,7 @@ fn save_password_post_invalid_uid() {
 
 #[test]
 fn save_password_post_invalid_code() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_admin(&client, &email_folder);
         setup_owner(&client, &email_folder);
         logout(&client);

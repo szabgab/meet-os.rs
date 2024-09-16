@@ -1,6 +1,7 @@
 #![allow(unused_macros, unused_imports)]
 
 use std::path::PathBuf;
+use std::process::ExitStatus;
 
 use regex::Regex;
 use rocket::http::{ContentType, Status};
@@ -27,7 +28,7 @@ pub const OTHER_NAME: &str = "Foo Alpha";
 pub const OTHER_EMAIL: &str = "foo-alpha@meet-os.com";
 pub const OTHER_PW: &str = "password1";
 
-pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
+pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
     use rocket::config::Config;
 
     let tmp_dir = tempfile::tempdir().unwrap();
@@ -35,6 +36,29 @@ pub fn run_inprocess(func: fn(std::path::PathBuf, Client)) {
     let email_folder = tmp_dir.path().join("emails");
     let db_name = format!("test-name-{}", rand::random::<f64>());
     let db_namespace = "test-namespace-for-meet-os";
+
+    if !filename.is_empty() {
+        let path = format!("/external/tests/{filename}");
+        let result = std::process::Command::new("/usr/bin/docker")
+            .arg("exec")
+            .arg("surreal")
+            .arg("/surreal")
+            .arg("import")
+            .arg("-e")
+            .arg("http://localhost:8000")
+            .arg("--namespace")
+            .arg(&db_namespace)
+            .arg("--database")
+            .arg(&db_name)
+            .arg(&path)
+            .output()
+            .unwrap();
+
+        println!("result.status: {}", result.status);
+        println!("STDOUT: {:?}", std::str::from_utf8(&result.stdout));
+        println!("STDERR: {:?}", std::str::from_utf8(&result.stderr));
+        assert_eq!(result.status, ExitStatus::default(), "Importing test data");
+    }
 
     let provider = Config::figment()
         .merge(("database_namespace", &db_namespace))

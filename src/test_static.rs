@@ -3,7 +3,7 @@ use rocket::http::Status;
 
 #[test]
 fn get_register_page() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/register").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -21,7 +21,7 @@ fn get_register_page() {
 
 #[test]
 fn get_login_page() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/login").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();

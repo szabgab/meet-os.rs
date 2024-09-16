@@ -8,7 +8,7 @@ use rocket::http::{ContentType, Status};
 
 #[test]
 fn get_resend_email_verification_guest() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         let res = client.get("/resend-email-verification-code").dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
@@ -22,7 +22,7 @@ fn get_resend_email_verification_guest() {
 
 #[test]
 fn get_resend_email_verification_logged_in_user() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_user(&client, &email_folder);
         let res = client.get("/resend-email-verification-code").dispatch();
         check_only_guest!(res);
@@ -31,7 +31,7 @@ fn get_resend_email_verification_logged_in_user() {
 
 #[test]
 fn post_resend_email_verification_logged_in_user() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_user(&client, &email_folder);
         let res = client
             .post("/resend-email-verification-code")
@@ -44,7 +44,7 @@ fn post_resend_email_verification_logged_in_user() {
 
 #[test]
 fn post_resend_email_verification_verified_email() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_user(&client, &email_folder);
         logout(&client);
 
@@ -65,7 +65,7 @@ fn post_resend_email_verification_verified_email() {
 
 #[test]
 fn post_resend_email_verification_unverified_email() {
-    run_inprocess(|email_folder, client| {
+    run_inprocess("", |email_folder, client| {
         setup_unverified_user(&client, &email_folder);
         logout(&client);
 
