@@ -15,16 +15,19 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Start SurrealDB
-      uses: surrealdb/setup-surreal@v1
-      with:
-        surrealdb_version: latest
-        surrealdb_port: 8000
-        surrealdb_username: root
-        surrealdb_password: root
-        surrealdb_auth: false
-        surrealdb_strict: false
-        surrealdb_log: trace
-        surrealdb_additional_args: --allow-all
+      run: |
+        docker volume create my-surreal-db
+        docker run --detach --restart always --name surrealdb -p 127.0.0.1:8000:8000 --user root -v$(pwd):/external my-surreal-db:/database surrealdb/surrealdb:v1.5.5 start --user root --pass root --log trace file://database
+      #uses: surrealdb/setup-surreal@v1
+      #with:
+      #  surrealdb_version: latest
+      #  surrealdb_port: 8000
+      #  surrealdb_username: root
+      #  surrealdb_password: root
+      #  surrealdb_auth: false
+      #  surrealdb_strict: false
+      #  surrealdb_log: trace
+      #  surrealdb_additional_args: --allow-all
 
     - name: Show Rust version
       run: rustc -Vv
