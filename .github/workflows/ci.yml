@@ -44,6 +44,8 @@ jobs:
           df -h
           du -hs ~/.cargo
           du -hs *
+          which surreal
+          printenv | sort
 
     - name: Check cargo fmt
       run: cargo fmt --check
