@@ -61,8 +61,8 @@ jobs:
     - name: Clippy stop at any warning
       run: cargo clippy -- --deny warnings --no-deps
 
-    - name: Build debug version
-      run: cargo build --verbose
+        #    - name: Build debug version
+        #      run: cargo build --verbose
 
     - name: Lists tests
       run: cargo test -- --list
