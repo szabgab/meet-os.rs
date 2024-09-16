@@ -39,7 +39,7 @@ use surrealdb::Surreal;
 
 use meetings::db;
 
-use meetings::{get_public_config, sendmail, EmailAddress, Event, MyConfig, User};
+use meetings::{get_public_config, sendmail, EmailAddress, Event, EventStatus, MyConfig, User};
 
 use web::{LoggedIn, Visitor};
 
@@ -1213,6 +1213,7 @@ async fn add_event_post(
         date,
         location,
         group_id: input.gid,
+        status: EventStatus::Published,
     };
     db::add_event(dbh, &event).await.unwrap();
 
@@ -1365,6 +1366,7 @@ async fn edit_event_post(
         date,
         location,
         group_id: event.group_id,
+        status: EventStatus::Published,
     };
     db::update_event(dbh, &event).await.unwrap();
 

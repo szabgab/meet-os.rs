@@ -7,6 +7,7 @@ use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
+use crate::EventStatus;
 use crate::{Audit, Counter, Event, Group, Membership, MyConfig, User, RSVP};
 
 /// # Panics
@@ -42,9 +43,14 @@ pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> 
 /// Panics when there is an error
 pub async fn upgrade(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
     let version = get_schema_version(dbh).await.unwrap();
+    rocket::info!("Upgrade from {version}");
 
     if version == 0 {
         upgrade_to_1(dbh).await?;
+        upgrade_to_2(dbh).await?;
+    }
+    if version == 1 {
+        upgrade_to_2(dbh).await?;
     }
 
     Ok(())
@@ -54,6 +60,8 @@ pub async fn upgrade(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
 ///
 /// Panics when there is an error
 pub async fn upgrade_to_1(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
+    rocket::info!("upgrade_to_1");
+
     dbh.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
         .await
         .unwrap()
@@ -94,6 +102,20 @@ pub async fn upgrade_to_1(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
     Ok(())
 }
 
+/// # Panics
+///
+/// Panics when there is an error
+pub async fn upgrade_to_2(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
+    rocket::info!("upgrade_to_2");
+
+    dbh.query("UPDATE event SET status=$status")
+        .bind(("status", EventStatus::Published))
+        .await?;
+
+    update_schema_version(dbh, 2).await?;
+    Ok(())
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct Schema {
     version: u64,
@@ -115,13 +137,13 @@ async fn create_schema_version(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
     Ok(())
 }
 
-// async fn update_schema_version(dbh: &Surreal<Client>, version: u64) -> surrealdb::Result<()> {
-//     dbh.query("UPDATE schema SET version=$version")
-//         .bind(("version", version))
-//         .await?;
+async fn update_schema_version(dbh: &Surreal<Client>, version: u64) -> surrealdb::Result<()> {
+    dbh.query("UPDATE schema SET version=$version")
+        .bind(("version", version))
+        .await?;
 
-//     Ok(())
-// }
+    Ok(())
+}
 
 pub async fn add_user(dbh: &Surreal<Client>, user: &User) -> surrealdb::Result<()> {
     rocket::info!("add user email: '{}' code: '{}'", user.email, user.code);

@@ -51,6 +51,15 @@ pub struct RSVP {
     pub status: bool,
 }
 
+#[non_exhaustive]
+#[derive(Deserialize, Serialize, Debug)]
+pub enum EventStatus {
+    Draft,
+    Published,
+    Cancelled,
+    Hidden,
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Event {
     pub eid: usize,
@@ -59,6 +68,7 @@ pub struct Event {
     pub location: String,
     pub group_id: usize,
     pub description: String,
+    pub status: EventStatus,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
