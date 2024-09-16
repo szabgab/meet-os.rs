@@ -4,6 +4,7 @@
 /emails/
 *.bak
 *.swp
+/backup/
 
 
 # tarpaulin files
