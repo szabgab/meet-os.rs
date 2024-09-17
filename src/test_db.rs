@@ -35,11 +35,6 @@ async fn test_db_get_none() {
 
     let user = db::get_user_by_id(&dbh, 23).await.unwrap();
     assert!(user.is_none());
-
-    let user = db::get_user_by_code(&dbh, "register", "hello")
-        .await
-        .unwrap();
-    assert!(user.is_none());
 }
 
 #[async_test]
@@ -136,12 +131,6 @@ async fn test_db_user() {
     assert_eq!(user, user_foo);
 
     let user = db::get_user_by_id(&dbh, 1).await.unwrap().unwrap();
-    assert_eq!(user, user_foo);
-
-    let user = db::get_user_by_code(&dbh, "register", "generated code")
-        .await
-        .unwrap()
-        .unwrap();
     assert_eq!(user, user_foo);
 
     // Add group

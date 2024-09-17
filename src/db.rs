@@ -139,7 +139,7 @@ async fn update_schema_version(dbh: &Surreal<Client>, version: u64) -> surrealdb
 }
 
 pub async fn add_user(dbh: &Surreal<Client>, user: &User) -> surrealdb::Result<()> {
-    rocket::info!("add user email: '{}' code: '{}'", user.email, user.code);
+    rocket::info!("add user email: '{}'", user.email);
 
     dbh.create(Resource::from("user")).content(user).await?;
 
@@ -147,7 +147,7 @@ pub async fn add_user(dbh: &Surreal<Client>, user: &User) -> surrealdb::Result<(
 }
 
 pub async fn add_event(dbh: &Surreal<Client>, event: &Event) -> surrealdb::Result<()> {
-    rocket::info!("add event: '{}' code: '{}'", event.eid, event.title);
+    rocket::info!("add event eid: '{}' title: '{}'", event.eid, event.title);
 
     dbh.create(Resource::from("event")).content(event).await?;
 
@@ -194,28 +194,6 @@ pub async fn add_group(dbh: &Surreal<Client>, group: &Group) -> surrealdb::Resul
     dbh.create(Resource::from("group")).content(group).await?;
 
     Ok(())
-}
-
-pub async fn get_user_by_code(
-    dbh: &Surreal<Client>,
-    process: &str,
-    code: &str,
-) -> surrealdb::Result<Option<User>> {
-    rocket::info!("verification code: '{code}' process = '{process}'");
-
-    let mut response = dbh
-        .query("SELECT * FROM user WHERE code=$code AND process=$process;")
-        .bind(("code", code))
-        .bind(("process", process))
-        .await?;
-
-    let entry: Option<User> = response.take(0)?;
-
-    if let Some(entry) = entry.as_ref() {
-        rocket::info!("Found user {}, {}", entry.name, entry.email);
-    }
-
-    Ok(entry)
 }
 
 pub async fn set_user_verified(
