@@ -73,13 +73,6 @@ pub async fn upgrade_to_1(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
         .check()
         .unwrap();
 
-    // We can't set this to unique as we are converting them to the empty string when the code is used
-    // dbh.query("DEFINE INDEX user_code ON TABLE user COLUMNS code UNIQUE")
-    //     .await
-    //     .unwrap()
-    //     .check()
-    //     .unwrap();
-
     dbh.query("DEFINE INDEX group_gid ON TABLE group COLUMNS gid UNIQUE")
         .await
         .unwrap()
