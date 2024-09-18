@@ -127,7 +127,7 @@ docker exec -it surrealdb /surreal export -e http://localhost:8000 --ns meet-os-
 * restore / import
 
 ```
-docker exec surrealdb /surreal import -e http://localhost:8000 --namespace meet-os-ns --database meet-os-db /external/out.txt
+docker exec surrealdb /surreal import -e http://localhost:8000 --namespace meet-os-ns --database meet-os-db --user root --pass root /external/backup/file.txt
 ```
 
 ## CLI
