@@ -418,7 +418,7 @@ pub async fn get_users(dbh: &Surreal<Client>) -> surrealdb::Result<Vec<User>> {
 
 pub async fn get_groups(dbh: &Surreal<Client>) -> surrealdb::Result<Vec<Group>> {
     rocket::info!("get_groups");
-    let mut response = dbh.query("SELECT * FROM group;").await?;
+    let mut response = dbh.query("SELECT * FROM group ORDER BY name;").await?;
     let entries: Vec<Group> = response.take(0)?;
     for ent in &entries {
         rocket::info!("group name {}", ent.name);
@@ -528,7 +528,7 @@ pub async fn get_groups_by_owner_id(
 ) -> surrealdb::Result<Vec<Group>> {
     rocket::info!("get_groups_by_owner_id: '{uid}'");
     let mut response = dbh
-        .query("SELECT * FROM group WHERE owner=$uid;")
+        .query("SELECT * FROM group WHERE owner=$uid ORDER BY name;")
         .bind(("uid", uid))
         .await?;
 

@@ -328,11 +328,32 @@ async fn test_db_groups() {
 
     let groups = db::get_groups(&dbh).await.unwrap();
     assert_eq!(groups.len(), 3);
-    assert_eq!(groups, [rust_maven, python_maven, guest_maven]);
+    assert_eq!(
+        groups,
+        [
+            guest_maven.clone(),
+            python_maven.clone(),
+            rust_maven.clone()
+        ]
+    );
 
-    // get_group_by_gid
+    let groups = db::get_groups_by_owner_id(&dbh, 1).await.unwrap();
+    assert_eq!(groups, []);
 
-    // get_groups_by_owner_id
+    let groups = db::get_groups_by_owner_id(&dbh, 2).await.unwrap();
+    assert_eq!(groups, [python_maven.clone(), rust_maven.clone()]);
+
+    let groups = db::get_groups_by_owner_id(&dbh, 3).await.unwrap();
+    assert_eq!(groups, [guest_maven.clone()]);
+
+    let group = db::get_group_by_gid(&dbh, 1).await.unwrap().unwrap();
+    assert_eq!(group, rust_maven);
+
+    let group = db::get_group_by_gid(&dbh, 2).await.unwrap().unwrap();
+    assert_eq!(group, python_maven);
+
+    let group = db::get_group_by_gid(&dbh, 3).await.unwrap().unwrap();
+    assert_eq!(group, guest_maven);
 }
 
 #[async_test]
