@@ -8,6 +8,9 @@ email_folder     = "/path/to/email_folder"
 admins           = ["admin@meet-os.com"]
 from_email       = "no-reply@meet-os.com"
 from_name        = "Meet-OS"
+
+database_username  = "root"
+database_password  = "root"
 database_namespace = "meet-os-local-ns"
 database_name      = "meet-os-local-db"
 

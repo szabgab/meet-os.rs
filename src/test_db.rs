@@ -117,7 +117,7 @@ async fn test_db_get_empty_lists() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
 
-    let dbh = db::get_database(&database_name, &database_namespace).await;
+    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
 
     let events = db::get_events(&dbh).await.unwrap();
     assert!(events.is_empty());
@@ -138,7 +138,7 @@ async fn test_db_get_none() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
 
-    let dbh = db::get_database(&database_name, &database_namespace).await;
+    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
 
     let event = db::get_event_by_eid(&dbh, 1).await.unwrap();
     assert!(event.is_none());
@@ -160,7 +160,7 @@ async fn test_db_user() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
 
-    let dbh = db::get_database(&database_name, &database_namespace).await;
+    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
 
     let utc: DateTime<Utc> = Utc::now();
 
@@ -285,7 +285,7 @@ async fn test_db_groups() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
 
-    let dbh = db::get_database(&database_name, &database_namespace).await;
+    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
     add_admin_helper(&dbh).await;
     add_owner_helper(&dbh).await;
     add_user_helper(&dbh).await;
@@ -361,7 +361,7 @@ async fn test_db_events() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
 
-    let dbh = db::get_database(&database_name, &database_namespace).await;
+    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
 
     add_admin_helper(&dbh).await;
     add_owner_helper(&dbh).await;
@@ -409,7 +409,7 @@ async fn test_db_increment() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
 
-    let dbh = db::get_database(&database_name, &database_namespace).await;
+    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
 
     let people = db::increment(&dbh, "people").await.unwrap();
     assert_eq!(people, 1);

@@ -115,6 +115,8 @@ pub struct MyConfig {
     pub from_name: String,
     pub from_email: String,
 
+    pub database_username: String,
+    pub database_password: String,
     pub database_namespace: String,
     pub database_name: String,
 }

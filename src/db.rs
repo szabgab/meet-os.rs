@@ -20,7 +20,13 @@ pub fn fairing() -> AdHoc {
     AdHoc::on_ignite("Managed Database Connection", |rocket| async {
         let config = rocket.state::<MyConfig>().unwrap();
 
-        let dbh = get_database(&config.database_name, &config.database_namespace).await;
+        let dbh = get_database(
+            &config.database_username,
+            &config.database_password,
+            &config.database_name,
+            &config.database_namespace,
+        )
+        .await;
 
         rocket.manage(dbh)
     })
@@ -29,17 +35,16 @@ pub fn fairing() -> AdHoc {
 /// # Panics
 ///
 /// Panics when it fails to create the database folder or set up the database.
-pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> {
+pub async fn get_database(
+    username: &str,
+    password: &str,
+    db_name: &str,
+    db_namespace: &str,
+) -> Surreal<Client> {
     let address = "127.0.0.1:8000";
     let dbh = Surreal::new::<Ws>(address).await.unwrap();
 
-    // TODO: get the credentials from Rocket.toml
-    dbh.signin(Root {
-        username: "root",
-        password: "root",
-    })
-    .await
-    .unwrap();
+    dbh.signin(Root { username, password }).await.unwrap();
 
     dbh.use_ns(db_namespace).use_db(db_name).await.unwrap();
 
