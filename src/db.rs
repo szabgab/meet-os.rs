@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use rocket::fairing::AdHoc;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::engine::remote::ws::Ws;
+use surrealdb::opt::auth::Root;
 use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
@@ -31,6 +32,15 @@ pub fn fairing() -> AdHoc {
 pub async fn get_database(db_name: &str, db_namespace: &str) -> Surreal<Client> {
     let address = "127.0.0.1:8000";
     let dbh = Surreal::new::<Ws>(address).await.unwrap();
+
+    // TODO: get the credentials from Rocket.toml
+    dbh.signin(Root {
+        username: "root",
+        password: "root",
+    })
+    .await
+    .unwrap();
+
     dbh.use_ns(db_namespace).use_db(db_name).await.unwrap();
 
     upgrade(&dbh).await.unwrap();
@@ -64,31 +74,22 @@ pub async fn upgrade_to_1(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
 
     dbh.query("DEFINE INDEX user_email ON TABLE user COLUMNS email UNIQUE")
         .await
-        .unwrap()
-        .check()
         .unwrap();
+
     dbh.query("DEFINE INDEX user_uid ON TABLE user COLUMNS uid UNIQUE")
         .await
-        .unwrap()
-        .check()
         .unwrap();
 
     dbh.query("DEFINE INDEX group_gid ON TABLE group COLUMNS gid UNIQUE")
         .await
-        .unwrap()
-        .check()
         .unwrap();
 
     dbh.query("DEFINE INDEX member_ship ON TABLE membership COLUMNS uid, gid UNIQUE")
         .await
-        .unwrap()
-        .check()
         .unwrap();
 
     dbh.query("DEFINE INDEX rsvp_index ON TABLE rsvp COLUMNS uid, eid UNIQUE")
         .await
-        .unwrap()
-        .check()
         .unwrap();
 
     create_schema_version(dbh).await?;
@@ -125,7 +126,11 @@ async fn get_schema_version(dbh: &Surreal<Client>) -> surrealdb::Result<u64> {
 }
 
 async fn create_schema_version(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
-    let _created: Vec<Schema> = dbh.create("schema").content(Schema { version: 1 }).await?;
+    let _created: Option<Schema> = dbh
+        .create("schema")
+        .content(Schema { version: 1 })
+        .await
+        .unwrap();
 
     Ok(())
 }
@@ -141,7 +146,9 @@ async fn update_schema_version(dbh: &Surreal<Client>, version: u64) -> surrealdb
 pub async fn add_user(dbh: &Surreal<Client>, user: &User) -> surrealdb::Result<()> {
     rocket::info!("add user email: '{}'", user.email);
 
-    dbh.create(Resource::from("user")).content(user).await?;
+    dbh.create(Resource::from("user"))
+        .content(user.clone())
+        .await?;
 
     Ok(())
 }
@@ -149,7 +156,9 @@ pub async fn add_user(dbh: &Surreal<Client>, user: &User) -> surrealdb::Result<(
 pub async fn add_event(dbh: &Surreal<Client>, event: &Event) -> surrealdb::Result<()> {
     rocket::info!("add event eid: '{}' title: '{}'", event.eid, event.title);
 
-    dbh.create(Resource::from("event")).content(event).await?;
+    dbh.create(Resource::from("event"))
+        .content(event.clone())
+        .await?;
 
     Ok(())
 }
@@ -191,7 +200,9 @@ pub async fn update_event(dbh: &Surreal<Client>, event: &Event) -> surrealdb::Re
 pub async fn add_group(dbh: &Surreal<Client>, group: &Group) -> surrealdb::Result<()> {
     rocket::info!("add group: '{}'", group.name);
 
-    dbh.create(Resource::from("group")).content(group).await?;
+    dbh.create(Resource::from("group"))
+        .content(group.clone())
+        .await?;
 
     Ok(())
 }
@@ -250,9 +261,9 @@ pub async fn update_group(
                 description=$description
             WHERE gid=$gid;",
         )
-        .bind(("name", name))
-        .bind(("location", location))
-        .bind(("description", description))
+        .bind(("name", name.to_owned()))
+        .bind(("location", location.to_owned()))
+        .bind(("description", description.to_owned()))
         .bind(("gid", gid))
         .await?;
 
@@ -293,7 +304,7 @@ pub async fn save_password(
                 password=$password
             WHERE uid=$uid;",
         )
-        .bind(("password", password))
+        .bind(("password", password.to_owned()))
         .bind(("uid", uid))
         .await?;
 
@@ -324,12 +335,12 @@ pub async fn update_user(
                 github=$github
             WHERE uid=$uid;",
         )
-        .bind(("name", name))
-        .bind(("github", github))
-        .bind(("gitlab", gitlab))
-        .bind(("linkedin", linkedin))
+        .bind(("name", name.to_owned()))
+        .bind(("github", github.to_owned()))
+        .bind(("gitlab", gitlab.to_owned()))
+        .bind(("linkedin", linkedin.to_owned()))
         .bind(("uid", uid))
-        .bind(("about", about))
+        .bind(("about", about.to_owned()))
         .await?;
 
     let entry: Option<User> = response.take(0)?;
@@ -360,7 +371,7 @@ pub async fn get_user_by_email(
     rocket::info!("get_user_by_email: '{email}'");
     let mut response = dbh
         .query("SELECT * FROM user WHERE email=$email;")
-        .bind(("email", email))
+        .bind(("email", email.to_owned()))
         .await?;
 
     let entry: Option<User> = response.take(0)?;
@@ -381,9 +392,9 @@ pub async fn add_login_code_to_user(
     rocket::info!("add_login_code_to_user: '{email}', '{process}', '{code}'");
     let mut response = dbh
         .query("UPDATE user SET code=$code, process=$process WHERE email=$email;")
-        .bind(("email", email))
-        .bind(("process", process))
-        .bind(("code", code))
+        .bind(("email", email.to_owned()))
+        .bind(("process", process.to_owned()))
+        .bind(("code", code.to_owned()))
         .await?;
 
     let entry: Option<User> = response.take(0)?;
@@ -582,7 +593,7 @@ pub async fn increment(dbh: &Surreal<Client>, name: &str) -> surrealdb::Result<u
                 VALUES ($name, $count) ON DUPLICATE KEY UPDATE count += 1;
         ",
         )
-        .bind(("name", name))
+        .bind(("name", name.to_owned()))
         .bind(("count", 1_i32))
         .await?;
 

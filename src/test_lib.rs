@@ -36,6 +36,9 @@ pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
     let email_folder = tmp_dir.path().join("emails");
     let db_name = format!("test-name-{}", rand::random::<f64>());
     let db_namespace = "test-namespace-for-meet-os";
+    let user_name = "root";
+    let user_pw = "root";
+    println!("namespace: {db_namespace} database: {db_name}");
 
     if !filename.is_empty() {
         let path = format!("/external/tests/{filename}");
@@ -51,6 +54,10 @@ pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
             .arg(&db_namespace)
             .arg("--database")
             .arg(&db_name)
+            .arg("--user")
+            .arg(&user_name)
+            .arg("--pass")
+            .arg(&user_pw)
             .arg(&path)
             .output()
             .unwrap();

@@ -5,19 +5,19 @@
 
 ```
 docker volume create my-surreal-db
-docker run --detach --restart always --name surrealdb -p 127.0.0.1:8000:8000 --user root -v$(pwd):/external -v my-surreal-db:/database surrealdb/surrealdb:v1.5.5 start --user root --pass root --log trace file://database
+docker run --detach --restart always --name surrealdb -p 127.0.0.1:8000:8000 --user root -v$(pwd):/external -v my-surreal-db:/database surrealdb/surrealdb:v2.0.1 start --user root --pass root --log trace file://database
 ```
 
 * Note: At the end of the development session you might want to stop the docker container.
 
 ```
-docker stop surreal
+docker stop surrealdb
 ```
 
 * For the next session you can start it again.
 
 ```
-docker restart surreal
+docker restart surrealdb
 ```
 
 The database is store in the Docker volume. If you'd like to get rid of it you can do so
@@ -121,19 +121,19 @@ cargo test admin
 * dump / export
 
 ```
-docker exec -it surreal /surreal export -e http://localhost:8000 --ns meet-os-ns --db meet-os-db > out.txt
+docker exec -it surrealdb /surreal export -e http://localhost:8000 --ns meet-os-ns --db meet-os-db > out.txt
 ```
 
 * restore / import
 
 ```
-docker exec surreal /surreal import -e http://localhost:8000 --namespace meet-os-ns --database meet-os-db /external/out.txt
+docker exec surrealdb /surreal import -e http://localhost:8000 --namespace meet-os-ns --database meet-os-db /external/out.txt
 ```
 
 ## CLI
 
 ```
-docker exec -it surreal /surreal sql -e http://localhost:8000 --ns meet-os-ns --db meet-os-ns --pretty
+docker exec -it surrealdb /surreal sql -e http://localhost:8000 --ns meet-os-ns --db meet-os-ns --pretty
 ```
 
 ## Measure elapsed time of tests
