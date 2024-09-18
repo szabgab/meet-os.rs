@@ -171,3 +171,34 @@ Here is the procedure for the local development setup.
 * Import the data
 * Start the web application
 
+## Generate test coverage report
+
+* We generate a test coverage report in the GitHub Actions CI you download from GitHub.
+* You can also generate the report locally by using [tarpaulin](https://github.com/xd009642/tarpaulin)
+
+Install tarpaulin:
+
+```
+cargo install cargo-tarpaulin
+```
+
+Tarpaulin does not seem to work well with the forking tests so until we figure out how to fix that we need to temporarily remove
+those tests:
+
+```
+rm -f tests/*.rs
+```
+
+Run tarpaulin:
+
+```
+time cargo tarpaulin --ignore-tests -o Html -o Lcov --timeout 240 --engine llvm
+```
+
+Alternatively you can run it for a subset of the tests. e.g. for the database specific test:
+
+```
+time cargo tarpaulin --ignore-tests -o Html -o Lcov --timeout 240 --engine llvm -- test_db
+```
+
+These commands will generate 2 files: `lcov.info` is really only needed for the CI to upload to [Coveralls](https://coveralls.io/) and `tarpaulin-report.html` that you can open with your browser.
