@@ -52,7 +52,7 @@ pub struct RSVP {
 }
 
 #[non_exhaustive]
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub enum EventStatus {
     Draft,
     Published,
@@ -60,7 +60,7 @@ pub enum EventStatus {
     Hidden,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct Event {
     pub eid: usize,
     pub title: String,

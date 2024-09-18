@@ -1,7 +1,116 @@
 use chrono::{DateTime, Utc};
 
+use surrealdb::engine::remote::ws::Client;
+use surrealdb::Surreal;
+
 use crate::db;
-use meetings::{Group, User};
+use meetings::{Event, EventStatus, Group, User};
+
+use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
+
+async fn add_admin_helper(dbh: &Surreal<Client>) {
+    let utc: DateTime<Utc> = Utc::now();
+    let user = User {
+        uid: 1,
+        name: ADMIN_NAME.to_owned(),
+        email: ADMIN_EMAIL.to_owned(),
+        password: String::from("should be hashed password"),
+        code: String::from("generated code"),
+        process: String::from("register"),
+        verified: false,
+        registration_date: utc,
+        verification_date: None,
+        github: None,
+        gitlab: None,
+        linkedin: None,
+        about: None,
+    };
+
+    let res = db::add_user(&dbh, &user).await.unwrap();
+    assert_eq!(res, ());
+}
+
+async fn add_owner_helper(dbh: &Surreal<Client>) {
+    let utc: DateTime<Utc> = Utc::now();
+    let user = User {
+        uid: 2,
+        name: OWNER_NAME.to_owned(),
+        email: OWNER_EMAIL.to_owned(),
+        password: String::from("should be hashed password"),
+        code: String::from("generated code"),
+        process: String::from("register"),
+        verified: false,
+        registration_date: utc,
+        verification_date: None,
+        github: None,
+        gitlab: None,
+        linkedin: None,
+        about: None,
+    };
+
+    let res = db::add_user(&dbh, &user).await.unwrap();
+    assert_eq!(res, ());
+}
+
+async fn add_user_helper(dbh: &Surreal<Client>) {
+    let utc: DateTime<Utc> = Utc::now();
+    let user = User {
+        uid: 3,
+        name: USER_NAME.to_owned(),
+        email: USER_EMAIL.to_owned(),
+        password: String::from("should be hashed password"),
+        code: String::from("generated code"),
+        process: String::from("register"),
+        verified: false,
+        registration_date: utc,
+        verification_date: None,
+        github: None,
+        gitlab: None,
+        linkedin: None,
+        about: None,
+    };
+
+    let res = db::add_user(&dbh, &user).await.unwrap();
+    assert_eq!(res, ());
+}
+
+async fn add_groups_helper(dbh: &Surreal<Client>) {
+    let utc: DateTime<Utc> = Utc::now();
+    let rust_maven = Group {
+        gid: 1,
+        owner: 2,
+        name: String::from("Rust Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    assert_eq!(res, ());
+
+    let utc: DateTime<Utc> = Utc::now();
+    let rust_maven = Group {
+        gid: 2,
+        owner: 2,
+        name: String::from("Python Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    assert_eq!(res, ());
+
+    let utc: DateTime<Utc> = Utc::now();
+    let rust_maven = Group {
+        gid: 3,
+        owner: 3,
+        name: String::from("Guestt Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    assert_eq!(res, ());
+}
 
 #[async_test]
 async fn test_db_get_empty_lists() {
@@ -35,6 +144,9 @@ async fn test_db_get_none() {
 
     let user = db::get_user_by_id(&dbh, 23).await.unwrap();
     assert!(user.is_none());
+
+    let events = db::get_events(&dbh).await.unwrap();
+    assert!(events.is_empty());
 }
 
 #[async_test]
@@ -161,3 +273,84 @@ async fn test_db_user() {
         "There was a problem with the database: Database index `group_gid` already contains 1"
     ));
 }
+
+#[async_test]
+async fn test_db_events() {
+    let database_name = format!("test-name-{}", rand::random::<f64>());
+    let database_namespace = "test-namespace-for-meet-os";
+
+    let dbh = db::get_database(&database_name, &database_namespace).await;
+
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_user_helper(&dbh).await;
+    add_groups_helper(&dbh).await;
+
+    let eid = db::increment(&dbh, "event").await.unwrap();
+
+    let title = "First Conference";
+    let description = "";
+    let date: DateTime<Utc> = Utc::now();
+    let location = "";
+    let gid = 1;
+
+    let event = Event {
+        eid,
+        title: title.to_owned(),
+        description: description.to_owned(),
+        date,
+        location: location.to_owned(),
+        group_id: gid,
+        status: EventStatus::Published,
+    };
+
+    db::add_event(&dbh, &event).await.unwrap();
+
+    let events = db::get_events(&dbh).await.unwrap();
+    // println!("{:#?}", events);
+    assert_eq!(events.len(), 1);
+    let expected = Event {
+        eid: 1,
+        title: title.to_owned(),
+        date: events[0].date,
+        location: String::new(),
+        group_id: 1,
+        description: String::new(),
+        status: EventStatus::Published,
+    };
+
+    assert_eq!(events, [event.clone()]);
+
+    let this_event = db::get_event_by_eid(&dbh, 1).await.unwrap().unwrap();
+    assert_eq!(this_event, event);
+
+    let group_events = db::get_events_by_group_id(&dbh, 1).await;
+    assert_eq!(group_events, [event.clone()]);
+
+    let group_events = db::get_events_by_group_id(&dbh, 2).await;
+    assert!(group_events.is_empty());
+}
+
+// set_user_verified
+// update_group
+// remove_code
+// save_password
+// update_user
+// add_login_code_to_user
+
+// get_groups_by_membership_id
+// get_members_of_group
+// get_groups_by_owner_id
+// get_group_by_gid
+// increment
+// join_group
+// leave_group
+// get_membership
+
+// get_all_rsvp_for_event
+// get_rsvp
+// new_rsvp
+// update_rsvp
+
+// audit
+// get_audit
