@@ -370,15 +370,6 @@ async fn test_db_events() {
     let events = db::get_events(&dbh).await.unwrap();
     // println!("{:#?}", events);
     assert_eq!(events.len(), 1);
-    let expected = Event {
-        eid: 1,
-        title: title.to_owned(),
-        date: events[0].date,
-        location: String::new(),
-        group_id: 1,
-        description: String::new(),
-        status: EventStatus::Published,
-    };
 
     assert_eq!(events, [event.clone()]);
 
