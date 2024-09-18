@@ -88,7 +88,7 @@ async fn add_groups_helper(dbh: &Surreal<Client>) {
     assert_eq!(res, ());
 
     let utc: DateTime<Utc> = Utc::now();
-    let rust_maven = Group {
+    let python_maven = Group {
         gid: 2,
         owner: 2,
         name: String::from("Python Maven"),
@@ -96,19 +96,19 @@ async fn add_groups_helper(dbh: &Surreal<Client>) {
         description: String::new(),
         creation_date: utc,
     };
-    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    let res = db::add_group(&dbh, &python_maven).await.unwrap();
     assert_eq!(res, ());
 
     let utc: DateTime<Utc> = Utc::now();
-    let rust_maven = Group {
+    let guest_maven = Group {
         gid: 3,
         owner: 3,
-        name: String::from("Guestt Maven"),
+        name: String::from("Guest Maven"),
         location: String::new(),
         description: String::new(),
         creation_date: utc,
     };
-    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    let res = db::add_group(&dbh, &guest_maven).await.unwrap();
     assert_eq!(res, ());
 }
 
@@ -127,6 +127,10 @@ async fn test_db_get_empty_lists() {
 
     let groups = db::get_groups(&dbh).await.unwrap();
     assert!(groups.is_empty());
+
+    let eid = 1;
+    let rsvps = db::get_all_rsvps_for_event(&dbh, eid).await.unwrap();
+    assert!(rsvps.is_empty());
 }
 
 #[async_test]
@@ -145,8 +149,10 @@ async fn test_db_get_none() {
     let user = db::get_user_by_id(&dbh, 23).await.unwrap();
     assert!(user.is_none());
 
-    let events = db::get_events(&dbh).await.unwrap();
-    assert!(events.is_empty());
+    let eid = 1;
+    let uid = 3;
+    let rsvp = db::get_rsvp(&dbh, eid, uid).await.unwrap();
+    assert!(rsvp.is_none());
 }
 
 #[async_test]
@@ -275,6 +281,61 @@ async fn test_db_user() {
 }
 
 #[async_test]
+async fn test_db_groups() {
+    let database_name = format!("test-name-{}", rand::random::<f64>());
+    let database_namespace = "test-namespace-for-meet-os";
+
+    let dbh = db::get_database(&database_name, &database_namespace).await;
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_user_helper(&dbh).await;
+
+    let utc: DateTime<Utc> = Utc::now();
+    let rust_maven = Group {
+        gid: 1,
+        owner: 2,
+        name: String::from("Rust Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &rust_maven).await.unwrap();
+    assert_eq!(res, ());
+
+    let utc: DateTime<Utc> = Utc::now();
+    let python_maven = Group {
+        gid: 2,
+        owner: 2,
+        name: String::from("Python Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &python_maven).await.unwrap();
+    assert_eq!(res, ());
+
+    let utc: DateTime<Utc> = Utc::now();
+    let guest_maven = Group {
+        gid: 3,
+        owner: 3,
+        name: String::from("Guest Maven"),
+        location: String::new(),
+        description: String::new(),
+        creation_date: utc,
+    };
+    let res = db::add_group(&dbh, &guest_maven).await.unwrap();
+    assert_eq!(res, ());
+
+    let groups = db::get_groups(&dbh).await.unwrap();
+    assert_eq!(groups.len(), 3);
+    assert_eq!(groups, [rust_maven, python_maven, guest_maven]);
+
+    // get_group_by_gid
+
+    // get_groups_by_owner_id
+}
+
+#[async_test]
 async fn test_db_events() {
     let database_name = format!("test-name-{}", rand::random::<f64>());
     let database_namespace = "test-namespace-for-meet-os";
@@ -331,6 +392,26 @@ async fn test_db_events() {
     assert!(group_events.is_empty());
 }
 
+#[async_test]
+async fn test_db_increment() {
+    let database_name = format!("test-name-{}", rand::random::<f64>());
+    let database_namespace = "test-namespace-for-meet-os";
+
+    let dbh = db::get_database(&database_name, &database_namespace).await;
+
+    let people = db::increment(&dbh, "people").await.unwrap();
+    assert_eq!(people, 1);
+
+    let people = db::increment(&dbh, "people").await.unwrap();
+    assert_eq!(people, 2);
+
+    let cars = db::increment(&dbh, "cars").await.unwrap();
+    assert_eq!(cars, 1);
+
+    let people = db::increment(&dbh, "people").await.unwrap();
+    assert_eq!(people, 3);
+}
+
 // set_user_verified
 // update_group
 // remove_code
@@ -340,14 +421,12 @@ async fn test_db_events() {
 
 // get_groups_by_membership_id
 // get_members_of_group
-// get_groups_by_owner_id
-// get_group_by_gid
 // increment
 // join_group
 // leave_group
 // get_membership
 
-// get_all_rsvp_for_event
+// get_all_rsvps_for_event
 // get_rsvp
 // new_rsvp
 // update_rsvp
