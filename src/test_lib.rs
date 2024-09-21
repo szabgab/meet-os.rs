@@ -129,6 +129,9 @@ impl TestRunner {
     pub fn login_admin(&self) {
         login_helper(&self.client, ADMIN_EMAIL, ADMIN_PW);
     }
+    pub fn login_owner(&self) {
+        login_helper(&self.client, OWNER_EMAIL, OWNER_PW);
+    }
 }
 
 impl Drop for TestRunner {
@@ -449,10 +452,6 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     let res = client.get(format!("/logout")).dispatch();
     //assert_eq!(res.status(), Status::Ok);
     rocket::info!("--------------- finished setup_many_users ----------------")
-}
-
-pub fn login_owner(client: &Client) {
-    login_helper(client, OWNER_EMAIL, OWNER_PW);
 }
 
 // pub fn login_user(client: &Client) {
