@@ -110,7 +110,7 @@ impl TestRunner {
         setup_owner(&self.client, &self.email_folder);
         setup_user(&self.client, &self.email_folder);
         create_group_helper(&self.client, "First Group", 2);
-        logout(&self.client);
+        self.logout();
     }
 
     pub fn setup_for_events(&self) {
@@ -119,7 +119,11 @@ impl TestRunner {
         setup_user(&self.client, &self.email_folder);
         create_group_helper(&self.client, "First Group", 2);
         setup_event(&self.client, 1);
-        logout(&self.client);
+        self.logout();
+    }
+
+    pub fn logout(&self) {
+        self.client.get(format!("/logout")).dispatch();
     }
 }
 
@@ -441,10 +445,6 @@ pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
     let res = client.get(format!("/logout")).dispatch();
     //assert_eq!(res.status(), Status::Ok);
     rocket::info!("--------------- finished setup_many_users ----------------")
-}
-
-pub fn logout(client: &Client) {
-    client.get(format!("/logout")).dispatch();
 }
 
 pub fn login_admin(client: &Client) {

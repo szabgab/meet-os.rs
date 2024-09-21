@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unauthorized, check_unprocessable,
-    create_group_helper, logout, params, setup_admin, setup_owner, setup_user, TestRunner,
-    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    create_group_helper, params, setup_admin, setup_owner, setup_user, TestRunner, ADMIN_EMAIL,
+    OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -164,7 +164,7 @@ fn get_join_group_as_user() {
     setup_owner(&tr.client, &tr.email_folder);
     setup_user(&tr.client, &tr.email_folder);
     create_group_helper(&tr.client, "First Group", 2);
-    logout(&tr.client);
+    tr.logout();
 
     // user joins group
     let res = tr
@@ -510,7 +510,7 @@ fn post_edit_group_owner() {
     setup_owner(&tr.client, &tr.email_folder);
     //setup_foo1(&tr.client, &tr.email_folder);
     create_group_helper(&tr.client, "First Group", 2);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr
         .client

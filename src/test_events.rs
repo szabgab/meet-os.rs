@@ -1,7 +1,6 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unprocessable, create_group_helper,
-    logout, params, setup_admin, setup_owner, setup_user, TestRunner, OWNER_EMAIL, USER_EMAIL,
-    USER_NAME,
+    params, setup_admin, setup_owner, setup_user, TestRunner, OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -553,7 +552,7 @@ fn post_add_event_owner_title_too_short() {
     setup_owner(&tr.client, &tr.email_folder);
     setup_user(&tr.client, &tr.email_folder);
     create_group_helper(&tr.client, "My group", 2);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr
         .client
@@ -588,7 +587,7 @@ fn post_add_event_owner_invalid_date() {
     setup_owner(&tr.client, &tr.email_folder);
     setup_user(&tr.client, &tr.email_folder);
     create_group_helper(&tr.client, "My group", 2);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr
         .client
@@ -623,7 +622,7 @@ fn post_add_event_owner_event_in_the_past() {
     setup_owner(&tr.client, &tr.email_folder);
     //setup_user(&tr.client, &tr.email_folder);
     create_group_helper(&tr.client, "My group", 2);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr
         .client
@@ -658,7 +657,7 @@ fn post_add_event_owner() {
     setup_owner(&tr.client, &tr.email_folder);
     setup_user(&tr.client, &tr.email_folder);
     create_group_helper(&tr.client, "My group", 2);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr
         .client

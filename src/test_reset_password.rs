@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_guest_menu, check_html, check_message, check_profile_by_user, check_user_menu,
-    clean_emails, logout, params, read_code_from_email, register_and_verify_user, setup_admin,
-    setup_owner, TestRunner, OWNER_EMAIL,
+    clean_emails, params, read_code_from_email, register_and_verify_user, setup_admin, setup_owner,
+    TestRunner, OWNER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -159,7 +159,7 @@ fn save_password_get_invalid_code() {
 
     setup_admin(&tr.client, &tr.email_folder);
     setup_owner(&tr.client, &tr.email_folder);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr.client.get("/save-password/2/abc").dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -192,7 +192,7 @@ fn save_password_post_invalid_code() {
 
     setup_admin(&tr.client, &tr.email_folder);
     setup_owner(&tr.client, &tr.email_folder);
-    logout(&tr.client);
+    tr.logout();
 
     let res = tr
         .client
