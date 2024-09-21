@@ -5,6 +5,7 @@
 *.bak
 *.swp
 /backup/
+/temp/*
 
 
 # tarpaulin files
