@@ -28,6 +28,32 @@ pub const OTHER_NAME: &str = "Foo Alpha";
 pub const OTHER_EMAIL: &str = "foo-alpha@meet-os.com";
 pub const OTHER_PW: &str = "password1";
 
+pub fn remove_database(db_namespace: &str, db_name: &str, user_name: &str, user_pw: &str) {
+    let tmp_dir = tempfile::tempdir().unwrap();
+    let filename = tmp_dir.path().join("remove.sql");
+    let sql = format!("REMOVE DATABASE `{db_name}`;");
+    std::fs::write(&filename, sql).unwrap();
+
+    let result = std::process::Command::new("/usr/bin/docker")
+        .arg("exec")
+        .arg("surrealdb")
+        .arg("/surreal")
+        .arg("import")
+        .arg("-e")
+        .arg("http://localhost:8000")
+        .arg("--namespace")
+        .arg(&db_namespace)
+        .arg("--database")
+        .arg(&db_name)
+        .arg("--user")
+        .arg(&user_name)
+        .arg("--pass")
+        .arg(&user_pw)
+        .arg(filename.as_path())
+        .output()
+        .unwrap();
+}
+
 pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
     use rocket::config::Config;
 
@@ -79,6 +105,8 @@ pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
     let client = Client::tracked(app).unwrap();
 
     func(email_folder, client);
+
+    remove_database(db_namespace, &db_name, user_name, user_pw);
 }
 
 pub fn clean_emails(email_folder: &std::path::PathBuf) {
