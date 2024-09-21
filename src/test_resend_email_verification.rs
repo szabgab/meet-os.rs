@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_html, check_message, check_only_guest, check_profile_by_user, check_user_menu,
-    clean_emails, params, read_code_from_email, setup_unverified_user, setup_user, TestRunner,
-    UNVERIFIED_EMAIL, UNVERIFIED_NAME, USER_EMAIL,
+    clean_emails, params, read_code_from_email, setup_user, TestRunner, UNVERIFIED_EMAIL,
+    UNVERIFIED_NAME, USER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -71,7 +71,7 @@ fn post_resend_email_verification_verified_email() {
 fn post_resend_email_verification_unverified_email() {
     let tr = TestRunner::new();
 
-    setup_unverified_user(&tr.client, &tr.email_folder);
+    tr.setup_unverified_user();
     tr.logout();
 
     clean_emails(&tr.email_folder);

@@ -147,6 +147,15 @@ impl TestRunner {
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
     }
+
+    pub fn setup_unverified_user(&self) {
+        register_user_helper(
+            &self.client,
+            UNVERIFIED_NAME,
+            UNVERIFIED_EMAIL,
+            UNVERIFIED_PW,
+        );
+    }
 }
 
 impl Drop for TestRunner {
@@ -450,10 +459,6 @@ pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
 
 pub fn setup_user(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, USER_NAME, USER_EMAIL, USER_PW, &email_folder);
-}
-
-pub fn setup_unverified_user(client: &Client, email_folder: &PathBuf) {
-    register_user_helper(&client, UNVERIFIED_NAME, UNVERIFIED_EMAIL, UNVERIFIED_PW);
 }
 
 pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
