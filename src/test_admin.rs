@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_unauthorized, login_admin, login_owner, params, setup_admin,
-    setup_all, setup_owner, TestRunner, ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
+    check_html, check_message, check_unauthorized, login_owner, params, setup_admin, setup_all,
+    setup_owner, TestRunner, ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
 };
 
 use rocket::http::{ContentType, Status};
@@ -30,7 +30,7 @@ fn admin_page_as_admin() {
     let tr = TestRunner::new();
 
     setup_admin(&tr.client, &tr.email_folder);
-    login_admin(&tr.client);
+    tr.login_admin();
 
     let res = tr.client.get("/admin").dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -46,7 +46,7 @@ fn admin_page_as_admin() {
 fn admin_users_page_as_admin() {
     let tr = TestRunner::new();
     setup_all(&tr.client, &tr.email_folder);
-    login_admin(&tr.client);
+    tr.login_admin();
 
     let res = tr.client.get("/admin/users").dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -65,7 +65,7 @@ fn admin_users_page_as_admin() {
 fn admin_search_get_as_admin() {
     let tr = TestRunner::new();
     setup_admin(&tr.client, &tr.email_folder);
-    login_admin(&tr.client);
+    tr.login_admin();
 
     let res = tr.client.get("/admin/search").dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -78,7 +78,7 @@ fn admin_search_get_as_admin() {
 fn admin_search_post_as_admin() {
     let tr = TestRunner::new();
     setup_all(&tr.client, &tr.email_folder);
-    login_admin(&tr.client);
+    tr.login_admin();
 
     //no params
     let res = tr
@@ -117,7 +117,7 @@ fn admin_search_post_as_admin() {
 fn admin_audit_as_admin() {
     let tr = TestRunner::new();
     setup_admin(&tr.client, &tr.email_folder);
-    login_admin(&tr.client);
+    tr.login_admin();
 
     let res = tr.client.get("/admin/audit").dispatch();
     assert_eq!(res.status(), Status::Ok);
