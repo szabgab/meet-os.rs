@@ -109,6 +109,128 @@ pub fn run_inprocess(filename: &str, func: fn(std::path::PathBuf, Client)) {
     remove_database(db_namespace, &db_name, user_name, user_pw);
 }
 
+#[allow(dead_code)]
+pub struct TestRunner {
+    db_name: String,
+    db_namespace: String,
+    user_name: String,
+    user_pw: String,
+    tmp_dir: tempfile::TempDir,
+    pub email_folder: PathBuf,
+    pub client: Client,
+}
+
+impl TestRunner {
+    pub fn new() -> Self {
+        Self::from("")
+    }
+
+    pub fn from(filename: &str) -> Self {
+        use rocket::config::Config;
+
+        let tmp_dir = tempfile::tempdir().unwrap();
+        println!("tmp_dir: {:?}", tmp_dir);
+        let email_folder = tmp_dir.path().join("emails");
+        let db_name = format!("test-name-{}", rand::random::<f64>());
+        let db_namespace = String::from("test-namespace-for-meet-os");
+        let user_name = String::from("root");
+        let user_pw = String::from("root");
+        println!("namespace: {db_namespace} database: {db_name}");
+
+        if !filename.is_empty() {
+            let path = format!("/external/tests/{filename}");
+
+            let result = std::process::Command::new("/usr/bin/docker")
+                .arg("exec")
+                .arg("surrealdb")
+                .arg("/surreal")
+                .arg("import")
+                .arg("-e")
+                .arg("http://localhost:8000")
+                .arg("--namespace")
+                .arg(&db_namespace)
+                .arg("--database")
+                .arg(&db_name)
+                .arg("--user")
+                .arg(&user_name)
+                .arg("--pass")
+                .arg(&user_pw)
+                .arg(&path)
+                .output()
+                .unwrap();
+
+            println!("result.status: {}", result.status);
+            println!("STDOUT: {:?}", std::str::from_utf8(&result.stdout));
+            println!("STDERR: {:?}", std::str::from_utf8(&result.stderr));
+            assert_eq!(result.status, ExitStatus::default(), "Importing test data");
+        }
+
+        let provider = Config::figment()
+            .merge(("database_namespace", &db_namespace))
+            .merge(("database_name", &db_name))
+            .merge(("email", "Folder"))
+            .merge(("email_folder", email_folder.to_str().unwrap()))
+            .merge(("admins", [ADMIN_EMAIL]));
+
+        let app = super::rocket().configure(provider);
+        let client = Client::tracked(app).unwrap();
+
+        Self {
+            db_name,
+            db_namespace,
+            user_name,
+            user_pw,
+            tmp_dir,
+            email_folder,
+            client,
+        }
+    }
+}
+
+impl Drop for TestRunner {
+    fn drop(&mut self) {
+        let tmp_dir = tempfile::tempdir_in("temp").unwrap();
+        let filename = tmp_dir.path().join("remove.sql");
+        println!("filename: {filename:?}");
+        let dirname = filename
+            .ancestors()
+            .nth(1)
+            .unwrap()
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap();
+        let path_to_file = format!("/external/temp/{dirname}/remove.sql");
+        println!("dirname: '{dirname}' '{path_to_file}'");
+        let sql = format!("REMOVE DATABASE `{}`;", self.db_name);
+        std::fs::write(&filename, sql).unwrap();
+
+        let result = std::process::Command::new("/usr/bin/docker")
+            .arg("exec")
+            .arg("surrealdb")
+            .arg("/surreal")
+            .arg("import")
+            .arg("-e")
+            .arg("http://localhost:8000")
+            .arg("--namespace")
+            .arg(&self.db_namespace)
+            .arg("--database")
+            .arg(&self.db_name)
+            .arg("--user")
+            .arg(&self.user_name)
+            .arg("--pass")
+            .arg(&self.user_pw)
+            .arg(path_to_file)
+            .output()
+            .unwrap();
+
+        println!("result.status: {}", result.status);
+        println!("STDOUT: {:?}", std::str::from_utf8(&result.stdout));
+        println!("STDERR: {:?}", std::str::from_utf8(&result.stderr));
+        assert_eq!(result.status, ExitStatus::default(), "Importing test data");
+    }
+}
+
 pub fn clean_emails(email_folder: &std::path::PathBuf) {
     for entry in email_folder.read_dir().unwrap() {
         let entry = entry.unwrap();
