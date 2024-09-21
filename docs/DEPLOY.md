@@ -8,8 +8,7 @@
 * We use [SurrealDB](https://surrealdb.com/) in a Docker container.
 
 ```
-docker volume create my-surreal-db
-docker run --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:v1.5.4 start --log trace file://database
+./tools/setup.sh
 ```
 
 This will start the database. The container will restart when the computer reboots.
@@ -53,8 +52,7 @@ sudo systemctl restart meet-os.service
 Start the docker container (same as the production)
 
 ```
-docker volume create my-surreal-db
-docker run --detach --restart always --name surreal -p 127.0.0.1:8000:8000 --user root -v my-surreal-db:/database surrealdb/surrealdb:v1.5.4 start --log trace file://database
+./tools/setup.sh
 ```
 
 Clone the repository to a local folder (different from production)

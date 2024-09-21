@@ -4,8 +4,7 @@
 * Start the Docker container that runs the SurrealDB
 
 ```
-docker volume create my-surreal-db
-docker run --detach --restart always --name surrealdb -p 127.0.0.1:8000:8000 --user root -v$(pwd):/external -v my-surreal-db:/database surrealdb/surrealdb:v2.0.1 start --user root --pass root --log trace file://database
+./tools/setup.sh
 ```
 
 * Note: At the end of the development session you might want to stop the docker container.
