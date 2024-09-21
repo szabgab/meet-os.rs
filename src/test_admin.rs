@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_unauthorized, login_admin, login_owner, params, run_inprocess,
-    setup_admin, setup_all, setup_owner, TestRunner, ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
+    check_html, check_message, check_unauthorized, login_admin, login_owner, params, setup_admin,
+    setup_all, setup_owner, TestRunner, ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
 };
 
 use rocket::http::{ContentType, Status};
