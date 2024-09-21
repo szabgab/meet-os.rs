@@ -151,10 +151,7 @@ async fn test_db_get_empty_lists() {
 
 #[async_test]
 async fn test_db_get_none() {
-    let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = "test-namespace-for-meet-os";
-
-    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
+    let (dbh, db_name) = setup().await;
 
     let event = db::get_event_by_eid(&dbh, 1).await.unwrap();
     assert!(event.is_none());
@@ -169,14 +166,13 @@ async fn test_db_get_none() {
     let uid = 3;
     let rsvp = db::get_rsvp(&dbh, eid, uid).await.unwrap();
     assert!(rsvp.is_none());
+
+    teardown(dbh, db_name).await;
 }
 
 #[async_test]
 async fn test_db_user() {
-    let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = "test-namespace-for-meet-os";
-
-    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
+    let (dbh, db_name) = setup().await;
 
     let utc: DateTime<Utc> = Utc::now();
 
@@ -294,14 +290,14 @@ async fn test_db_user() {
     assert!(err.contains(
         "There was a problem with the database: Database index `group_gid` already contains 1"
     ));
+
+    teardown(dbh, db_name).await;
 }
 
 #[async_test]
 async fn test_db_groups() {
-    let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = "test-namespace-for-meet-os";
+    let (dbh, db_name) = setup().await;
 
-    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
     add_admin_helper(&dbh).await;
     add_owner_helper(&dbh).await;
     add_user_helper(&dbh).await;
@@ -370,14 +366,13 @@ async fn test_db_groups() {
 
     let group = db::get_group_by_gid(&dbh, 3).await.unwrap().unwrap();
     assert_eq!(group, guest_maven);
+
+    teardown(dbh, db_name).await;
 }
 
 #[async_test]
 async fn test_db_events() {
-    let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = "test-namespace-for-meet-os";
-
-    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
+    let (dbh, db_name) = setup().await;
 
     add_admin_helper(&dbh).await;
     add_owner_helper(&dbh).await;
@@ -418,14 +413,13 @@ async fn test_db_events() {
 
     let group_events = db::get_events_by_group_id(&dbh, 2).await;
     assert!(group_events.is_empty());
+
+    teardown(dbh, db_name).await;
 }
 
 #[async_test]
 async fn test_db_increment() {
-    let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = "test-namespace-for-meet-os";
-
-    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
+    let (dbh, db_name) = setup().await;
 
     let people = db::increment(&dbh, "people").await.unwrap();
     assert_eq!(people, 1);
@@ -438,6 +432,8 @@ async fn test_db_increment() {
 
     let people = db::increment(&dbh, "people").await.unwrap();
     assert_eq!(people, 3);
+
+    teardown(dbh, db_name).await;
 }
 
 // set_user_verified
