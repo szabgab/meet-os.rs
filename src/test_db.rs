@@ -8,6 +8,23 @@ use meetings::{Event, EventStatus, Group, User};
 
 use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
 
+async fn setup() -> (Surreal<Client>, String) {
+    let db_namespace = String::from("test-namespace-for-meet-os");
+    let db_name = format!("test-name-{}", rand::random::<f64>());
+
+    let dbh = db::get_database("root", "root", &db_name, &db_namespace).await;
+
+    (dbh, db_name)
+}
+
+async fn teardown(dbh: Surreal<Client>, db_name: String) {
+    let res = dbh
+        .query("REMOVE DATABASE `$name`")
+        .bind(("name", db_name))
+        .await
+        .unwrap();
+}
+
 async fn add_admin_helper(dbh: &Surreal<Client>) {
     let utc: DateTime<Utc> = Utc::now();
     let user = User {
@@ -114,10 +131,7 @@ async fn add_groups_helper(dbh: &Surreal<Client>) {
 
 #[async_test]
 async fn test_db_get_empty_lists() {
-    let database_name = format!("test-name-{}", rand::random::<f64>());
-    let database_namespace = "test-namespace-for-meet-os";
-
-    let dbh = db::get_database("root", "root", &database_name, &database_namespace).await;
+    let (dbh, db_name) = setup().await;
 
     let events = db::get_events(&dbh).await.unwrap();
     assert!(events.is_empty());
@@ -131,6 +145,8 @@ async fn test_db_get_empty_lists() {
     let eid = 1;
     let rsvps = db::get_all_rsvps_for_event(&dbh, eid).await.unwrap();
     assert!(rsvps.is_empty());
+
+    teardown(dbh, db_name).await;
 }
 
 #[async_test]
