@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_unauthorized, params, setup_admin, setup_all, setup_owner,
-    TestRunner, ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
+    check_html, check_message, check_unauthorized, params, setup_admin, setup_owner, TestRunner,
+    ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
 };
 
 use rocket::http::{ContentType, Status};
@@ -45,7 +45,7 @@ fn admin_page_as_admin() {
 #[test]
 fn admin_users_page_as_admin() {
     let tr = TestRunner::new();
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
     tr.login_admin();
 
     let res = tr.client.get("/admin/users").dispatch();
@@ -77,7 +77,7 @@ fn admin_search_get_as_admin() {
 #[test]
 fn admin_search_post_as_admin() {
     let tr = TestRunner::new();
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
     tr.login_admin();
 
     //no params

@@ -1,4 +1,4 @@
-use crate::test_lib::{check_guest_menu, check_html, setup_all, TestRunner};
+use crate::test_lib::{check_guest_menu, check_html, TestRunner};
 use rocket::http::Status;
 
 #[test]
@@ -24,7 +24,7 @@ fn main_page_empty_db() {
 fn main_page_with_data() {
     let tr = TestRunner::new();
 
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
 
     let res = tr.client.get("/").dispatch();
     assert_eq!(res.status(), Status::Ok);

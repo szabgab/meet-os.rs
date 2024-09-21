@@ -156,6 +156,24 @@ impl TestRunner {
             UNVERIFIED_PW,
         );
     }
+
+    pub fn setup_all(&self) {
+        setup_many_users(&self.client, &self.email_folder);
+
+        create_group_helper(&self.client, "First Group", 2);
+        create_group_helper(&self.client, "Second Group", 2);
+        create_group_helper(&self.client, "Third Group", 3);
+        setup_event(&self.client, 1);
+        setup_event(&self.client, 2);
+        setup_event(&self.client, 3);
+
+        // Make sure the client is not logged in after the setup
+        let res = &self.client.get(format!("/logout")).dispatch();
+        // The setup_many_users logged the user out already so the above might return an error
+        // That's why we don't check if it is Status::Ok
+        //assert_eq!(res.status(), Status::Ok);
+        rocket::info!("--------------- finished setup_all ----------------")
+    }
 }
 
 impl Drop for TestRunner {
@@ -536,22 +554,4 @@ pub fn setup_event(client: &Client, eid: usize) {
 
         _ => panic!("no such eid",),
     }
-}
-
-pub fn setup_all(client: &Client, email_folder: &PathBuf) {
-    setup_many_users(client, email_folder);
-
-    create_group_helper(&client, "First Group", 2);
-    create_group_helper(&client, "Second Group", 2);
-    create_group_helper(&client, "Third Group", 3);
-    setup_event(client, 1);
-    setup_event(client, 2);
-    setup_event(client, 3);
-
-    // Make sure the client is not logged in after the setup
-    let res = client.get(format!("/logout")).dispatch();
-    // The setup_many_users logged the user out already so the above might return an error
-    // That's why we don't check if it is Status::Ok
-    //assert_eq!(res.status(), Status::Ok);
-    rocket::info!("--------------- finished setup_all ----------------")
 }

@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_not_the_owner, check_unprocessable, params, setup_all,
-    setup_many_users, TestRunner, OWNER_EMAIL, USER_EMAIL,
+    check_html, check_message, check_not_the_owner, check_unprocessable, params, setup_many_users,
+    TestRunner, OWNER_EMAIL, USER_EMAIL,
 };
 use rocket::http::{ContentType, Status};
 
@@ -43,7 +43,7 @@ fn contact_members_get_user_with_invalid_gid() {
 fn contact_members_get_owner_with_gid() {
     let tr = TestRunner::new();
 
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
 
     let res = tr
         .client
@@ -80,7 +80,7 @@ fn contact_members_get_user_not_owner() {
 fn contact_members_post_user_without_gid() {
     let tr = TestRunner::new();
 
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
 
     let res = tr
         .client
@@ -95,7 +95,7 @@ fn contact_members_post_user_without_gid() {
 fn contact_members_post_user_with_all() {
     let tr = TestRunner::new();
 
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
 
     let res = tr
         .client
@@ -121,7 +121,7 @@ fn contact_members_post_user_with_all() {
 fn contact_members_post_user_subject_too_short() {
     let tr = TestRunner::new();
 
-    setup_all(&tr.client, &tr.email_folder);
+    tr.setup_all();
 
     let res = tr
         .client
