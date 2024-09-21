@@ -1,6 +1,6 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unprocessable, params, setup_all,
-    setup_for_groups, setup_many_users, TestRunner, OWNER_EMAIL, USER_EMAIL,
+    setup_many_users, TestRunner, OWNER_EMAIL, USER_EMAIL,
 };
 use rocket::http::{ContentType, Status};
 
@@ -63,7 +63,7 @@ fn contact_members_get_owner_with_gid() {
 #[test]
 fn contact_members_get_user_not_owner() {
     let tr = TestRunner::new();
-    setup_for_groups(&tr.client, &tr.email_folder);
+    tr.setup_for_groups();
 
     let res = tr
         .client
@@ -148,7 +148,7 @@ fn contact_members_post_user_subject_too_short() {
 fn contact_members_post_user_who_is_not_the_owner() {
     let tr = TestRunner::new();
 
-    setup_for_groups(&tr.client, &tr.email_folder);
+    tr.setup_for_groups();
 
     let res = tr
         .client

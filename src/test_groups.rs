@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unauthorized, check_unprocessable,
-    create_group_helper, logout, params, setup_admin, setup_for_groups, setup_owner, setup_user,
-    TestRunner, ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    create_group_helper, logout, params, setup_admin, setup_owner, setup_user, TestRunner,
+    ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -364,7 +364,7 @@ fn get_edit_group_user_no_such_group() {
 fn get_edit_group_user_is_not_the_owner() {
     let tr = TestRunner::new();
 
-    setup_for_groups(&tr.client, &tr.email_folder);
+    tr.setup_for_groups();
 
     let res = tr
         .client
@@ -463,7 +463,7 @@ fn post_edit_group_user_no_such_group() {
 fn post_edit_group_by_user_not_owner() {
     let tr = TestRunner::new();
 
-    setup_for_groups(&tr.client, &tr.email_folder);
+    tr.setup_for_groups();
 
     let res = tr
         .client
@@ -485,7 +485,7 @@ fn post_edit_group_by_user_not_owner() {
 fn post_edit_group_user_not_owner() {
     let tr = TestRunner::new();
 
-    setup_for_groups(&tr.client, &tr.email_folder);
+    tr.setup_for_groups();
 
     let res = tr
         .client
