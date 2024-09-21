@@ -112,6 +112,15 @@ impl TestRunner {
         create_group_helper(&self.client, "First Group", 2);
         logout(&self.client);
     }
+
+    pub fn setup_for_events(&self) {
+        setup_admin(&self.client, &self.email_folder);
+        setup_owner(&self.client, &self.email_folder);
+        setup_user(&self.client, &self.email_folder);
+        create_group_helper(&self.client, "First Group", 2);
+        setup_event(&self.client, 1);
+        logout(&self.client);
+    }
 }
 
 impl Drop for TestRunner {
@@ -539,13 +548,4 @@ pub fn setup_all(client: &Client, email_folder: &PathBuf) {
     // That's why we don't check if it is Status::Ok
     //assert_eq!(res.status(), Status::Ok);
     rocket::info!("--------------- finished setup_all ----------------")
-}
-
-pub fn setup_for_events(client: &Client, email_folder: &PathBuf) {
-    setup_admin(&client, &email_folder);
-    setup_owner(&client, &email_folder);
-    setup_user(&client, &email_folder);
-    create_group_helper(&client, "First Group", 2);
-    setup_event(&client, 1);
-    logout(&client);
 }

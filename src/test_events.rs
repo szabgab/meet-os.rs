@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unprocessable, create_group_helper,
-    logout, params, setup_admin, setup_for_events, setup_owner, setup_user, TestRunner,
-    OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    logout, params, setup_admin, setup_owner, setup_user, TestRunner, OWNER_EMAIL, USER_EMAIL,
+    USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -16,7 +16,7 @@ use rocket::http::{ContentType, Status};
 fn leave_event_before_joining_it() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -35,7 +35,7 @@ fn leave_event_before_joining_it() {
 #[test]
 fn join_event() {
     let tr = TestRunner::new();
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     // event page before
     let res = tr
@@ -200,7 +200,7 @@ fn join_event() {
 fn join_not_existing_event() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -216,7 +216,7 @@ fn join_not_existing_event() {
 #[test]
 fn leave_not_existing_event() {
     let tr = TestRunner::new();
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -232,7 +232,7 @@ fn leave_not_existing_event() {
 fn join_event_by_group_owner() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -297,7 +297,7 @@ fn post_edit_event_user_no_such_event() {
 #[test]
 fn post_edit_event_user_not_the_owner() {
     let tr = TestRunner::new();
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     // update
     let res = tr
@@ -322,7 +322,7 @@ fn post_edit_event_user_not_the_owner() {
 fn post_edit_event_owner_title_too_short() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     // update
     let res = tr
@@ -354,7 +354,7 @@ fn post_edit_event_owner_title_too_short() {
 fn post_edit_event_owner_invalid_date() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     // update
     let res = tr
@@ -386,7 +386,7 @@ fn post_edit_event_owner_invalid_date() {
 fn post_edit_event_owner_date_in_the_past() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     // update
     let res = tr
@@ -418,7 +418,7 @@ fn post_edit_event_owner_date_in_the_past() {
 fn post_edit_event_owner() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     // check the event page before the update
     let res = tr.client.get("/event/1").dispatch();
@@ -489,7 +489,7 @@ fn get_add_event_user_missing_gid() {
 fn get_add_event_user_not_the_owner() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -503,7 +503,7 @@ fn get_add_event_user_not_the_owner() {
 fn get_add_event_user_is_owner() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -526,7 +526,7 @@ fn get_add_event_user_is_owner() {
 fn post_add_event_user_not_owner() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -689,7 +689,7 @@ fn post_add_event_owner() {
 fn get_event_as_guest() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr.client.get("/event/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -721,7 +721,7 @@ fn get_edit_event_as_user_no_eid() {
 fn get_edit_event_as_user_but_not_owner() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
@@ -734,7 +734,7 @@ fn get_edit_event_as_user_but_not_owner() {
 fn get_edit_event_as_owner_with_eid() {
     let tr = TestRunner::new();
 
-    setup_for_events(&tr.client, &tr.email_folder);
+    tr.setup_for_events();
 
     let res = tr
         .client
