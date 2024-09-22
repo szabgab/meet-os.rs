@@ -268,6 +268,14 @@ impl TestRunner {
 
         assert_eq!(res.status(), Status::Ok);
     }
+
+    pub fn clean_emails(&self) {
+        let email_folder = &self.email_folder;
+        for entry in email_folder.read_dir().unwrap() {
+            let entry = entry.unwrap();
+            std::fs::remove_file(entry.path()).unwrap();
+        }
+    }
 }
 
 impl Drop for TestRunner {
@@ -311,13 +319,6 @@ impl Drop for TestRunner {
         println!("STDOUT: {:?}", std::str::from_utf8(&result.stdout));
         println!("STDERR: {:?}", std::str::from_utf8(&result.stderr));
         assert_eq!(result.status, ExitStatus::default(), "Importing test data");
-    }
-}
-
-pub fn clean_emails(email_folder: &std::path::PathBuf) {
-    for entry in email_folder.read_dir().unwrap() {
-        let entry = entry.unwrap();
-        std::fs::remove_file(entry.path()).unwrap();
     }
 }
 

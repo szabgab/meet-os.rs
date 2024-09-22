@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_guest_menu, check_html, check_message, check_profile_by_user, check_user_menu,
-    clean_emails, params, read_code_from_email, register_and_verify_user, TestRunner, OWNER_EMAIL,
+    check_guest_menu, check_html, check_message, check_profile_by_user, check_user_menu, params,
+    read_code_from_email, register_and_verify_user, TestRunner, OWNER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -52,7 +52,7 @@ fn reset_password_full() {
         "No user with address <b>peter@meet-os.com</b>. Please try again"
     );
 
-    clean_emails(&tr.email_folder);
+    tr.clean_emails();
     // Try with the right email address
     let res = tr
         .client
