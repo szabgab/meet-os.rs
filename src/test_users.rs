@@ -1,9 +1,8 @@
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_message, check_not_logged_in,
     check_profile_by_guest, check_profile_by_user, check_user_menu, params, read_code_from_email,
-    register_and_verify_user, setup_admin, setup_owner, setup_user, TestRunner, ADMIN_EMAIL,
-    ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL, OWNER_NAME, OWNER_PW, UNVERIFIED_NAME,
-    USER_EMAIL, USER_NAME,
+    register_and_verify_user, TestRunner, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME,
+    OWNER_EMAIL, OWNER_NAME, OWNER_PW, UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -239,7 +238,7 @@ fn post_login_regular_user() {
 fn post_login_admin() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
+    tr.setup_admin();
     tr.logout();
 
     // login as admin
@@ -365,7 +364,7 @@ fn post_login_with_unregistered_email() {
 fn post_login_with_bad_password() {
     let tr = TestRunner::new();
 
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_user();
     tr.logout();
 
     let res = tr
@@ -469,7 +468,7 @@ fn post_register_with_short_password() {
 fn get_edit_profile_user() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -566,8 +565,8 @@ fn user_id_that_does_not_exist() {
 #[test]
 fn get_user_page() {
     let tr = TestRunner::new();
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
 
     let res = tr.client.get("/user/2").dispatch();
 
@@ -609,8 +608,8 @@ fn unverified_user_page_by_guest() {
 fn unverified_user_on_user_page_by_guest() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_user();
     tr.setup_unverified_user();
     tr.logout();
 
@@ -633,7 +632,7 @@ fn unverified_user_on_user_page_by_guest() {
 fn post_edit_profile_failures() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     // edit profile page invalid github account
     let res = tr
@@ -724,7 +723,7 @@ fn post_edit_profile_failures() {
 fn post_edit_profile_works() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     // verify that if we submit html tags to the about field, those are properly escaped in the result
     let res = tr.client

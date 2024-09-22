@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_not_the_owner, check_unprocessable, params, setup_admin,
-    setup_owner, setup_user, TestRunner, OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    check_html, check_message, check_not_the_owner, check_unprocessable, params, TestRunner,
+    OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -251,7 +251,7 @@ fn join_event_by_group_owner() {
 #[test]
 fn post_edit_event_user_missing_data() {
     let tr = TestRunner::new();
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -266,7 +266,7 @@ fn post_edit_event_user_missing_data() {
 fn post_edit_event_user_no_such_event() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -470,7 +470,7 @@ fn post_edit_event_owner() {
 fn get_add_event_user_missing_gid() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -548,9 +548,9 @@ fn post_add_event_user_not_owner() {
 fn post_add_event_owner_title_too_short() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
+    tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
 
@@ -583,9 +583,9 @@ fn post_add_event_owner_title_too_short() {
 fn post_add_event_owner_invalid_date() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
+    tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
 
@@ -618,9 +618,9 @@ fn post_add_event_owner_invalid_date() {
 fn post_add_event_owner_event_in_the_past() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
-    //setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
+    //tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
 
@@ -653,9 +653,9 @@ fn post_add_event_owner_event_in_the_past() {
 fn post_add_event_owner() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
+    tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
 
@@ -702,7 +702,7 @@ fn get_event_as_guest() {
 fn get_edit_event_as_user_no_eid() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client

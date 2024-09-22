@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_unauthorized, params, setup_admin, setup_owner, TestRunner,
-    ADMIN_EMAIL, ADMIN_NAME, OTHER_NAME,
+    check_html, check_message, check_unauthorized, params, TestRunner, ADMIN_EMAIL, ADMIN_NAME,
+    OTHER_NAME,
 };
 
 use rocket::http::{ContentType, Status};
@@ -9,7 +9,7 @@ use rocket::http::{ContentType, Status};
 fn admin_pages_as_user() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
     tr.login_owner();
 
     for path in ["/admin", "/admin/users", "/admin/audit", "/admin/search"] {
@@ -29,7 +29,7 @@ fn admin_pages_as_user() {
 fn admin_page_as_admin() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
+    tr.setup_admin();
     tr.login_admin();
 
     let res = tr.client.get("/admin").dispatch();
@@ -64,7 +64,7 @@ fn admin_users_page_as_admin() {
 #[test]
 fn admin_search_get_as_admin() {
     let tr = TestRunner::new();
-    setup_admin(&tr.client, &tr.email_folder);
+    tr.setup_admin();
     tr.login_admin();
 
     let res = tr.client.get("/admin/search").dispatch();
@@ -116,7 +116,7 @@ fn admin_search_post_as_admin() {
 #[test]
 fn admin_audit_as_admin() {
     let tr = TestRunner::new();
-    setup_admin(&tr.client, &tr.email_folder);
+    tr.setup_admin();
     tr.login_admin();
 
     let res = tr.client.get("/admin/audit").dispatch();

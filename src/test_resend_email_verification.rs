@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_html, check_message, check_only_guest, check_profile_by_user, check_user_menu,
-    clean_emails, params, read_code_from_email, setup_user, TestRunner, UNVERIFIED_EMAIL,
-    UNVERIFIED_NAME, USER_EMAIL,
+    clean_emails, params, read_code_from_email, TestRunner, UNVERIFIED_EMAIL, UNVERIFIED_NAME,
+    USER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -26,7 +26,7 @@ fn get_resend_email_verification_guest() {
 fn get_resend_email_verification_logged_in_user() {
     let tr = TestRunner::new();
 
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_user();
     let res = tr.client.get("/resend-email-verification-code").dispatch();
     check_only_guest!(res);
 }
@@ -35,7 +35,7 @@ fn get_resend_email_verification_logged_in_user() {
 fn post_resend_email_verification_logged_in_user() {
     let tr = TestRunner::new();
 
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_user();
     let res = tr
         .client
         .post("/resend-email-verification-code")
@@ -49,7 +49,7 @@ fn post_resend_email_verification_logged_in_user() {
 fn post_resend_email_verification_verified_email() {
     let tr = TestRunner::new();
 
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_user();
     tr.logout();
 
     let res = tr

@@ -106,17 +106,17 @@ impl TestRunner {
     }
 
     pub fn setup_for_groups(&self) {
-        setup_admin(&self.client, &self.email_folder);
-        setup_owner(&self.client, &self.email_folder);
-        setup_user(&self.client, &self.email_folder);
+        self.setup_admin();
+        self.setup_owner();
+        self.setup_user();
         self.create_group_helper("First Group", 2);
         self.logout();
     }
 
     pub fn setup_for_events(&self) {
-        setup_admin(&self.client, &self.email_folder);
-        setup_owner(&self.client, &self.email_folder);
-        setup_user(&self.client, &self.email_folder);
+        self.setup_admin();
+        self.setup_owner();
+        self.setup_user();
         self.create_group_helper("First Group", 2);
         self.setup_event(1);
         self.logout();
@@ -175,10 +175,40 @@ impl TestRunner {
         rocket::info!("--------------- finished setup_all ----------------")
     }
 
+    pub fn setup_admin(&self) {
+        register_and_verify_user(
+            &self.client,
+            ADMIN_NAME,
+            ADMIN_EMAIL,
+            ADMIN_PW,
+            &self.email_folder,
+        );
+    }
+
+    pub fn setup_owner(&self) {
+        register_and_verify_user(
+            &self.client,
+            OWNER_NAME,
+            OWNER_EMAIL,
+            OWNER_PW,
+            &self.email_folder,
+        );
+    }
+
+    pub fn setup_user(&self) {
+        register_and_verify_user(
+            &self.client,
+            USER_NAME,
+            USER_EMAIL,
+            USER_PW,
+            &self.email_folder,
+        );
+    }
+
     pub fn setup_many_users(&self) {
-        setup_admin(&self.client, &self.email_folder);
-        setup_owner(&self.client, &self.email_folder);
-        setup_user(&self.client, &self.email_folder);
+        self.setup_admin();
+        self.setup_owner();
+        self.setup_user();
 
         register_and_verify_user(
             &self.client,
@@ -529,18 +559,6 @@ pub fn register_and_verify_user(
     register_user_helper(client, name, email, password);
 
     verify_email(email_folder, client);
-}
-
-pub fn setup_admin(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW, &email_folder);
-}
-
-pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, OWNER_NAME, OWNER_EMAIL, OWNER_PW, &email_folder);
-}
-
-pub fn setup_user(client: &Client, email_folder: &PathBuf) {
-    register_and_verify_user(&client, USER_NAME, USER_EMAIL, USER_PW, &email_folder);
 }
 
 pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, owner_email: String) {

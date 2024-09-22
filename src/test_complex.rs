@@ -1,14 +1,12 @@
-use crate::test_lib::{
-    check_html, params, setup_admin, setup_owner, TestRunner, ADMIN_EMAIL, OWNER_EMAIL,
-};
+use crate::test_lib::{check_html, params, TestRunner, ADMIN_EMAIL, OWNER_EMAIL};
 
 use rocket::http::{ContentType, Status};
 
 #[test]
 fn test_complex() {
     let tr = TestRunner::new();
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
 
     // profile is not listing any groups
     let res = tr

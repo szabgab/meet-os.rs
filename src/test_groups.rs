@@ -1,7 +1,6 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unauthorized, check_unprocessable,
-    params, setup_admin, setup_owner, setup_user, TestRunner, ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL,
-    USER_NAME,
+    params, TestRunner, ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -18,8 +17,8 @@ use rocket::http::{ContentType, Status};
 fn create_group_by_admin() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
 
     // Access the Group creation page with authorized user
     let res = tr
@@ -90,7 +89,7 @@ fn create_group_by_admin() {
 fn create_group_unauthorized() {
     let tr = TestRunner::new();
 
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_user();
 
     // Access the Group creation page with unauthorized user
     let res = tr
@@ -139,7 +138,7 @@ fn create_group_guest() {
 fn get_join_group_not_existing_group_as_user() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -160,9 +159,9 @@ fn get_join_group_not_existing_group_as_user() {
 fn get_join_group_as_user() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
+    tr.setup_user();
     tr.create_group_helper("First Group", 2);
     tr.logout();
 
@@ -256,8 +255,8 @@ fn get_join_group_as_user() {
 fn get_join_group_as_owner() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
     tr.create_group_helper("First Group", 2);
 
     let res = tr
@@ -278,7 +277,7 @@ fn get_join_group_as_owner() {
 fn get_leave_not_existing_group() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -299,8 +298,8 @@ fn get_leave_not_existing_group() {
 fn get_leave_group_as_owner() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
     tr.create_group_helper("First Group", 2);
 
     let res = tr
@@ -321,9 +320,9 @@ fn get_leave_group_as_owner() {
 fn get_leave_group_user_does_not_belong_to() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
-    setup_user(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
+    tr.setup_user();
     tr.create_group_helper("First Group", 2);
 
     let res = tr
@@ -344,7 +343,7 @@ fn get_leave_group_user_does_not_belong_to() {
 fn get_edit_group_user_no_such_group() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -378,8 +377,8 @@ fn get_edit_group_user_is_not_the_owner() {
 fn get_edit_group_by_owner() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
     tr.create_group_helper("First Group", 2);
 
     let res = tr
@@ -421,7 +420,7 @@ fn get_group_that_does_not_exist() {
 fn post_edit_group_user_missing_gid() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -436,7 +435,7 @@ fn post_edit_group_user_missing_gid() {
 fn post_edit_group_user_no_such_group() {
     let tr = TestRunner::new();
 
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_owner();
 
     let res = tr
         .client
@@ -506,8 +505,8 @@ fn post_edit_group_user_not_owner() {
 fn post_edit_group_owner() {
     let tr = TestRunner::new();
 
-    setup_admin(&tr.client, &tr.email_folder);
-    setup_owner(&tr.client, &tr.email_folder);
+    tr.setup_admin();
+    tr.setup_owner();
     //setup_foo1(&tr.client, &tr.email_folder);
     tr.create_group_helper("First Group", 2);
     tr.logout();
