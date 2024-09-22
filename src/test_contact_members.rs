@@ -1,6 +1,6 @@
 use crate::test_lib::{
-    check_html, check_message, check_not_the_owner, check_unprocessable, params, setup_many_users,
-    TestRunner, OWNER_EMAIL, USER_EMAIL,
+    check_html, check_message, check_not_the_owner, check_unprocessable, params, TestRunner,
+    OWNER_EMAIL, USER_EMAIL,
 };
 use rocket::http::{ContentType, Status};
 
@@ -8,7 +8,7 @@ use rocket::http::{ContentType, Status};
 fn contact_members_get_user_without_gid() {
     let tr = TestRunner::new();
 
-    setup_many_users(&tr.client, &tr.email_folder);
+    tr.setup_many_users();
 
     let res = tr
         .client
@@ -26,7 +26,7 @@ fn contact_members_get_user_without_gid() {
 fn contact_members_get_user_with_invalid_gid() {
     let tr = TestRunner::new();
 
-    setup_many_users(&tr.client, &tr.email_folder);
+    tr.setup_many_users();
 
     let res = tr
         .client

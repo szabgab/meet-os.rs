@@ -1,9 +1,9 @@
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_message, check_not_logged_in,
     check_profile_by_guest, check_profile_by_user, check_user_menu, params, read_code_from_email,
-    register_and_verify_user, setup_admin, setup_many_users, setup_owner, setup_user, TestRunner,
-    ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL, OWNER_NAME, OWNER_PW,
-    UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
+    register_and_verify_user, setup_admin, setup_owner, setup_user, TestRunner, ADMIN_EMAIL,
+    ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL, OWNER_NAME, OWNER_PW, UNVERIFIED_NAME,
+    USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -525,7 +525,7 @@ fn get_users_list_users_empty_db_guest() {
 fn get_users_list_users_many_users_guest() {
     let tr = TestRunner::new();
 
-    setup_many_users(&tr.client, &tr.email_folder);
+    tr.setup_many_users();
 
     let res = tr.client.get("/users").dispatch();
 

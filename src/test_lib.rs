@@ -158,7 +158,7 @@ impl TestRunner {
     }
 
     pub fn setup_all(&self) {
-        setup_many_users(&self.client, &self.email_folder);
+        self.setup_many_users();
 
         create_group_helper(&self.client, "First Group", 2);
         create_group_helper(&self.client, "Second Group", 2);
@@ -173,6 +173,25 @@ impl TestRunner {
         // That's why we don't check if it is Status::Ok
         //assert_eq!(res.status(), Status::Ok);
         rocket::info!("--------------- finished setup_all ----------------")
+    }
+
+    pub fn setup_many_users(&self) {
+        setup_admin(&self.client, &self.email_folder);
+        setup_owner(&self.client, &self.email_folder);
+        setup_user(&self.client, &self.email_folder);
+
+        register_and_verify_user(
+            &self.client,
+            OTHER_NAME,
+            OTHER_EMAIL,
+            OTHER_PW,
+            &self.email_folder,
+        );
+
+        // Make sure the client is not logged in after the setup
+        let res = &self.client.get(format!("/logout")).dispatch();
+        //assert_eq!(res.status(), Status::Ok);
+        rocket::info!("--------------- finished setup_many_users ----------------")
     }
 }
 
@@ -477,19 +496,6 @@ pub fn setup_owner(client: &Client, email_folder: &PathBuf) {
 
 pub fn setup_user(client: &Client, email_folder: &PathBuf) {
     register_and_verify_user(&client, USER_NAME, USER_EMAIL, USER_PW, &email_folder);
-}
-
-pub fn setup_many_users(client: &Client, email_folder: &PathBuf) {
-    setup_admin(client, email_folder);
-    setup_owner(client, email_folder);
-    setup_user(client, email_folder);
-
-    register_and_verify_user(&client, OTHER_NAME, OTHER_EMAIL, OTHER_PW, &email_folder);
-
-    // Make sure the client is not logged in after the setup
-    let res = client.get(format!("/logout")).dispatch();
-    //assert_eq!(res.status(), Status::Ok);
-    rocket::info!("--------------- finished setup_many_users ----------------")
 }
 
 pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, owner_email: String) {
