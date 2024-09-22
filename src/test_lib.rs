@@ -109,7 +109,7 @@ impl TestRunner {
         setup_admin(&self.client, &self.email_folder);
         setup_owner(&self.client, &self.email_folder);
         setup_user(&self.client, &self.email_folder);
-        create_group_helper(&self.client, "First Group", 2);
+        self.create_group_helper("First Group", 2);
         self.logout();
     }
 
@@ -117,8 +117,8 @@ impl TestRunner {
         setup_admin(&self.client, &self.email_folder);
         setup_owner(&self.client, &self.email_folder);
         setup_user(&self.client, &self.email_folder);
-        create_group_helper(&self.client, "First Group", 2);
-        setup_event(&self.client, 1);
+        self.create_group_helper("First Group", 2);
+        self.setup_event(1);
         self.logout();
     }
 
@@ -160,12 +160,12 @@ impl TestRunner {
     pub fn setup_all(&self) {
         self.setup_many_users();
 
-        create_group_helper(&self.client, "First Group", 2);
-        create_group_helper(&self.client, "Second Group", 2);
-        create_group_helper(&self.client, "Third Group", 3);
-        setup_event(&self.client, 1);
-        setup_event(&self.client, 2);
-        setup_event(&self.client, 3);
+        self.create_group_helper("First Group", 2);
+        self.create_group_helper("Second Group", 2);
+        self.create_group_helper("Third Group", 3);
+        self.setup_event(1);
+        self.setup_event(2);
+        self.setup_event(3);
 
         // Make sure the client is not logged in after the setup
         let res = &self.client.get(format!("/logout")).dispatch();
@@ -192,6 +192,51 @@ impl TestRunner {
         let res = &self.client.get(format!("/logout")).dispatch();
         //assert_eq!(res.status(), Status::Ok);
         rocket::info!("--------------- finished setup_many_users ----------------")
+    }
+
+    pub fn setup_event(&self, eid: usize) {
+        match eid {
+            1 => add_event_helper(
+                &self.client,
+                "First event",
+                "2030-01-01 10:10",
+                "1",
+                String::from(OWNER_EMAIL),
+            ),
+            2 => add_event_helper(
+                &self.client,
+                "Second event",
+                "2030-01-02 10:10",
+                "1",
+                String::from(OWNER_EMAIL),
+            ),
+            3 => add_event_helper(
+                &self.client,
+                "Third event",
+                "2030-01-03 10:10",
+                "2",
+                String::from(OWNER_EMAIL),
+            ),
+
+            _ => panic!("no such eid",),
+        }
+    }
+
+    pub fn create_group_helper(&self, name: &str, owner: usize) {
+        let res = self
+            .client
+            .post("/admin/create-group")
+            .header(ContentType::Form)
+            .body(params!([
+                ("name", name),
+                ("location", ""),
+                ("description", "",),
+                ("owner", &owner.to_string()),
+            ]))
+            .private_cookie(("meet-os", ADMIN_EMAIL))
+            .dispatch();
+
+        assert_eq!(res.status(), Status::Ok);
     }
 }
 
@@ -516,48 +561,4 @@ pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, own
     let html = res.into_string().unwrap();
     assert!(html.contains("Event added"));
     //rocket::info!("{html}");
-}
-
-pub fn create_group_helper(client: &Client, name: &str, owner: usize) {
-    let res = client
-        .post("/admin/create-group")
-        .header(ContentType::Form)
-        .body(params!([
-            ("name", name),
-            ("location", ""),
-            ("description", "",),
-            ("owner", &owner.to_string()),
-        ]))
-        .private_cookie(("meet-os", ADMIN_EMAIL))
-        .dispatch();
-
-    assert_eq!(res.status(), Status::Ok);
-}
-
-pub fn setup_event(client: &Client, eid: usize) {
-    match eid {
-        1 => add_event_helper(
-            &client,
-            "First event",
-            "2030-01-01 10:10",
-            "1",
-            String::from(OWNER_EMAIL),
-        ),
-        2 => add_event_helper(
-            &client,
-            "Second event",
-            "2030-01-02 10:10",
-            "1",
-            String::from(OWNER_EMAIL),
-        ),
-        3 => add_event_helper(
-            &client,
-            "Third event",
-            "2030-01-03 10:10",
-            "2",
-            String::from(OWNER_EMAIL),
-        ),
-
-        _ => panic!("no such eid",),
-    }
 }
