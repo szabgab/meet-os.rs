@@ -253,7 +253,7 @@ impl TestRunner {
     pub fn register_and_verify_user(&self, name: &str, email: &str, password: &str) {
         register_user_helper(&self.client, name, email, password);
 
-        verify_email(&self.email_folder, &self.client);
+        self.verify_email();
     }
 
     pub fn add_event_helper(&self, title: &str, date: &str, gid: &str, owner_email: String) {
@@ -275,6 +275,26 @@ impl TestRunner {
         let html = res.into_string().unwrap();
         assert!(html.contains("Event added"));
         //rocket::info!("{html}");
+    }
+
+    fn verify_email(&self) {
+        let dir = &self
+            .email_folder
+            .read_dir()
+            .expect("read_dir call failed")
+            .flatten()
+            .collect::<Vec<_>>();
+        println!("dir: {}", dir.len());
+
+        // -2 because after the email with the code we also send a notification to the admin.
+        let filename = format!("{}.txt", dir.len() - 2);
+        let (uid, code) = read_code_from_email(&self.email_folder, &filename, "verify-email");
+
+        let res = &self
+            .client
+            .get(format!("/verify-email/{uid}/{code}"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
     }
 }
 
@@ -531,21 +551,5 @@ pub fn register_user_helper(client: &Client, name: &str, email: &str, password: 
             ("password", password)
         ]))
         .dispatch();
-    assert_eq!(res.status(), Status::Ok);
-}
-
-fn verify_email(email_folder: &PathBuf, client: &Client) {
-    let dir = email_folder
-        .read_dir()
-        .expect("read_dir call failed")
-        .flatten()
-        .collect::<Vec<_>>();
-    println!("dir: {}", dir.len());
-
-    // -2 because after the email with the code we also send a notification to the admin.
-    let filename = format!("{}.txt", dir.len() - 2);
-    let (uid, code) = read_code_from_email(email_folder, &filename, "verify-email");
-
-    let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);
 }
