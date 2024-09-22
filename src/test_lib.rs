@@ -149,12 +149,7 @@ impl TestRunner {
     }
 
     pub fn setup_unverified_user(&self) {
-        register_user_helper(
-            &self.client,
-            UNVERIFIED_NAME,
-            UNVERIFIED_EMAIL,
-            UNVERIFIED_PW,
-        );
+        self.register_user_helper(UNVERIFIED_NAME, UNVERIFIED_EMAIL, UNVERIFIED_PW);
     }
 
     pub fn setup_all(&self) {
@@ -251,8 +246,7 @@ impl TestRunner {
     }
 
     pub fn register_and_verify_user(&self, name: &str, email: &str, password: &str) {
-        register_user_helper(&self.client, name, email, password);
-
+        self.register_user_helper(name, email, password);
         self.verify_email();
     }
 
@@ -293,6 +287,20 @@ impl TestRunner {
         let res = &self
             .client
             .get(format!("/verify-email/{uid}/{code}"))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+    }
+
+    pub fn register_user_helper(&self, name: &str, email: &str, password: &str) {
+        let res = &self
+            .client
+            .post(format!("/register"))
+            .header(ContentType::Form)
+            .body(params!([
+                ("name", name),
+                ("email", email),
+                ("password", password)
+            ]))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
     }
@@ -540,16 +548,3 @@ pub(crate) use check_only_guest;
 //         assert_eq!(element.inner_html(), text[ix]);
 //     }
 // }
-
-pub fn register_user_helper(client: &Client, name: &str, email: &str, password: &str) {
-    let res = client
-        .post(format!("/register"))
-        .header(ContentType::Form)
-        .body(params!([
-            ("name", name),
-            ("email", email),
-            ("password", password)
-        ]))
-        .dispatch();
-    assert_eq!(res.status(), Status::Ok);
-}
