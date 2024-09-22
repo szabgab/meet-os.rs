@@ -176,33 +176,15 @@ impl TestRunner {
     }
 
     pub fn setup_admin(&self) {
-        register_and_verify_user(
-            &self.client,
-            ADMIN_NAME,
-            ADMIN_EMAIL,
-            ADMIN_PW,
-            &self.email_folder,
-        );
+        self.register_and_verify_user(ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW);
     }
 
     pub fn setup_owner(&self) {
-        register_and_verify_user(
-            &self.client,
-            OWNER_NAME,
-            OWNER_EMAIL,
-            OWNER_PW,
-            &self.email_folder,
-        );
+        self.register_and_verify_user(OWNER_NAME, OWNER_EMAIL, OWNER_PW);
     }
 
     pub fn setup_user(&self) {
-        register_and_verify_user(
-            &self.client,
-            USER_NAME,
-            USER_EMAIL,
-            USER_PW,
-            &self.email_folder,
-        );
+        self.register_and_verify_user(USER_NAME, USER_EMAIL, USER_PW);
     }
 
     pub fn setup_many_users(&self) {
@@ -210,13 +192,7 @@ impl TestRunner {
         self.setup_owner();
         self.setup_user();
 
-        register_and_verify_user(
-            &self.client,
-            OTHER_NAME,
-            OTHER_EMAIL,
-            OTHER_PW,
-            &self.email_folder,
-        );
+        self.register_and_verify_user(OTHER_NAME, OTHER_EMAIL, OTHER_PW);
 
         // Make sure the client is not logged in after the setup
         let res = &self.client.get(format!("/logout")).dispatch();
@@ -275,6 +251,12 @@ impl TestRunner {
             let entry = entry.unwrap();
             std::fs::remove_file(entry.path()).unwrap();
         }
+    }
+
+    pub fn register_and_verify_user(&self, name: &str, email: &str, password: &str) {
+        register_user_helper(&self.client, name, email, password);
+
+        verify_email(&self.email_folder, &self.client);
     }
 }
 
@@ -548,18 +530,6 @@ fn verify_email(email_folder: &PathBuf, client: &Client) {
 
     let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);
-}
-
-pub fn register_and_verify_user(
-    client: &Client,
-    name: &str,
-    email: &str,
-    password: &str,
-    email_folder: &PathBuf,
-) {
-    register_user_helper(client, name, email, password);
-
-    verify_email(email_folder, client);
 }
 
 pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, owner_email: String) {

@@ -1,8 +1,8 @@
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_message, check_not_logged_in,
     check_profile_by_guest, check_profile_by_user, check_user_menu, params, read_code_from_email,
-    register_and_verify_user, TestRunner, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME,
-    OWNER_EMAIL, OWNER_NAME, OWNER_PW, UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
+    TestRunner, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL, OWNER_NAME, OWNER_PW,
+    UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -181,13 +181,7 @@ fn post_register_duplicate_email() {
 fn post_login_regular_user() {
     let tr = TestRunner::new();
 
-    register_and_verify_user(
-        &tr.client,
-        OWNER_NAME,
-        OWNER_EMAIL,
-        OWNER_PW,
-        &tr.email_folder,
-    );
+    tr.register_and_verify_user(OWNER_NAME, OWNER_EMAIL, OWNER_PW);
 
     check_profile_by_user!(&tr.client, &OWNER_EMAIL, OWNER_NAME);
 
