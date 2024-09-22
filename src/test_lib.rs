@@ -202,22 +202,19 @@ impl TestRunner {
 
     pub fn setup_event(&self, eid: usize) {
         match eid {
-            1 => add_event_helper(
-                &self.client,
+            1 => &self.add_event_helper(
                 "First event",
                 "2030-01-01 10:10",
                 "1",
                 String::from(OWNER_EMAIL),
             ),
-            2 => add_event_helper(
-                &self.client,
+            2 => &self.add_event_helper(
                 "Second event",
                 "2030-01-02 10:10",
                 "1",
                 String::from(OWNER_EMAIL),
             ),
-            3 => add_event_helper(
-                &self.client,
+            3 => &self.add_event_helper(
                 "Third event",
                 "2030-01-03 10:10",
                 "2",
@@ -225,7 +222,7 @@ impl TestRunner {
             ),
 
             _ => panic!("no such eid",),
-        }
+        };
     }
 
     pub fn create_group_helper(&self, name: &str, owner: usize) {
@@ -257,6 +254,27 @@ impl TestRunner {
         register_user_helper(&self.client, name, email, password);
 
         verify_email(&self.email_folder, &self.client);
+    }
+
+    pub fn add_event_helper(&self, title: &str, date: &str, gid: &str, owner_email: String) {
+        let res = self
+            .client
+            .post("/add-event")
+            .header(ContentType::Form)
+            .body(params!([
+                ("gid", gid),
+                ("offset", "-180"),
+                ("title", title),
+                ("location", "Virtual"),
+                ("description", ""),
+                ("date", date),
+            ]))
+            .private_cookie(("meet-os", owner_email))
+            .dispatch();
+        assert_eq!(res.status(), Status::Ok);
+        let html = res.into_string().unwrap();
+        assert!(html.contains("Event added"));
+        //rocket::info!("{html}");
     }
 }
 
@@ -530,24 +548,4 @@ fn verify_email(email_folder: &PathBuf, client: &Client) {
 
     let res = client.get(format!("/verify-email/{uid}/{code}")).dispatch();
     assert_eq!(res.status(), Status::Ok);
-}
-
-pub fn add_event_helper(client: &Client, title: &str, date: &str, gid: &str, owner_email: String) {
-    let res = client
-        .post("/add-event")
-        .header(ContentType::Form)
-        .body(params!([
-            ("gid", gid),
-            ("offset", "-180"),
-            ("title", title),
-            ("location", "Virtual"),
-            ("description", ""),
-            ("date", date),
-        ]))
-        .private_cookie(("meet-os", owner_email))
-        .dispatch();
-    assert_eq!(res.status(), Status::Ok);
-    let html = res.into_string().unwrap();
-    assert!(html.contains("Event added"));
-    //rocket::info!("{html}");
 }
