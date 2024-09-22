@@ -1,6 +1,6 @@
 use crate::test_lib::{
     check_html, check_message, check_only_guest, check_profile_by_user, check_user_menu, params,
-    read_code_from_email, TestRunner, UNVERIFIED_EMAIL, UNVERIFIED_NAME, USER_EMAIL,
+    TestRunner, UNVERIFIED_EMAIL, UNVERIFIED_NAME, USER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -88,7 +88,7 @@ fn post_resend_email_verification_unverified_email() {
         r#"We sent you an email to <b>unverified@meet-os.com</b> Please click on the link to reset your password."#
     );
 
-    let (uid, code) = read_code_from_email(&tr.email_folder, "0.txt", "verify-email");
+    let (uid, code) = tr.read_code_from_email("0.txt", "verify-email");
 
     assert_eq!(uid, 1);
     //assert_eq!(code, "");

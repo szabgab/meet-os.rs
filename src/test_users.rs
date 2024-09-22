@@ -1,7 +1,7 @@
 use crate::test_lib::{
     check_admin_menu, check_guest_menu, check_html, check_message, check_not_logged_in,
-    check_profile_by_guest, check_profile_by_user, check_user_menu, params, read_code_from_email,
-    TestRunner, ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL, OWNER_NAME, OWNER_PW,
+    check_profile_by_guest, check_profile_by_user, check_user_menu, params, TestRunner,
+    ADMIN_EMAIL, ADMIN_NAME, ADMIN_PW, OTHER_NAME, OWNER_EMAIL, OWNER_NAME, OWNER_PW,
     UNVERIFIED_NAME, USER_EMAIL, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
@@ -85,7 +85,7 @@ fn register_user() {
     check_message!(&html, "We sent you an email", &expected);
     check_guest_menu!(&html);
 
-    let (uid, code) = read_code_from_email(&tr.email_folder, "0.txt", "verify-email");
+    let (uid, code) = tr.read_code_from_email("0.txt", "verify-email");
 
     // Verify the email
     let res = tr

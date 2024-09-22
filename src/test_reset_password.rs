@@ -1,6 +1,6 @@
 use crate::test_lib::{
     check_guest_menu, check_html, check_message, check_profile_by_user, check_user_menu, params,
-    read_code_from_email, TestRunner, OWNER_EMAIL,
+    TestRunner, OWNER_EMAIL,
 };
 
 use rocket::http::{ContentType, Status};
@@ -67,7 +67,7 @@ fn reset_password_full() {
     check_message!(&html, "We sent you an email", &expected);
 
     // get code from email
-    let (uid, code) = read_code_from_email(&tr.email_folder, "0.txt", "save-password");
+    let (uid, code) = tr.read_code_from_email("0.txt", "save-password");
 
     let res = tr
         .client
