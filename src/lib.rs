@@ -35,7 +35,7 @@ pub struct Group {
     pub creation_date: DateTime<Utc>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct Membership {
     pub gid: usize,
     pub uid: usize,

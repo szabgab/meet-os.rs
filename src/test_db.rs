@@ -4,7 +4,7 @@ use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
 use crate::db;
-use meetings::{Event, EventStatus, Group, User, RSVP};
+use meetings::{Event, EventStatus, Group, Membership, User, RSVP};
 
 use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
 
@@ -405,6 +405,64 @@ async fn test_db_groups() {
 }
 
 #[async_test]
+async fn test_db_group_membership() {
+    let (dbh, db_name) = setup().await;
+
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_user_helper(&dbh).await;
+    add_groups_helper(&dbh).await;
+
+    let gid = 1;
+    let members = db::get_members_of_group(&dbh, gid).await.unwrap();
+    assert!(members.is_empty());
+
+    let uid = 1;
+    let membership = db::get_membership(&dbh, gid, uid).await.unwrap();
+    assert!(membership.is_none());
+
+    db::join_group(&dbh, gid, uid).await.unwrap();
+    let membership = db::get_membership(&dbh, gid, uid).await.unwrap().unwrap();
+    //println!("{membership:?}");
+    assert_eq!(
+        membership,
+        Membership {
+            gid: 1,
+            uid: 1,
+            join_date: membership.join_date,
+            admin: false
+        }
+    );
+
+    let uid = 2;
+    db::join_group(&dbh, gid, uid).await.unwrap();
+    let membership = db::get_membership(&dbh, gid, uid).await.unwrap().unwrap();
+    //println!("{membership:?}");
+    assert_eq!(
+        membership,
+        Membership {
+            gid: 1,
+            uid: 2,
+            join_date: membership.join_date,
+            admin: false
+        }
+    );
+
+    let group_membership = db::get_groups_by_membership_id(&dbh, uid).await.unwrap();
+    println!("{group_membership:?}");
+
+    let members = db::get_members_of_group(&dbh, gid).await.unwrap();
+    assert_eq!(members.len(), 2);
+
+    db::leave_group(&dbh, gid, uid).await.unwrap();
+
+    let members = db::get_members_of_group(&dbh, gid).await.unwrap();
+    assert_eq!(members.len(), 1);
+
+    teardown(dbh, db_name).await;
+}
+
+#[async_test]
 async fn test_db_events() {
     let (dbh, db_name) = setup().await;
 
@@ -563,10 +621,3 @@ async fn test_db_audit() {
 // save_password
 // update_user
 // add_login_code_to_user
-
-// get_groups_by_membership_id
-// get_members_of_group
-// increment
-// join_group
-// leave_group
-// get_membership
