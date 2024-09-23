@@ -615,9 +615,53 @@ async fn test_db_audit() {
     teardown(dbh, db_name).await;
 }
 
-// set_user_verified
+#[async_test]
+async fn test_db_code() {
+    let (dbh, db_name) = setup().await;
+
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_user_helper(&dbh).await;
+
+    let user = db::get_user_by_id(&dbh, 3).await.unwrap().unwrap();
+    assert_eq!(user.name, USER_NAME);
+    assert_eq!(user.code, "generated code");
+    assert_eq!(user.verified, false);
+    assert!(user.verification_date.is_none());
+
+    db::set_user_verified(&dbh, 3).await.unwrap();
+
+    let user = db::get_user_by_id(&dbh, 3).await.unwrap().unwrap();
+    assert_eq!(user.name, USER_NAME);
+    assert_eq!(user.code, "");
+    assert_eq!(user.verified, true);
+    assert!(user.verification_date.is_some());
+
+    let user = db::get_user_by_id(&dbh, 2).await.unwrap().unwrap();
+    assert_eq!(user.name, OWNER_NAME);
+    assert_eq!(user.code, "generated code");
+    assert_eq!(user.verified, false);
+    assert!(user.verification_date.is_none());
+
+    db::remove_code(&dbh, 2).await.unwrap();
+    let user = db::get_user_by_id(&dbh, 2).await.unwrap().unwrap();
+    assert_eq!(user.name, OWNER_NAME);
+    assert_eq!(user.code, "");
+    assert_eq!(user.verified, false);
+    assert!(user.verification_date.is_none());
+
+    db::add_login_code_to_user(&dbh, OWNER_EMAIL, "qqrq", "new code")
+        .await
+        .unwrap();
+    let user = db::get_user_by_id(&dbh, 2).await.unwrap().unwrap();
+    assert_eq!(user.name, OWNER_NAME);
+    assert_eq!(user.code, "new code");
+    assert_eq!(user.verified, false);
+    assert!(user.verification_date.is_none());
+
+    teardown(dbh, db_name).await;
+}
+
 // update_group
-// remove_code
 // save_password
 // update_user
-// add_login_code_to_user
