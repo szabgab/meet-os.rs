@@ -776,7 +776,7 @@ pub async fn audit(dbh: &Surreal<Client>, text: String) -> surrealdb::Result<()>
 
 pub async fn get_audit(dbh: &Surreal<Client>) -> surrealdb::Result<Vec<Audit>> {
     rocket::info!("get_audits");
-    let mut response = dbh.query("SELECT * FROM audit;").await?;
+    let mut response = dbh.query("SELECT * FROM audit ORDER BY date;").await?;
     let entries: Vec<Audit> = response.take(0)?;
     Ok(entries)
 }

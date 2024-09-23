@@ -436,6 +436,30 @@ async fn test_db_increment() {
     teardown(dbh, db_name).await;
 }
 
+#[async_test]
+async fn test_db_audit() {
+    let (dbh, db_name) = setup().await;
+
+    db::audit(&dbh, String::from("First message"))
+        .await
+        .unwrap();
+
+    db::audit(&dbh, String::from("Second message"))
+        .await
+        .unwrap();
+
+    db::audit(&dbh, String::from("And one more")).await.unwrap();
+
+    let audit = db::get_audit(&dbh).await.unwrap();
+    println!("{audit:?}");
+    assert_eq!(audit.len(), 3);
+    assert_eq!(audit[0].text, "First message");
+    assert_eq!(audit[1].text, "Second message");
+    assert_eq!(audit[2].text, "And one more");
+
+    teardown(dbh, db_name).await;
+}
+
 // set_user_verified
 // update_group
 // remove_code
@@ -454,6 +478,3 @@ async fn test_db_increment() {
 // get_rsvp
 // new_rsvp
 // update_rsvp
-
-// audit
-// get_audit
