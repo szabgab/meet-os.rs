@@ -37,6 +37,7 @@ async fn add_admin_helper(dbh: &Surreal<Client>) {
         verified: false,
         registration_date: utc,
         verification_date: None,
+        code_generated_date: Some(utc),
         github: None,
         gitlab: None,
         linkedin: None,
@@ -59,6 +60,8 @@ async fn add_owner_helper(dbh: &Surreal<Client>) {
         verified: false,
         registration_date: utc,
         verification_date: None,
+        code_generated_date: Some(utc),
+
         github: None,
         gitlab: None,
         linkedin: None,
@@ -81,6 +84,8 @@ async fn add_user_helper(dbh: &Surreal<Client>) {
         verified: false,
         registration_date: utc,
         verification_date: None,
+        code_generated_date: Some(utc),
+
         github: None,
         gitlab: None,
         linkedin: None,
@@ -220,6 +225,7 @@ async fn test_db_user() {
         verified: false,
         registration_date: utc,
         verification_date: None,
+        code_generated_date: Some(utc),
         github: None,
         gitlab: None,
         linkedin: None,

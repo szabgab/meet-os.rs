@@ -513,6 +513,7 @@ async fn register_post(
         code: format!("{code}"),
         registration_date: utc,
         verification_date: None,
+        code_generated_date: Some(utc),
         verified: false,
         github: None,
         gitlab: None,

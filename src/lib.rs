@@ -19,6 +19,7 @@ pub struct User {
     pub verified: bool,
     pub registration_date: DateTime<Utc>,
     pub verification_date: Option<DateTime<Utc>>,
+    pub code_generated_date: Option<DateTime<Utc>>,
     pub github: Option<String>,
     pub gitlab: Option<String>,
     pub linkedin: Option<String>,

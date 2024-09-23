@@ -284,7 +284,8 @@ pub async fn remove_code(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Result
             "
             UPDATE user
             SET
-                code=''
+                code='',
+                code_generated_date=None
             WHERE uid=$uid;",
         )
         .bind(("uid", uid))
@@ -395,11 +396,13 @@ pub async fn add_login_code_to_user(
     code: &str,
 ) -> surrealdb::Result<Option<User>> {
     rocket::info!("add_login_code_to_user: '{email}', '{process}', '{code}'");
+    let utc: DateTime<Utc> = Utc::now();
     let mut response = dbh
-        .query("UPDATE user SET code=$code, process=$process WHERE email=$email;")
+    .query("UPDATE user SET code=$code, process=$process, code_generated_date=$date WHERE email=$email;")
         .bind(("email", email.to_owned()))
         .bind(("process", process.to_owned()))
         .bind(("code", code.to_owned()))
+        .bind(("date", utc))
         .await?;
 
     let entry: Option<User> = response.take(0)?;
