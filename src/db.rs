@@ -689,7 +689,7 @@ pub async fn get_all_rsvps_for_event(
     eid: usize,
 ) -> surrealdb::Result<Vec<(RSVP, User)>> {
     let mut response = dbh
-        .query("SELECT * FROM rsvp WHERE eid=$eid;")
+        .query("SELECT * FROM rsvp WHERE eid=$eid ORDER BY uid;")
         .bind(("eid", eid))
         .await?;
 

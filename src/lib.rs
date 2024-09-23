@@ -43,7 +43,7 @@ pub struct Membership {
     pub admin: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct RSVP {
     pub eid: usize,
     pub uid: usize,

@@ -4,7 +4,7 @@ use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
 use crate::db;
-use meetings::{Event, EventStatus, Group, User};
+use meetings::{Event, EventStatus, Group, User, RSVP};
 
 use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
 
@@ -127,6 +127,40 @@ async fn add_groups_helper(dbh: &Surreal<Client>) {
     };
     let res = db::add_group(&dbh, &guest_maven).await.unwrap();
     assert_eq!(res, ());
+}
+
+async fn add_events_helper(dbh: &Surreal<Client>) {
+    let eid = 1;
+    let title = "First Conference";
+    let description = "";
+    let date: DateTime<Utc> = Utc::now();
+    let location = "";
+    let gid = 1;
+
+    let event = Event {
+        eid,
+        title: title.to_owned(),
+        description: description.to_owned(),
+        date,
+        location: location.to_owned(),
+        group_id: gid,
+        status: EventStatus::Published,
+    };
+
+    db::add_event(&dbh, &event).await.unwrap();
+
+    let date: DateTime<Utc> = Utc::now();
+    let event = Event {
+        eid: 2,
+        title: String::from("Second conf"),
+        description: String::new(),
+        date,
+        location: location.to_owned(),
+        group_id: gid,
+        status: EventStatus::Published,
+    };
+
+    db::add_event(&dbh, &event).await.unwrap();
 }
 
 #[async_test]
@@ -418,6 +452,69 @@ async fn test_db_events() {
 }
 
 #[async_test]
+async fn test_db_rsvp() {
+    let (dbh, db_name) = setup().await;
+
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_user_helper(&dbh).await;
+    add_groups_helper(&dbh).await;
+    add_events_helper(&dbh).await;
+
+    let eid = 1;
+    let uid = 1;
+    db::new_rsvp(&dbh, eid, uid, true).await.unwrap();
+
+    let uid = 2;
+    db::new_rsvp(&dbh, eid, uid, true).await.unwrap();
+
+    let rsvps = db::get_all_rsvps_for_event(&dbh, eid).await.unwrap();
+    assert_eq!(rsvps.len(), 2);
+    //println!("{rsvps:?}");
+    assert_eq!(rsvps[0].0.eid, 1);
+    assert_eq!(rsvps[0].1.uid, 1);
+
+    assert_eq!(rsvps[1].0.eid, 1);
+    assert_eq!(rsvps[1].1.uid, 2);
+
+    let rsvp = db::get_rsvp(&dbh, eid, uid).await.unwrap().unwrap();
+    assert_eq!(
+        rsvp,
+        RSVP {
+            eid: 1,
+            uid: 2,
+            status: true,
+            date: rsvp.date
+        }
+    );
+
+    let rsvp = db::get_rsvp(&dbh, eid, 1).await.unwrap().unwrap();
+    assert_eq!(
+        rsvp,
+        RSVP {
+            eid: 1,
+            uid: 1,
+            status: true,
+            date: rsvp.date
+        }
+    );
+
+    db::update_rsvp(&dbh, eid, uid, false).await.unwrap();
+    let rsvp = db::get_rsvp(&dbh, eid, uid).await.unwrap().unwrap();
+    assert_eq!(
+        rsvp,
+        RSVP {
+            eid: 1,
+            uid: 2,
+            status: false,
+            date: rsvp.date
+        }
+    );
+
+    teardown(dbh, db_name).await;
+}
+
+#[async_test]
 async fn test_db_increment() {
     let (dbh, db_name) = setup().await;
 
@@ -473,8 +570,3 @@ async fn test_db_audit() {
 // join_group
 // leave_group
 // get_membership
-
-// get_all_rsvps_for_event
-// get_rsvp
-// new_rsvp
-// update_rsvp
