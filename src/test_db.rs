@@ -5,7 +5,7 @@ use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
 use crate::db;
-use meetings::{AuditType, Event, EventStatus, Group, Membership, User, RSVP};
+use meetings::{db::get_user_by_id, AuditType, Event, EventStatus, Group, Membership, User, RSVP};
 
 use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
 
@@ -701,6 +701,158 @@ async fn test_db_code() {
     teardown(dbh, db_name).await;
 }
 
-// update_group
+#[async_test]
+async fn test_db_update_user() {
+    let (dbh, db_name) = setup().await;
+
+    add_admin_helper(&dbh).await;
+    let admin = get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    //println!("{admin:?}");
+    assert_eq!(
+        admin,
+        User {
+            uid: 1,
+            email: ADMIN_EMAIL.to_string(),
+            password: String::from("should be hashed password"),
+            name: ADMIN_NAME.to_string(),
+            code: String::from("generated code"),
+            process: String::from("register"),
+            verified: false,
+            registration_date: admin.registration_date,
+            verification_date: None,
+            code_generated_date: admin.code_generated_date,
+            github: None,
+            gitlab: None,
+            linkedin: None,
+            about: None
+        }
+    );
+
+    db::update_user(
+        &dbh,
+        1,
+        "New Name",
+        "foogh",
+        "foogl",
+        "https://linkedin.com/",
+        "about",
+    )
+    .await
+    .unwrap();
+
+    let admin = get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    assert_eq!(
+        admin,
+        User {
+            uid: 1,
+            email: ADMIN_EMAIL.to_string(),
+            password: String::from("should be hashed password"),
+            name: "New Name".to_string(),
+            code: String::from("generated code"),
+            process: String::from("register"),
+            verified: false,
+            registration_date: admin.registration_date,
+            verification_date: None,
+            code_generated_date: admin.code_generated_date,
+            github: Some(String::from("foogh")),
+            gitlab: Some(String::from("foogl")),
+            linkedin: Some(String::from("https://linkedin.com/")),
+            about: Some(String::from("about")),
+        }
+    );
+
+    teardown(dbh, db_name).await;
+}
+
+#[async_test]
+async fn test_db_update_group() {
+    let (dbh, db_name) = setup().await;
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_groups_helper(&dbh).await;
+
+    let group = db::get_group_by_gid(&dbh, 1).await.unwrap().unwrap();
+    //println!("{group:?}");
+    assert_eq!(
+        group,
+        Group {
+            gid: 1,
+            name: String::from("Rust Maven"),
+            location: String::new(),
+            description: String::new(),
+            owner: 2,
+            creation_date: group.creation_date,
+        }
+    );
+
+    db::update_group(&dbh, 1, "New Name", "New Location", "New Description")
+        .await
+        .unwrap();
+
+    let group = db::get_group_by_gid(&dbh, 1).await.unwrap().unwrap();
+    //println!("{group:?}");
+    assert_eq!(
+        group,
+        Group {
+            gid: 1,
+            name: String::from("New Name"),
+            location: String::from("New Location"),
+            description: String::from("New Description"),
+            owner: 2,
+            creation_date: group.creation_date,
+        }
+    );
+
+    teardown(dbh, db_name).await;
+}
+
+#[async_test]
+async fn test_db_update_event() {
+    let (dbh, db_name) = setup().await;
+
+    add_admin_helper(&dbh).await;
+    add_owner_helper(&dbh).await;
+    add_user_helper(&dbh).await;
+    add_groups_helper(&dbh).await;
+    add_events_helper(&dbh).await;
+
+    let mut event = db::get_event_by_eid(&dbh, 1).await.unwrap().unwrap();
+    //println!("{event:?}");
+    assert_eq!(
+        event,
+        Event {
+            eid: 1,
+            title: String::from("First Conference"),
+            description: String::new(),
+            date: event.date,
+            location: String::new(),
+            group_id: 1,
+            status: EventStatus::Published,
+        }
+    );
+
+    event.title = String::from("New Title");
+    event.description = String::from("New Description");
+    event.location = String::from("New Location");
+
+    db::update_event(&dbh, &event).await.unwrap();
+
+    let updated_event = db::get_event_by_eid(&dbh, 1).await.unwrap().unwrap();
+    //println!("{event:?}");
+    assert_eq!(
+        updated_event,
+        Event {
+            eid: 1,
+            title: String::from("New Title"),
+            description: String::from("New Description"),
+            date: event.date,
+            location: String::from("New Location"),
+            group_id: 1,
+            status: EventStatus::Published,
+        }
+    );
+
+    teardown(dbh, db_name).await;
+}
+
 // save_password
-// update_user
