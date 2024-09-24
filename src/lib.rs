@@ -72,9 +72,21 @@ pub struct Event {
     pub status: EventStatus,
 }
 
+#[non_exhaustive]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
+pub enum AuditType {
+    GroupCreated,
+    JoinGroup,
+    LeaveGroup,
+    RSVPYes,
+    RSVPYesAgain,
+    RSVPNo,
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Audit {
     pub date: DateTime<Utc>,
+    pub atype: AuditType,
     pub text: String,
 }
 

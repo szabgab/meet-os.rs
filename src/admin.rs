@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use serde_json::json;
 
 use rocket::form::Form;
 use rocket::Route;
@@ -14,7 +15,7 @@ use crate::notify;
 use crate::web::{AdminUser, LoggedIn, Visitor};
 
 use crate::{get_public_config, MyConfig, User};
-use meetings::Group;
+use meetings::{AuditType, Group};
 
 #[derive(FromForm)]
 struct GroupForm<'r> {
@@ -180,9 +181,27 @@ async fn create_group_post(
 
     db::add_group(dbh, &group).await.unwrap();
     notify::owner_group_was_created(dbh, myconfig, &owner, &group).await;
-    db::audit(dbh, format!("Group {gid} name: '{}' created.", group.name))
-        .await
-        .unwrap();
+    let user = visitor.user.clone().unwrap();
+    db::audit(
+        dbh,
+        AuditType::GroupCreated,
+        json!({
+            "group": {
+                "id": gid,
+                "name": group.name,
+            },
+            "owner": {
+                "id": owner.uid,
+                "name": owner.name,
+            },
+            "user": {
+                "id": user.uid,
+                "name": user.name,
+            },
+        }),
+    )
+    .await
+    .unwrap();
     Template::render(
         "message",
         context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},

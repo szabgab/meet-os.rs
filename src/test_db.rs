@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
+use serde_json::json;
 
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
 use crate::db;
-use meetings::{Event, EventStatus, Group, Membership, User, RSVP};
+use meetings::{AuditType, Event, EventStatus, Group, Membership, User, RSVP};
 
 use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
 
@@ -601,22 +602,54 @@ async fn test_db_increment() {
 async fn test_db_audit() {
     let (dbh, db_name) = setup().await;
 
-    db::audit(&dbh, String::from("First message"))
-        .await
-        .unwrap();
+    db::audit(
+        &dbh,
+        AuditType::GroupCreated,
+        json!({
+            "owner": {
+                "uid": 1,
+                "name": "Owner"
+            }
+        }),
+    )
+    .await
+    .unwrap();
 
-    db::audit(&dbh, String::from("Second message"))
-        .await
-        .unwrap();
+    db::audit(
+        &dbh,
+        AuditType::JoinGroup,
+        json!({
+            "user": {
+                "uid": 1,
+                "name": "Foo Bar",
+            }
+        }),
+    )
+    .await
+    .unwrap();
 
-    db::audit(&dbh, String::from("And one more")).await.unwrap();
+    db::audit(
+        &dbh,
+        AuditType::RSVPYes,
+        json!({
+            "user": {
+                "uid": 2,
+                "name": "Active Person",
+            }
+        }),
+    )
+    .await
+    .unwrap();
 
     let audit = db::get_audit(&dbh).await.unwrap();
     println!("{audit:?}");
     assert_eq!(audit.len(), 3);
-    assert_eq!(audit[0].text, "First message");
-    assert_eq!(audit[1].text, "Second message");
-    assert_eq!(audit[2].text, "And one more");
+    assert_eq!(audit[0].atype, AuditType::GroupCreated);
+    assert_eq!(audit[1].atype, AuditType::JoinGroup);
+    assert_eq!(audit[2].atype, AuditType::RSVPYes);
+    // assert_eq!(audit[0].text, "First message");
+    // assert_eq!(audit[1].text, "Second message");
+    // assert_eq!(audit[2].text, "And one more");
 
     teardown(dbh, db_name).await;
 }

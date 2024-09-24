@@ -17,6 +17,7 @@ const MAX_NAME_LEN: usize = 50;
 const MIN_PASSWORD_LENGTH: usize = 6;
 
 use chrono::{DateTime, Duration, Utc};
+use serde_json::json;
 
 use rocket::form::Form;
 use rocket::fs::{relative, FileServer};
@@ -39,7 +40,9 @@ use surrealdb::Surreal;
 
 use meetings::db;
 
-use meetings::{get_public_config, sendmail, EmailAddress, Event, EventStatus, MyConfig, User};
+use meetings::{
+    get_public_config, sendmail, AuditType, EmailAddress, Event, EventStatus, MyConfig, User,
+};
 
 use web::{LoggedIn, Visitor};
 
@@ -643,9 +646,22 @@ async fn join_group_get(
     }
 
     db::join_group(dbh, gid, uid).await.unwrap();
-    db::audit(dbh, format!("User {uid} joined group {gid}"))
-        .await
-        .unwrap();
+    db::audit(
+        dbh,
+        AuditType::JoinGroup,
+        json!({
+            "user": {
+                "id": uid,
+                "name": user.name,
+            },
+            "group": {
+                "id": gid,
+                "name": group.name,
+            }
+        }),
+    )
+    .await
+    .unwrap();
     notify::owner_user_joined_group(dbh, myconfig, &user, &group).await;
     Template::render(
         "message",
@@ -691,9 +707,22 @@ async fn leave_group_get(
 
     db::leave_group(dbh, gid, uid).await.unwrap();
     notify::owner_user_left_group(dbh, myconfig, &user, &group).await;
-    db::audit(dbh, format!("User {uid} left group {gid}"))
-        .await
-        .unwrap();
+    db::audit(
+        dbh,
+        AuditType::LeaveGroup,
+        json!({
+            "user": {
+                "id": uid,
+                "name": user.name,
+            },
+            "group": {
+                "id": gid,
+                "name": group.name,
+            },
+        }),
+    )
+    .await
+    .unwrap();
 
     Template::render(
         "message",
@@ -735,9 +764,22 @@ async fn rsvp_yes_event_get(
     let member = db::get_membership(dbh, gid, uid).await.unwrap();
     if member.is_none() {
         db::join_group(dbh, gid, uid).await.unwrap();
-        db::audit(dbh, format!("User {uid} joined group {gid}"))
-            .await
-            .unwrap();
+        db::audit(
+            dbh,
+            AuditType::JoinGroup,
+            json!({
+                "user": {
+                    "id": uid,
+                    "name": user.name,
+                },
+                "group": {
+                    "id": gid,
+                    "name": group.name,
+                },
+            }),
+        )
+        .await
+        .unwrap();
         notify::owner_user_joined_group(dbh, myconfig, &user, &group).await;
     }
 
@@ -749,14 +791,40 @@ async fn rsvp_yes_event_get(
             );
         }
         db::update_rsvp(dbh, eid, uid, true).await.unwrap();
-        db::audit(dbh, format!("User {uid} RSVPed again to event {eid}"))
-            .await
-            .unwrap();
+        db::audit(
+            dbh,
+            AuditType::RSVPYesAgain,
+            json!({
+                "user": {
+                    "id": uid,
+                    "name": user.name,
+                },
+                "event": {
+                    "id": eid,
+                    "title": event.title,
+                },
+            }),
+        )
+        .await
+        .unwrap();
     } else {
         db::new_rsvp(dbh, eid, uid, true).await.unwrap();
-        db::audit(dbh, format!("User {uid} RSVPed to event {eid}"))
-            .await
-            .unwrap();
+        db::audit(
+            dbh,
+            AuditType::RSVPYes,
+            json!({
+                "user": {
+                    "id": uid,
+                    "name": user.name,
+                },
+                "event": {
+                    "id": eid,
+                    "title": event.title,
+                },
+            }),
+        )
+        .await
+        .unwrap();
         //notify::owner_user_rsvped_to_event(dbh, myconfig, &user, &group, &event).await;
     }
 
@@ -775,15 +843,15 @@ async fn rsvp_no_event_get(
 ) -> Template {
     let config = get_public_config();
 
-    let Some(_event) = db::get_event_by_eid(dbh, eid).await.unwrap() else {
+    let Some(event) = db::get_event_by_eid(dbh, eid).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "No such event", message: "No such event", config, visitor},
         );
     };
 
-    // let user = visitor.user.clone().unwrap();
-    let uid = visitor.user.clone().unwrap().uid;
+    let user = visitor.user.clone().unwrap();
+    let uid = user.uid;
 
     let rsvp = db::get_rsvp(dbh, eid, uid).await.unwrap();
     if rsvp.is_none() {
@@ -793,9 +861,22 @@ async fn rsvp_no_event_get(
         );
     }
     db::update_rsvp(dbh, eid, uid, false).await.unwrap();
-    db::audit(dbh, format!("User {uid} left the event {eid}"))
-        .await
-        .unwrap();
+    db::audit(
+        dbh,
+        AuditType::RSVPNo,
+        json!({
+            "user": {
+                "id": uid,
+                "name": user.name,
+            },
+            "event": {
+                "id": eid,
+                "title": event.title,
+            },
+        }),
+    )
+    .await
+    .unwrap();
 
     // TODO audit
     // TODO notify

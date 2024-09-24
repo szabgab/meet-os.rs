@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use rocket::fairing::AdHoc;
 use surrealdb::engine::remote::ws::Client;
@@ -9,7 +10,7 @@ use surrealdb::opt::Resource;
 use surrealdb::Surreal;
 
 use crate::EventStatus;
-use crate::{Audit, Counter, Event, Group, Membership, MyConfig, User, RSVP};
+use crate::{Audit, AuditType, Counter, Event, Group, Membership, MyConfig, User, RSVP};
 
 /// # Panics
 ///
@@ -63,9 +64,13 @@ pub async fn upgrade(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
     if version == 0 {
         upgrade_to_1(dbh).await?;
         upgrade_to_2(dbh).await?;
+        upgrade_to_3(dbh).await?;
     }
     if version == 1 {
         upgrade_to_2(dbh).await?;
+    }
+    if version == 2 {
+        upgrade_to_3(dbh).await?;
     }
 
     Ok(())
@@ -112,6 +117,18 @@ pub async fn upgrade_to_2(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
         .await?;
 
     update_schema_version(dbh, 2).await?;
+    Ok(())
+}
+
+/// # Panics
+///
+/// Panics when there is an error
+pub async fn upgrade_to_3(dbh: &Surreal<Client>) -> surrealdb::Result<()> {
+    rocket::info!("upgrade_to_3");
+
+    dbh.query("DELETE audit").await?;
+
+    update_schema_version(dbh, 3).await?;
     Ok(())
 }
 
@@ -766,11 +783,12 @@ pub async fn update_rsvp(
     Ok(())
 }
 
-pub async fn audit(dbh: &Surreal<Client>, text: String) -> surrealdb::Result<()> {
+pub async fn audit(dbh: &Surreal<Client>, atype: AuditType, json: Value) -> surrealdb::Result<()> {
+    let text = json.to_string();
     rocket::info!("audit {text}");
 
     let date: DateTime<Utc> = Utc::now();
-    let entry = Audit { date, text };
+    let entry = Audit { date, atype, text };
 
     dbh.create(Resource::from("audit")).content(entry).await?;
 
