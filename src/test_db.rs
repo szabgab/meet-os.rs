@@ -761,6 +761,28 @@ async fn test_db_update_user() {
         }
     );
 
+    db::save_password(&dbh, 1, "new password").await.unwrap();
+    let admin = get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    assert_eq!(
+        admin,
+        User {
+            uid: 1,
+            email: ADMIN_EMAIL.to_string(),
+            password: String::from("new password"),
+            name: "New Name".to_string(),
+            code: String::from("generated code"),
+            process: String::from("register"),
+            verified: false,
+            registration_date: admin.registration_date,
+            verification_date: None,
+            code_generated_date: admin.code_generated_date,
+            github: Some(String::from("foogh")),
+            gitlab: Some(String::from("foogl")),
+            linkedin: Some(String::from("https://linkedin.com/")),
+            about: Some(String::from("about")),
+        }
+    );
+
     teardown(dbh, db_name).await;
 }
 
@@ -854,5 +876,3 @@ async fn test_db_update_event() {
 
     teardown(dbh, db_name).await;
 }
-
-// save_password
