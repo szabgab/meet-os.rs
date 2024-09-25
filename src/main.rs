@@ -242,7 +242,7 @@ async fn login_post(
 }
 
 #[get("/logout")]
-fn logout_get(cookies: &CookieJar<'_>, visitor: Visitor, logged_in: LoggedIn) -> Template {
+fn logout_get(cookies: &CookieJar<'_>, visitor: LoggedIn) -> Template {
     cookies.remove_private("meet-os");
     let config = get_public_config();
 
@@ -613,8 +613,7 @@ async fn verify_email(
 async fn join_group_get(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -673,8 +672,7 @@ async fn join_group_get(
 async fn leave_group_get(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -734,8 +732,7 @@ async fn leave_group_get(
 async fn rsvp_yes_event_get(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -837,8 +834,7 @@ async fn rsvp_yes_event_get(
 #[get("/rsvp-no-event?<eid>")]
 async fn rsvp_no_event_get(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     eid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -888,11 +884,7 @@ async fn rsvp_no_event_get(
 }
 
 #[get("/profile")]
-async fn show_profile(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
-) -> Template {
+async fn show_profile(dbh: &State<Surreal<Client>>, visitor: LoggedIn) -> Template {
     let config = get_public_config();
 
     let uid = visitor.user.clone().unwrap().uid;
@@ -916,7 +908,7 @@ async fn show_profile(
 }
 
 #[get("/edit-profile")]
-fn edit_profile_get(visitor: Visitor, logged_in: LoggedIn) -> Template {
+fn edit_profile_get(visitor: LoggedIn) -> Template {
     let config = get_public_config();
 
     Template::render(
@@ -929,8 +921,7 @@ fn edit_profile_get(visitor: Visitor, logged_in: LoggedIn) -> Template {
 async fn edit_profile_post(
     dbh: &State<Surreal<Client>>,
     input: Form<ProfileForm<'_>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
 ) -> Template {
     let config = get_public_config();
 
@@ -1156,12 +1147,7 @@ async fn user(dbh: &State<Surreal<Client>>, visitor: Visitor, uid: usize) -> Tem
 }
 
 #[get("/edit-group?<gid>")]
-async fn edit_group_get(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
-    gid: usize,
-) -> Template {
+async fn edit_group_get(dbh: &State<Surreal<Client>>, visitor: LoggedIn, gid: usize) -> Template {
     let config = get_public_config();
 
     let uid = visitor.user.clone().unwrap().uid;
@@ -1194,8 +1180,7 @@ async fn edit_group_get(
 #[post("/edit-group", data = "<input>")]
 async fn edit_group_post(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     let config = get_public_config();
@@ -1232,8 +1217,7 @@ async fn edit_group_post(
 #[post("/add-event", data = "<input>")]
 async fn add_event_post(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     input: Form<AddEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: gid: {:?} title: '{:?}'", input.gid, input.title);
@@ -1306,12 +1290,7 @@ async fn add_event_post(
 }
 
 #[get("/add-event?<gid>")]
-async fn add_event_get(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
-    gid: usize,
-) -> Template {
+async fn add_event_get(dbh: &State<Surreal<Client>>, visitor: LoggedIn, gid: usize) -> Template {
     rocket::info!("add-event to {gid}");
     let config = get_public_config();
 
@@ -1338,12 +1317,7 @@ async fn add_event_get(
 }
 
 #[get("/edit-event?<eid>")]
-async fn edit_event_get(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
-    eid: usize,
-) -> Template {
+async fn edit_event_get(dbh: &State<Surreal<Client>>, visitor: LoggedIn, eid: usize) -> Template {
     let config = get_public_config();
 
     let uid = visitor.user.clone().unwrap().uid;
@@ -1377,8 +1351,7 @@ async fn edit_event_get(
 #[post("/edit-event", data = "<input>")]
 async fn edit_event_post(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     input: Form<EditEventForm<'_>>,
 ) -> Template {
     rocket::info!("input: eid: {:?} title: '{:?}'", input.eid, input.title);
@@ -1461,8 +1434,7 @@ async fn edit_event_post(
 #[get("/contact-members?<gid>")]
 async fn contact_members_get(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     gid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -1498,8 +1470,7 @@ async fn contact_members_get(
 async fn contact_members_post(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    logged_in: LoggedIn,
+    visitor: LoggedIn,
     input: Form<ContactMembersForm<'_>>,
 ) -> Template {
     let config = get_public_config();

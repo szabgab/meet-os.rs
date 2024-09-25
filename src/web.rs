@@ -17,8 +17,13 @@ pub struct CookieUser {
     email: String,
 }
 
+#[expect(clippy::struct_field_names)]
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct LoggedIn;
+pub struct LoggedIn {
+    pub logged_in: bool,
+    pub admin: bool,
+    pub user: Option<User>,
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for LoggedIn {
@@ -30,7 +35,12 @@ impl<'r> FromRequest<'r> for LoggedIn {
             Outcome::Success(visitor) => {
                 rocket::info!("from_request visitor: {visitor:?}");
                 if visitor.logged_in {
-                    Outcome::Success(LoggedIn)
+                    let user = Self {
+                        logged_in: visitor.logged_in,
+                        admin: visitor.admin,
+                        user: visitor.user,
+                    };
+                    Outcome::Success(user)
                 } else {
                     Outcome::Error((Status::Unauthorized, ()))
                 }
