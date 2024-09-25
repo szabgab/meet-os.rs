@@ -251,6 +251,7 @@ impl TestRunner {
     }
 
     pub fn add_event_helper(&self, title: &str, date: &str, gid: &str, owner_email: String) {
+        self.login_owner();
         let res = self
             .client
             .post("/add-event")
@@ -263,7 +264,6 @@ impl TestRunner {
                 ("description", ""),
                 ("date", date),
             ]))
-            .private_cookie(("meet-os", owner_email))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();
