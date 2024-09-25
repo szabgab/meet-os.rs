@@ -19,13 +19,10 @@ fn create_group_by_admin() {
 
     tr.setup_admin();
     tr.setup_owner();
+    tr.login_admin();
 
     // Access the Group creation page with authorized user
-    let res = tr
-        .client
-        .get("/admin/create-group?uid=2")
-        .private_cookie(("meet-os", ADMIN_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/admin/create-group?uid=2").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
@@ -46,7 +43,6 @@ fn create_group_by_admin() {
             ),
             ("owner", "2"),
         ]))
-        .private_cookie(("meet-os", ADMIN_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
@@ -75,7 +71,6 @@ fn create_group_by_admin() {
             ("description", "Text with [link](https://code-maven.com/)"),
             ("owner", "2"),
         ]))
-        .private_cookie(("meet-os", ADMIN_EMAIL))
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
 
@@ -95,13 +90,10 @@ fn create_group_unauthorized() {
     let tr = TestRunner::new();
 
     tr.setup_user();
+    tr.login_user();
 
     // Access the Group creation page with unauthorized user
-    let res = tr
-        .client
-        .get("/admin/create-group?uid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/admin/create-group?uid=1").dispatch();
     check_unauthorized!(res);
 
     // Create group should fail
@@ -114,7 +106,6 @@ fn create_group_unauthorized() {
             ("description", "nope"),
             ("owner", "1"),
         ]))
-        .private_cookie(("meet-os", USER_EMAIL))
         .dispatch();
     check_unauthorized!(res);
 }
@@ -144,12 +135,9 @@ fn get_join_group_not_existing_group_as_user() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/join-group?gid=20")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/join-group?gid=20").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
@@ -169,13 +157,10 @@ fn get_join_group_as_user() {
     tr.setup_user();
     tr.create_group_helper("First Group", 2);
     tr.logout();
+    tr.login_user();
 
     // user joins group
-    let res = tr
-        .client
-        .get("/join-group?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/join-group?gid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
@@ -196,11 +181,7 @@ fn get_join_group_as_user() {
     assert!(html.contains(&expected));
 
     // visit the group page as a member of the group
-    let res = tr
-        .client
-        .get("/group/1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/group/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     //assert_eq!(html, "");
@@ -215,11 +196,7 @@ fn get_join_group_as_user() {
     ));
 
     // try to join the same group again - should fail
-    let res = tr
-        .client
-        .get("/join-group?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/join-group?gid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
@@ -230,11 +207,7 @@ fn get_join_group_as_user() {
         .contains(r#"You are already a member of the <a href="/group/1">First Group</a> group"#));
 
     // leave group
-    let res = tr
-        .client
-        .get("/leave-group?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/leave-group?gid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
@@ -245,6 +218,7 @@ fn get_join_group_as_user() {
     );
 
     // See that user is NOT listed on the group page any more
+    tr.logout();
     let res = tr.client.get("/group/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
