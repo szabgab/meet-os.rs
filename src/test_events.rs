@@ -254,6 +254,7 @@ fn post_edit_event_user_no_such_event() {
 fn post_edit_event_user_not_the_owner() {
     let tr = TestRunner::new();
     tr.setup_for_events();
+    tr.login_user();
 
     // update
     let res = tr
@@ -268,7 +269,6 @@ fn post_edit_event_user_not_the_owner() {
             ("offset", "-180"),
             ("eid", "1"),
         ]))
-        .private_cookie(("meet-os", USER_EMAIL))
         .dispatch();
 
     check_not_the_owner!(res);
@@ -279,6 +279,7 @@ fn post_edit_event_owner_title_too_short() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_owner();
 
     // update
     let res = tr
@@ -293,7 +294,6 @@ fn post_edit_event_owner_title_too_short() {
             ("offset", "-180"),
             ("eid", "1"),
         ]))
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
@@ -311,6 +311,7 @@ fn post_edit_event_owner_invalid_date() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_owner();
 
     // update
     let res = tr
@@ -325,7 +326,6 @@ fn post_edit_event_owner_invalid_date() {
             ("offset", "-180"),
             ("eid", "1"),
         ]))
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
@@ -343,6 +343,7 @@ fn post_edit_event_owner_date_in_the_past() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_owner();
 
     // update
     let res = tr
@@ -357,7 +358,6 @@ fn post_edit_event_owner_date_in_the_past() {
             ("offset", "-180"),
             ("eid", "1"),
         ]))
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
@@ -386,6 +386,7 @@ fn post_edit_event_owner() {
     assert!(html.contains("Virtual"));
     assert!(html.contains(r#"<span class="datetime" value="2030-01-01T07:10:00Z"></span>"#));
 
+    tr.login_owner();
     // update
     let res = tr
         .client
@@ -399,7 +400,6 @@ fn post_edit_event_owner() {
             ("offset", "-180"),
             ("eid", "1"),
         ]))
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
@@ -411,6 +411,7 @@ fn post_edit_event_owner() {
         r#"Event updated: <a href="/event/1">The new title</a>"#
     );
 
+    tr.logout();
     // check the event page after the update
     let res = tr.client.get("/event/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
@@ -428,12 +429,9 @@ fn get_add_event_user_missing_gid() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/add-event")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/add-event").dispatch();
 
     assert_eq!(res.status(), Status::NotFound);
 
@@ -446,12 +444,9 @@ fn get_add_event_user_not_the_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/add-event?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/add-event?gid=1").dispatch();
     check_not_the_owner!(res);
 }
 
@@ -460,12 +455,9 @@ fn get_add_event_user_is_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/add-event?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/add-event?gid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
 
