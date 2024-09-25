@@ -1,6 +1,5 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unprocessable, params, TestRunner,
-    OWNER_EMAIL, USER_EMAIL,
 };
 use rocket::http::{ContentType, Status};
 
