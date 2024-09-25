@@ -134,9 +134,9 @@ impl TestRunner {
         self.login_helper(OWNER_EMAIL, OWNER_PW);
     }
 
-    // pub fn login_user(&self) {
-    //     self.login_helper(USER_EMAIL, USER_PW);
-    // }
+    pub fn login_user(&self) {
+        self.login_helper(USER_EMAIL, USER_PW);
+    }
 
     fn login_helper(&self, email: &str, password: &str) {
         let res = self

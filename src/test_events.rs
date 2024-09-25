@@ -16,12 +16,9 @@ fn leave_event_before_joining_it() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/rsvp-no-event?eid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-no-event?eid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     check_message!(
@@ -35,13 +32,10 @@ fn leave_event_before_joining_it() {
 fn join_event() {
     let tr = TestRunner::new();
     tr.setup_for_events();
+    tr.login_user();
 
     // event page before
-    let res = tr
-        .client
-        .get("/event/1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/event/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -67,11 +61,7 @@ fn join_event() {
     assert!(!html.contains(&expected_user_name_listed_as_participant));
 
     // RSVP to event
-    let res = tr
-        .client
-        .get("/rsvp-yes-event?eid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-yes-event?eid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -93,11 +83,7 @@ fn join_event() {
     assert!(html.contains(&expected));
 
     // check if user is listed on the event page
-    let res = tr
-        .client
-        .get("/event/1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/event/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -109,11 +95,7 @@ fn join_event() {
     assert!(html.contains(r#"Unregister from the event"#));
 
     // leave event
-    let res = tr
-        .client
-        .get("/rsvp-no-event?eid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-no-event?eid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -124,11 +106,7 @@ fn join_event() {
     );
 
     // check if user is NOT listed on the event page
-    let res = tr
-        .client
-        .get("/event/1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/event/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     check_html!(&html, "title", "First event");
@@ -152,11 +130,7 @@ fn join_event() {
     assert!(html.contains(&expected));
 
     // join event again
-    let res = tr
-        .client
-        .get("/rsvp-yes-event?eid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-yes-event?eid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     check_message!(
@@ -166,11 +140,7 @@ fn join_event() {
     );
 
     // check if user is listed on the event page
-    let res = tr
-        .client
-        .get("/event/1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/event/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -184,11 +154,7 @@ fn join_event() {
     assert!(html.contains(r#"Unregister from the event"#));
 
     // join event again while already joined
-    let res = tr
-        .client
-        .get("/rsvp-yes-event?eid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-yes-event?eid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -200,12 +166,9 @@ fn join_not_existing_event() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/rsvp-yes-event?eid=10")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-yes-event?eid=10").dispatch();
     assert_eq!(res.status(), Status::Ok);
 
     let html = res.into_string().unwrap();
@@ -216,12 +179,9 @@ fn join_not_existing_event() {
 fn leave_not_existing_event() {
     let tr = TestRunner::new();
     tr.setup_for_events();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/rsvp-no-event?eid=10")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-no-event?eid=10").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     check_message!(&html, "No such event", "No such event");
@@ -232,12 +192,9 @@ fn join_event_by_group_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/rsvp-yes-event?eid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/rsvp-yes-event?eid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
@@ -252,12 +209,12 @@ fn join_event_by_group_owner() {
 fn post_edit_event_user_missing_data() {
     let tr = TestRunner::new();
     tr.setup_owner();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/edit-event")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
     check_unprocessable!(res);
 }
