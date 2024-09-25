@@ -1,6 +1,6 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unprocessable, params, TestRunner,
-    OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -224,6 +224,7 @@ fn post_edit_event_user_no_such_event() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
     let res = tr
         .client
@@ -237,7 +238,6 @@ fn post_edit_event_user_no_such_event() {
             ("offset", "-180"),
             ("eid", "1"),
         ]))
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
@@ -475,12 +475,12 @@ fn post_add_event_user_not_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_user();
 
     let res = tr
         .client
         .post("/add-event")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", USER_EMAIL))
         .body(params!([
             ("title", "Event title"),
             ("date", "2030-10-10 08:00"),
@@ -503,11 +503,11 @@ fn post_add_event_owner_title_too_short() {
     tr.create_group_helper("My group", 2);
     tr.logout();
 
+    tr.login_owner();
     let res = tr
         .client
         .post("/add-event")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("title", "OK"),
             ("date", "2030-10-10 08:00"),
@@ -537,12 +537,12 @@ fn post_add_event_owner_invalid_date() {
     tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/add-event")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("title", "Event title"),
             ("date", "2030-02-30 08:00"),
@@ -569,15 +569,14 @@ fn post_add_event_owner_event_in_the_past() {
 
     tr.setup_admin();
     tr.setup_owner();
-    //tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/add-event")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("title", "Event title"),
             ("date", "2020-02-10 08:00"),
@@ -607,12 +606,12 @@ fn post_add_event_owner() {
     tr.setup_user();
     tr.create_group_helper("My group", 2);
     tr.logout();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/add-event")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("title", "Event title"),
             ("date", "2030-10-10 08:00"),
@@ -652,12 +651,9 @@ fn get_edit_event_as_user_no_eid() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/edit-event")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-event").dispatch();
 
     assert_eq!(res.status(), Status::NotFound);
 
@@ -670,12 +666,9 @@ fn get_edit_event_as_user_but_not_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/edit-event?eid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-event?eid=1").dispatch();
     check_not_the_owner!(res);
 }
 #[test]
@@ -683,12 +676,9 @@ fn get_edit_event_as_owner_with_eid() {
     let tr = TestRunner::new();
 
     tr.setup_for_events();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/edit-event?eid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-event?eid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
 
