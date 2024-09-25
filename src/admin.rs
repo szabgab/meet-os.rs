@@ -12,7 +12,7 @@ use surrealdb::Surreal;
 
 use crate::db;
 use crate::notify;
-use crate::web::{AdminUser, LoggedIn, Visitor};
+use crate::web::AdminUser;
 
 use crate::{get_public_config, MyConfig, User};
 use meetings::{AuditType, Group};
@@ -44,7 +44,7 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/")]
-fn admin(visitor: Visitor, _logged_in: LoggedIn, _admin: AdminUser) -> Template {
+fn admin(visitor: AdminUser) -> Template {
     let config = get_public_config();
 
     Template::render(
@@ -58,12 +58,7 @@ fn admin(visitor: Visitor, _logged_in: LoggedIn, _admin: AdminUser) -> Template 
 }
 
 #[get("/users")]
-async fn admin_users(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
-) -> Template {
+async fn admin_users(dbh: &State<Surreal<Client>>, visitor: AdminUser) -> Template {
     let config = get_public_config();
 
     let users = db::get_users(dbh).await.unwrap();
@@ -80,7 +75,7 @@ async fn admin_users(
 }
 
 #[get("/search")]
-fn search_get(visitor: Visitor, _logged_in: LoggedIn, _admin: AdminUser) -> Template {
+fn search_get(visitor: AdminUser) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
@@ -96,9 +91,7 @@ fn search_get(visitor: Visitor, _logged_in: LoggedIn, _admin: AdminUser) -> Temp
 #[post("/search", data = "<input>")]
 async fn search_post(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
+    visitor: AdminUser,
     input: Form<SearchForm<'_>>,
 ) -> Template {
     rocket::info!("search_post: {:?}", input.query);
@@ -126,9 +119,7 @@ async fn search_post(
 #[get("/create-group?<uid>")]
 async fn create_group_get(
     dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
+    visitor: AdminUser,
     uid: usize,
 ) -> Template {
     let config = get_public_config();
@@ -147,9 +138,7 @@ async fn create_group_get(
 async fn create_group_post(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
+    visitor: AdminUser,
     input: Form<GroupForm<'_>>,
 ) -> Template {
     rocket::info!("create_group_post: {:?}", input.name);
@@ -209,12 +198,7 @@ async fn create_group_post(
 }
 
 #[get("/audit")]
-async fn audit_get(
-    dbh: &State<Surreal<Client>>,
-    visitor: Visitor,
-    _logged_in: LoggedIn,
-    _admin: AdminUser,
-) -> Template {
+async fn audit_get(dbh: &State<Surreal<Client>>, visitor: AdminUser) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();

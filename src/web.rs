@@ -54,25 +54,33 @@ impl<'r> FromRequest<'r> for LoggedIn {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct AdminUser;
+pub struct AdminUser {
+    pub logged_in: bool,
+    pub admin: bool,
+    pub user: Option<User>,
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AdminUser {
     type Error = ();
 
     async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, ()> {
-        match Visitor::from_request(request).await {
+        match LoggedIn::from_request(request).await {
             Outcome::Success(visitor) => {
                 if visitor.admin {
-                    Outcome::Success(Self)
+                    let user = Self {
+                        logged_in: visitor.logged_in,
+                        admin: visitor.admin,
+                        user: visitor.user,
+                    };
+                    Outcome::Success(user)
                 } else {
                     Outcome::Error((Status::Forbidden, ()))
                 }
             }
+            Outcome::Error(err) => Outcome::Error(err),
             // This should never happen
-            Outcome::Error(_) | Outcome::Forward(_) => {
-                Outcome::Error((Status::InternalServerError, ()))
-            }
+            Outcome::Forward(_) => Outcome::Error((Status::InternalServerError, ())),
         }
     }
 }
