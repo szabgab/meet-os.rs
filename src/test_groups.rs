@@ -1,6 +1,6 @@
 use crate::test_lib::{
     check_html, check_message, check_not_the_owner, check_unauthorized, check_unprocessable,
-    params, TestRunner, ADMIN_EMAIL, OWNER_EMAIL, USER_EMAIL, USER_NAME,
+    params, TestRunner, USER_NAME,
 };
 use rocket::http::{ContentType, Status};
 
@@ -184,7 +184,6 @@ fn get_join_group_as_user() {
     let res = tr.client.get("/group/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "First Group");
     check_html!(&html, "h1", "First Group");
     assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
@@ -200,7 +199,6 @@ fn get_join_group_as_user() {
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
-    // assert_eq!(html, "");
     check_html!(&html, "title", "You are already a member of this group");
     check_html!(&html, "h1", "You are already a member of this group");
     assert!(html
@@ -222,7 +220,6 @@ fn get_join_group_as_user() {
     let res = tr.client.get("/group/1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "First Group");
     check_html!(&html, "h1", "First Group");
     assert!(html.contains(r#"<h2 class="title is-4">Members</h2>"#));
@@ -237,12 +234,9 @@ fn get_join_group_as_owner() {
     tr.setup_admin();
     tr.setup_owner();
     tr.create_group_helper("First Group", 2);
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/join-group?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/join-group?gid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     check_message!(
@@ -257,12 +251,9 @@ fn get_leave_not_existing_group() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/leave-group?gid=20")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/leave-group?gid=20").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
@@ -280,16 +271,12 @@ fn get_leave_group_as_owner() {
     tr.setup_admin();
     tr.setup_owner();
     tr.create_group_helper("First Group", 2);
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/leave-group?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/leave-group?gid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
-    //assert_eq!(html, "");
     check_html!(&html, "title", "You are the owner of this group");
     check_html!(&html, "h1", "You are the owner of this group");
     assert!(html.contains(r#"You cannot leave a group you own."#));
@@ -303,16 +290,12 @@ fn get_leave_group_user_does_not_belong_to() {
     tr.setup_owner();
     tr.setup_user();
     tr.create_group_helper("First Group", 2);
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/leave-group?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/leave-group?gid=1").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
-    //assert_eq!(html, "");
     check_html!(&html, "title", "You are not a member of this group");
     check_html!(&html, "h1", "You are not a member of this group");
     assert!(html.contains(r#"You cannot leave a group where you are not a member."#));
@@ -323,16 +306,12 @@ fn get_edit_group_user_no_such_group() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/edit-group?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-group?gid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "No such group");
     check_html!(&html, "h1", "No such group");
     assert!(html.contains("Group <b>1</b> does not exist"));
@@ -343,12 +322,9 @@ fn get_edit_group_user_is_not_the_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_groups();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/edit-group?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-group?gid=1").dispatch();
     check_not_the_owner!(res);
 }
 
@@ -359,16 +335,12 @@ fn get_edit_group_by_owner() {
     tr.setup_admin();
     tr.setup_owner();
     tr.create_group_helper("First Group", 2);
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/edit-group?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-group?gid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "Edit Group");
     check_html!(&html, "h1", "Edit Group");
     assert!(html.contains(r#"<form method="POST" action="/edit-group">"#));
@@ -389,7 +361,6 @@ fn get_group_that_does_not_exist() {
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "No such group");
     check_html!(&html, "h1", "No such group");
     assert!(html.contains("The group <b>42</b> does not exist."));
@@ -400,12 +371,12 @@ fn post_edit_group_user_missing_gid() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/edit-group")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .dispatch();
     check_unprocessable!(res);
 }
@@ -415,12 +386,12 @@ fn post_edit_group_user_no_such_group() {
     let tr = TestRunner::new();
 
     tr.setup_owner();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/edit-group")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("name", "Update"),
@@ -431,7 +402,6 @@ fn post_edit_group_user_no_such_group() {
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "No such group");
     check_html!(&html, "h1", "No such group");
     assert!(html.contains("Group <b>1</b> does not exist"));
@@ -442,12 +412,12 @@ fn post_edit_group_by_user_not_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_groups();
+    tr.login_user();
 
     let res = tr
         .client
         .post("/edit-group")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", USER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("name", "Updated name"),
@@ -464,12 +434,12 @@ fn post_edit_group_user_not_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_groups();
+    tr.login_user();
 
     let res = tr
         .client
         .post("/edit-group")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", USER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("name", "Updated name"),
@@ -486,15 +456,14 @@ fn post_edit_group_owner() {
 
     tr.setup_admin();
     tr.setup_owner();
-    //setup_foo1(&tr.client, &tr.email_folder);
     tr.create_group_helper("First Group", 2);
     tr.logout();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/edit-group")
         .header(ContentType::Form)
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("name", "Updated name"),
