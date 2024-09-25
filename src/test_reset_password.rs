@@ -133,10 +133,9 @@ fn reset_password_full() {
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
-    //assert_eq!(html, "");
     check_html!(&html, "title", "Welcome back");
     check_user_menu!(&html);
-    check_profile_by_user!(&tr.client, &OWNER_EMAIL, name);
+    check_profile_by_user!(&tr.client, name);
 
     // Try again with the same code
     // Try with id that does not exist

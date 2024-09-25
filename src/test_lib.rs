@@ -196,25 +196,11 @@ impl TestRunner {
     }
 
     pub fn setup_event(&self, eid: usize) {
+        self.login_owner();
         match eid {
-            1 => &self.add_event_helper(
-                "First event",
-                "2030-01-01 10:10",
-                "1",
-                String::from(OWNER_EMAIL),
-            ),
-            2 => &self.add_event_helper(
-                "Second event",
-                "2030-01-02 10:10",
-                "1",
-                String::from(OWNER_EMAIL),
-            ),
-            3 => &self.add_event_helper(
-                "Third event",
-                "2030-01-03 10:10",
-                "2",
-                String::from(OWNER_EMAIL),
-            ),
+            1 => &self.add_event_helper("First event", "2030-01-01 10:10", "1"),
+            2 => &self.add_event_helper("Second event", "2030-01-02 10:10", "1"),
+            3 => &self.add_event_helper("Third event", "2030-01-03 10:10", "2"),
 
             _ => panic!("no such eid",),
         };
@@ -250,7 +236,7 @@ impl TestRunner {
         self.verify_email();
     }
 
-    pub fn add_event_helper(&self, title: &str, date: &str, gid: &str, owner_email: String) {
+    pub fn add_event_helper(&self, title: &str, date: &str, gid: &str) {
         self.login_owner();
         let res = self
             .client
@@ -387,11 +373,8 @@ macro_rules! check_profile_by_guest {
 pub(crate) use check_profile_by_guest;
 
 macro_rules! check_profile_by_user {
-    ($client: expr, $email: expr, $h1: expr) => {{
-        let res = $client
-            .get("/profile")
-            .private_cookie(("meet-os", $email.to_owned()))
-            .dispatch();
+    ($client: expr, $h1: expr) => {{
+        let res = $client.get("/profile").dispatch();
 
         assert_eq!(res.status(), Status::Ok);
         let html = res.into_string().unwrap();

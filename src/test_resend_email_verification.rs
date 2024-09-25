@@ -107,5 +107,5 @@ fn post_resend_email_verification_unverified_email() {
     );
     check_user_menu!(&html);
 
-    check_profile_by_user!(&tr.client, UNVERIFIED_EMAIL, UNVERIFIED_NAME);
+    check_profile_by_user!(&tr.client, UNVERIFIED_NAME);
 }

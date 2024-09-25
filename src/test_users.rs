@@ -102,7 +102,7 @@ fn register_user() {
     );
     check_user_menu!(&html);
 
-    check_profile_by_user!(&tr.client, OWNER_EMAIL, OWNER_NAME);
+    check_profile_by_user!(&tr.client, OWNER_NAME);
 }
 
 #[test]
@@ -184,7 +184,9 @@ fn post_login_regular_user() {
     tr.register_and_verify_user(OWNER_NAME, OWNER_EMAIL, OWNER_PW);
     tr.logout();
 
-    check_profile_by_user!(&tr.client, &OWNER_EMAIL, OWNER_NAME);
+    tr.login_owner();
+
+    check_profile_by_user!(&tr.client, OWNER_NAME);
 
     let res = tr
         .client
@@ -198,7 +200,7 @@ fn post_login_regular_user() {
 
     check_html!(&html, "title", "Welcome back");
     check_user_menu!(&html);
-    check_profile_by_user!(&tr.client, &OWNER_EMAIL, OWNER_NAME);
+    check_profile_by_user!(&tr.client, OWNER_NAME);
 
     // logout
     let res = tr.client.get("/logout").dispatch();
@@ -235,7 +237,7 @@ fn post_login_admin() {
     check_html!(&html, "title", "Welcome back");
     check_admin_menu!(&html);
 
-    check_profile_by_user!(&tr.client, &ADMIN_EMAIL, ADMIN_NAME);
+    check_profile_by_user!(&tr.client, ADMIN_NAME);
 
     // logout
     let res = tr.client.get("/logout").dispatch();
