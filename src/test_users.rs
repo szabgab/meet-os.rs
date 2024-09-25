@@ -182,6 +182,7 @@ fn post_login_regular_user() {
     let tr = TestRunner::new();
 
     tr.register_and_verify_user(OWNER_NAME, OWNER_EMAIL, OWNER_PW);
+    tr.logout();
 
     check_profile_by_user!(&tr.client, &OWNER_EMAIL, OWNER_NAME);
 
@@ -195,26 +196,12 @@ fn post_login_regular_user() {
 
     let html = res.into_string().unwrap();
 
-    //assert_eq!(html, "");
     check_html!(&html, "title", "Welcome back");
     check_user_menu!(&html);
-
-    // Access the profile with the cookie
     check_profile_by_user!(&tr.client, &OWNER_EMAIL, OWNER_NAME);
 
-    // TODO: logout requires a logged in user
-    //let res = client.get("/logout").dispatch();
-    // assert_eq!(res.status(), Status::Unauthorized);
-    //let html = res.into_string().unwrap();
-    // check_html!(&html, "title", "Not logged in");
-    // assert!(html.contains("You are not logged in"));
-
     // logout
-    let res = tr
-        .client
-        .get("/logout")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/logout").dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
 
@@ -789,4 +776,12 @@ fn post_register_with_invalid_username() {
         "Invalid character",
         r#"The name 'é' contains a character that we currently don't accept. Use Latin letters for now and comment on <a href="https://github.com/szabgab/meet-os.rs/issues/38">this issue</a> where this topic is discussed."#
     );
+}
+
+#[test]
+fn logout_by_guest() {
+    let tr = TestRunner::new();
+    // logout requires a logged in user
+    let res = tr.client.get("/logout").dispatch();
+    check_not_logged_in!(res);
 }
