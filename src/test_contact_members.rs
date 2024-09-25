@@ -9,12 +9,9 @@ fn contact_members_get_user_without_gid() {
     let tr = TestRunner::new();
 
     tr.setup_many_users();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/contact-members")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/contact-members").dispatch();
 
     assert_eq!(res.status(), Status::NotFound);
     let html = res.into_string().unwrap();
@@ -27,12 +24,9 @@ fn contact_members_get_user_with_invalid_gid() {
     let tr = TestRunner::new();
 
     tr.setup_many_users();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/contact-members?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/contact-members?gid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
@@ -44,12 +38,9 @@ fn contact_members_get_owner_with_gid() {
     let tr = TestRunner::new();
 
     tr.setup_all();
+    tr.login_owner();
 
-    let res = tr
-        .client
-        .get("/contact-members?gid=1")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/contact-members?gid=1").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
@@ -64,12 +55,9 @@ fn contact_members_get_owner_with_gid() {
 fn contact_members_get_user_not_owner() {
     let tr = TestRunner::new();
     tr.setup_for_groups();
+    tr.login_user();
 
-    let res = tr
-        .client
-        .get("/contact-members?gid=1")
-        .private_cookie(("meet-os", USER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/contact-members?gid=1").dispatch();
     check_not_the_owner!(res);
 }
 
@@ -81,11 +69,11 @@ fn contact_members_post_user_without_gid() {
     let tr = TestRunner::new();
 
     tr.setup_all();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/contact-members")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .header(ContentType::Form)
         .dispatch();
     check_unprocessable!(res);
@@ -96,11 +84,11 @@ fn contact_members_post_user_with_all() {
     let tr = TestRunner::new();
 
     tr.setup_all();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/contact-members")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("subject", "Test subject line"),
@@ -122,11 +110,11 @@ fn contact_members_post_user_subject_too_short() {
     let tr = TestRunner::new();
 
     tr.setup_all();
+    tr.login_owner();
 
     let res = tr
         .client
         .post("/contact-members")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("subject", "Test"),
@@ -149,11 +137,11 @@ fn contact_members_post_user_who_is_not_the_owner() {
     let tr = TestRunner::new();
 
     tr.setup_for_groups();
+    tr.login_user();
 
     let res = tr
         .client
         .post("/contact-members")
-        .private_cookie(("meet-os", USER_EMAIL))
         .body(params!([
             ("gid", "1"),
             ("subject", "Test subject line"),
