@@ -392,6 +392,11 @@ fn post_login_with_unverified_email() {
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "We sent you an email",
+        "We sent you an email to <b>foo@meet-os.com</b> Please check your inbox and verify your email address."
+    );
 
     let res = tr
         .client

@@ -163,7 +163,7 @@ impl TestRunner {
         self.setup_event(3);
 
         // Make sure the client is not logged in after the setup
-        let res = &self.client.get(format!("/logout")).dispatch();
+        let _res = &self.client.get(format!("/logout")).dispatch();
         // The setup_many_users logged the user out already so the above might return an error
         // That's why we don't check if it is Status::Ok
         //assert_eq!(res.status(), Status::Ok);
@@ -190,7 +190,7 @@ impl TestRunner {
         self.register_and_verify_user(OTHER_NAME, OTHER_EMAIL, OTHER_PW);
 
         // Make sure the client is not logged in after the setup
-        let res = &self.client.get(format!("/logout")).dispatch();
+        let _res = &self.client.get(format!("/logout")).dispatch();
         //assert_eq!(res.status(), Status::Ok);
         rocket::info!("--------------- finished setup_many_users ----------------")
     }

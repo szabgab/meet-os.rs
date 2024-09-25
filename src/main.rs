@@ -1422,7 +1422,7 @@ async fn edit_event_post(
 
     Template::render(
         "message",
-        context! {title: "Event udapted", message: format!(r#"Event updated: <a href="/event/{}">{}</a>"#, input.eid, title ), config, visitor},
+        context! {title: "Event updated", message: format!(r#"Event updated: <a href="/event/{}">{}</a>"#, input.eid, title ), config, visitor},
     )
 }
 

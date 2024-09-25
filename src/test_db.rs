@@ -19,7 +19,7 @@ async fn setup() -> (Surreal<Client>, String) {
 }
 
 async fn teardown(dbh: Surreal<Client>, db_name: String) {
-    let res = dbh
+    let _res = dbh
         .query("REMOVE DATABASE `$name`")
         .bind(("name", db_name))
         .await

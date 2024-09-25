@@ -51,6 +51,11 @@ fn create_group_by_admin() {
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "Group created",
+        r#"Group <b><a href="/group/1">Rust Maven</a></b> created"#
+    );
 
     // List the groups
     let res = tr.client.get("/groups").dispatch();

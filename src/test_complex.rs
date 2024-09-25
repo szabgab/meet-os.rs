@@ -1,4 +1,4 @@
-use crate::test_lib::{check_html, params, TestRunner, ADMIN_EMAIL, OWNER_EMAIL};
+use crate::test_lib::{check_html, check_message, params, TestRunner, ADMIN_EMAIL, OWNER_EMAIL};
 
 use rocket::http::{ContentType, Status};
 
@@ -34,6 +34,11 @@ fn test_complex() {
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "Group created",
+        r#"Group <b><a href="/group/1">Rust Maven</a></b> created"#
+    );
 
     // The profile now lists the group for the owner
     let res = tr
@@ -65,6 +70,11 @@ fn test_complex() {
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "Event added",
+        r#"Event added: <a href="/event/1">The first meeting</a>"#
+    );
 
     // main page lists group and event
     let res = tr.client.get("/").dispatch();
@@ -113,6 +123,11 @@ fn test_complex() {
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "Event added",
+        r#"Event added: <a href="/event/2">The second excursion</a>"#
+    );
 
     // Add event 3
     let third_event_title = "The 3rd party";
@@ -132,6 +147,11 @@ fn test_complex() {
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "Event added",
+        r#"Event added: <a href="/event/3">The 3rd party</a>"#
+    );
 
     // main page
     let res = tr.client.get("/").dispatch();
@@ -170,6 +190,11 @@ fn test_complex() {
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
+    check_message!(
+        &html,
+        "Event updated",
+        r#"Event updated: <a href="/event/2">New title for the 2nd event</a>"#
+    );
 
     std::thread::sleep(std::time::Duration::from_millis(1000));
     // events page

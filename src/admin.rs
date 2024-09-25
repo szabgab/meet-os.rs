@@ -204,7 +204,7 @@ async fn create_group_post(
     .unwrap();
     Template::render(
         "message",
-        context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b>created"#, gid, group.name), config, visitor},
+        context! {title: "Group created", message: format!(r#"Group <b><a href="/group/{}">{}</a></b> created"#, gid, group.name), config, visitor},
     )
 }
 

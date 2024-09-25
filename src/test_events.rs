@@ -450,7 +450,7 @@ fn post_edit_event_owner() {
     let html = res.into_string().unwrap();
     check_message!(
         &html,
-        "Event udapted",
+        "Event updated",
         r#"Event updated: <a href="/event/1">The new title</a>"#
     );
 
