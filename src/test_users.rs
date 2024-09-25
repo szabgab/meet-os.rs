@@ -456,11 +456,7 @@ fn get_edit_profile_user() {
 
     tr.setup_owner();
 
-    let res = tr
-        .client
-        .get("/edit-profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/edit-profile").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
@@ -624,7 +620,6 @@ fn post_edit_profile_failures() {
     let res = tr
         .client
         .post("/edit-profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .header(ContentType::Form)
         .body("name=XX&github=szabgab*&gitlab=&linkedin")
         .dispatch();
@@ -640,7 +635,6 @@ fn post_edit_profile_failures() {
     let res = tr
         .client
         .post("/edit-profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .header(ContentType::Form)
         .body("name=XX&github=&gitlab=foo*bar&linkedin=")
         .dispatch();
@@ -656,7 +650,6 @@ fn post_edit_profile_failures() {
     let res = tr
         .client
         .post("/edit-profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .header(ContentType::Form)
         .body("name=XX&github=&gitlab=&linkedin=szabgab")
         .dispatch();
@@ -672,7 +665,6 @@ fn post_edit_profile_failures() {
     let res = tr
         .client
         .post("/edit-profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .header(ContentType::Form)
         .body(
             "name=QWERTYUIOPASDFGHJKLZXCVBNM QWERTYUIOPASDFGHJKLZXCVBNM&github=&gitlab=&linkedin=",
@@ -690,7 +682,6 @@ fn post_edit_profile_failures() {
     let res = tr
         .client
         .post("/edit-profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
         .header(ContentType::Form)
         .body("name=é&github=&gitlab=&linkedin=")
         .dispatch();
@@ -714,7 +705,6 @@ fn post_edit_profile_works() {
     // verify that if we submit html tags to the about field, those are properly escaped in the result
     let res = tr.client
             .post("/edit-profile")
-            .private_cookie(("meet-os", OWNER_EMAIL))
             .header(ContentType::Form)
             .body("name= Lord Voldemort &github= alfa &gitlab= beta &linkedin=  https://www.linkedin.com/in/szabgab/  ")
             .dispatch();
@@ -729,11 +719,7 @@ fn post_edit_profile_works() {
     );
 
     // Check updated profile
-    let res = tr
-        .client
-        .get("/profile")
-        .private_cookie(("meet-os", OWNER_EMAIL))
-        .dispatch();
+    let res = tr.client.get("/profile").dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
