@@ -38,11 +38,11 @@ fn protected_post_requests_as_guest() {
 
     for path in [
         "/contact-members",
-        // "/add-event",
-        // "/edit-event",
-        // "/edit-group",
-        // "/admin/search",
-        // "/admin/create-group",
+        "/add-event",
+        "/edit-event",
+        "/edit-group",
+        "/admin/search",
+        "/admin/create-group",
     ] {
         let res = tr.client.post(path).header(ContentType::Form).dispatch();
 
