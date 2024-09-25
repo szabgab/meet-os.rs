@@ -221,6 +221,7 @@ impl TestRunner {
     }
 
     pub fn create_group_helper(&self, name: &str, owner: usize) {
+        self.login_admin();
         let res = self
             .client
             .post("/admin/create-group")
@@ -231,7 +232,6 @@ impl TestRunner {
                 ("description", "",),
                 ("owner", &owner.to_string()),
             ]))
-            .private_cookie(("meet-os", ADMIN_EMAIL))
             .dispatch();
 
         assert_eq!(res.status(), Status::Ok);
