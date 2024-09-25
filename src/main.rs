@@ -1,5 +1,4 @@
 #![allow(clippy::allow_attributes_without_reason)]
-#![allow(unused_variables)]
 #![allow(clippy::needless_pass_by_value)]
 
 #[macro_use]
@@ -242,11 +241,10 @@ async fn login_post(
 }
 
 #[get("/logout")]
-fn logout_get(cookies: &CookieJar<'_>, visitor: LoggedIn) -> Template {
+fn logout_get(cookies: &CookieJar<'_>, _visitor: LoggedIn) -> Template {
     cookies.remove_private("meet-os");
     let config = get_public_config();
 
-    #[expect(clippy::shadow_unrelated)]
     let visitor = Visitor::new_after_logout();
 
     Template::render(
@@ -331,9 +329,7 @@ async fn reset_password_post(
 
 #[get("/save-password/<uid>/<code>")]
 async fn save_password_get(
-    cookies: &CookieJar<'_>,
     dbh: &State<Surreal<Client>>,
-    myconfig: &State<MyConfig>,
     visitor: Visitor,
     uid: usize,
     code: &str,
@@ -400,7 +396,6 @@ async fn save_password_post(
             context! {title: "Invalid password", message: format!("The password must be at least {MIN_PASSWORD_LENGTH} characters long."), config, visitor},
         );
     }
-    let process = "register";
 
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Pbkdf2.hash_password(password, &salt).unwrap().to_string();
