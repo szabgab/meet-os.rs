@@ -7,6 +7,7 @@ use surrealdb::engine::remote::ws::Client;
 use surrealdb::engine::remote::ws::Ws;
 use surrealdb::opt::auth::Root;
 use surrealdb::opt::Resource;
+use surrealdb::sql::{Id, Thing};
 use surrealdb::Surreal;
 
 use crate::EventStatus;
@@ -370,8 +371,8 @@ pub async fn update_user(
     Ok(entry)
 }
 
-pub async fn get_user_by_id(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Result<Option<User>> {
-    rocket::info!("get_user_by_id: '{uid}'");
+pub async fn get_user_by_uid(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Result<Option<User>> {
+    rocket::info!("get_user_by_uid: '{uid}'");
 
     let mut response = dbh
         .query("SELECT * FROM user WHERE uid=$uid;")
@@ -383,6 +384,19 @@ pub async fn get_user_by_id(dbh: &Surreal<Client>, uid: usize) -> surrealdb::Res
     if let Some(entry) = entry.as_ref() {
         rocket::info!("Found user {}, {}", entry.name, entry.email);
     }
+
+    Ok(entry)
+}
+
+pub async fn get_user_by_id(dbh: &Surreal<Client>, id: Id) -> surrealdb::Result<Option<User>> {
+    rocket::info!("get_user_by_id: '{id}'");
+
+    let mut response = dbh
+        .query("SELECT * FROM user WHERE id=$id;")
+        .bind(("id", Thing::from(("user", id))))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
 
     Ok(entry)
 }
@@ -718,7 +732,7 @@ pub async fn get_all_rsvps_for_event(
     let mut people = vec![];
     for entry in entries {
         // We assume that each uid will have a user
-        let user = get_user_by_id(dbh, entry.uid).await.unwrap().unwrap();
+        let user = get_user_by_uid(dbh, entry.uid).await.unwrap().unwrap();
         people.push((entry, user));
     }
 

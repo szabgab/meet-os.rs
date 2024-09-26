@@ -338,7 +338,7 @@ async fn save_password_get(
     rocket::info!("save-password for uid={uid} with code: {code}");
     let config = get_public_config();
 
-    let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
+    let Some(user) = db::get_user_by_uid(dbh, uid).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "Invalid id", message: format!("Invalid id <b>{uid}</b>"), config, visitor},
@@ -375,7 +375,7 @@ async fn save_password_post(
     let uid = input.uid;
     let code = input.code;
 
-    let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
+    let Some(user) = db::get_user_by_uid(dbh, uid).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "Invalid userid", message: format!("Invalid userid <b>{uid}</b>."), config, visitor},
@@ -574,7 +574,7 @@ async fn verify_email(
 
     let config = get_public_config();
 
-    let Some(user) = db::get_user_by_id(dbh, uid).await.unwrap() else {
+    let Some(user) = db::get_user_by_uid(dbh, uid).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "Invalid id", message: format!("Invalid id <b>{uid}</b>"), config, visitor},
@@ -1050,7 +1050,10 @@ async fn group_get(dbh: &State<Surreal<Client>>, visitor: Visitor, gid: usize) -
     let events = db::get_events_by_group_id(dbh, gid).await;
 
     let description = markdown2html(&group.description).unwrap();
-    let owner = db::get_user_by_id(dbh, group.owner).await.unwrap().unwrap();
+    let owner = db::get_user_by_uid(dbh, group.owner)
+        .await
+        .unwrap()
+        .unwrap();
 
     Template::render(
         "group",
@@ -1105,7 +1108,7 @@ async fn list_users(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template 
 async fn user(dbh: &State<Surreal<Client>>, visitor: Visitor, uid: usize) -> Template {
     let config = get_public_config();
 
-    let user = match db::get_user_by_id(dbh, uid).await.unwrap() {
+    let user = match db::get_user_by_uid(dbh, uid).await.unwrap() {
         None => {
             return Template::render(
                 "message",

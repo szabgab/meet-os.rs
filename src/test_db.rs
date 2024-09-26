@@ -6,7 +6,7 @@ use surrealdb::sql::{Id, Thing};
 use surrealdb::Surreal;
 
 use crate::db;
-use meetings::{db::get_user_by_id, AuditType, Event, EventStatus, Group, Membership, User, RSVP};
+use meetings::{db::get_user_by_uid, AuditType, Event, EventStatus, Group, Membership, User, RSVP};
 
 use crate::test_lib::{ADMIN_EMAIL, ADMIN_NAME, OWNER_EMAIL, OWNER_NAME, USER_EMAIL, USER_NAME};
 
@@ -206,7 +206,7 @@ async fn test_db_get_none() {
     let user = db::get_user_by_email(&dbh, "bad_email").await.unwrap();
     assert!(user.is_none());
 
-    let user = db::get_user_by_id(&dbh, 23).await.unwrap();
+    let user = db::get_user_by_uid(&dbh, 23).await.unwrap();
     assert!(user.is_none());
 
     let eid = 1;
@@ -222,9 +222,9 @@ async fn test_db_user() {
     let (dbh, db_name) = setup().await;
 
     let utc: DateTime<Utc> = Utc::now();
-    let id = Id::ulid();
+    let id1 = Id::ulid();
     let user_foo = User {
-        id: Thing::from(("user", id)),
+        id: Thing::from(("user", id1.clone())),
         uid: 1,
         name: String::from("Foo Bar"),
         email: String::from("foo@meet-os.com"),
@@ -249,9 +249,9 @@ async fn test_db_user() {
     assert_eq!(users[0].name, user_foo.name);
     assert_eq!(users[0], user_foo);
 
-    let id = Id::ulid();
+    let id2 = Id::ulid();
     let other_user = User {
-        id: Thing::from(("user", id)),
+        id: Thing::from(("user", id2.clone())),
         code: String::from("other code"),
         uid: 2,
         ..user_foo.clone()
@@ -262,9 +262,9 @@ async fn test_db_user() {
     //println!("{err}");
     assert!(err.contains("There was a problem with the database: Database index `user_email` already contains 'foo@meet-os.com'"));
 
-    let id = Id::ulid();
+    let id3 = Id::ulid();
     let other_user = User {
-        id: Thing::from(("user", id)),
+        id: Thing::from(("user", id3.clone())),
         code: String::from("other code"),
         email: String::from("peti@meet-os.com"),
         ..user_foo.clone()
@@ -276,6 +276,10 @@ async fn test_db_user() {
     assert!(err.contains(
         "There was a problem with the database: Database index `user_uid` already contains 1"
     ));
+
+    println!("id1: {id1}, id2: {id2}, id3: {id3}");
+    let user1 = db::get_user_by_id(&dbh, id1).await.unwrap().unwrap();
+    assert_eq!(user1.email, "foo@meet-os.com");
 
     // TODO make sure we don't accidentally use the same code twice
     // let other_user = User {
@@ -316,7 +320,7 @@ async fn test_db_user() {
         .unwrap();
     assert_eq!(user, user_foo);
 
-    let user = db::get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    let user = db::get_user_by_uid(&dbh, 1).await.unwrap().unwrap();
     assert_eq!(user, user_foo);
 
     // Add group
@@ -677,7 +681,7 @@ async fn test_db_code() {
     add_owner_helper(&dbh).await;
     add_user_helper(&dbh).await;
 
-    let user = db::get_user_by_id(&dbh, 3).await.unwrap().unwrap();
+    let user = db::get_user_by_uid(&dbh, 3).await.unwrap().unwrap();
     assert_eq!(user.name, USER_NAME);
     assert_eq!(user.code, "generated code");
     assert_eq!(user.verified, false);
@@ -685,20 +689,20 @@ async fn test_db_code() {
 
     db::set_user_verified(&dbh, 3).await.unwrap();
 
-    let user = db::get_user_by_id(&dbh, 3).await.unwrap().unwrap();
+    let user = db::get_user_by_uid(&dbh, 3).await.unwrap().unwrap();
     assert_eq!(user.name, USER_NAME);
     assert_eq!(user.code, "");
     assert_eq!(user.verified, true);
     assert!(user.verification_date.is_some());
 
-    let user = db::get_user_by_id(&dbh, 2).await.unwrap().unwrap();
+    let user = db::get_user_by_uid(&dbh, 2).await.unwrap().unwrap();
     assert_eq!(user.name, OWNER_NAME);
     assert_eq!(user.code, "generated code");
     assert_eq!(user.verified, false);
     assert!(user.verification_date.is_none());
 
     db::remove_code(&dbh, 2).await.unwrap();
-    let user = db::get_user_by_id(&dbh, 2).await.unwrap().unwrap();
+    let user = db::get_user_by_uid(&dbh, 2).await.unwrap().unwrap();
     assert_eq!(user.name, OWNER_NAME);
     assert_eq!(user.code, "");
     assert_eq!(user.verified, false);
@@ -707,7 +711,7 @@ async fn test_db_code() {
     db::add_login_code_to_user(&dbh, OWNER_EMAIL, "qqrq", "new code")
         .await
         .unwrap();
-    let user = db::get_user_by_id(&dbh, 2).await.unwrap().unwrap();
+    let user = db::get_user_by_uid(&dbh, 2).await.unwrap().unwrap();
     assert_eq!(user.name, OWNER_NAME);
     assert_eq!(user.code, "new code");
     assert_eq!(user.verified, false);
@@ -721,7 +725,7 @@ async fn test_db_update_user() {
     let (dbh, db_name) = setup().await;
 
     add_admin_helper(&dbh).await;
-    let admin = get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    let admin = get_user_by_uid(&dbh, 1).await.unwrap().unwrap();
     //println!("{admin:?}");
     assert_eq!(
         admin,
@@ -756,7 +760,7 @@ async fn test_db_update_user() {
     .await
     .unwrap();
 
-    let admin = get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    let admin = get_user_by_uid(&dbh, 1).await.unwrap().unwrap();
     assert_eq!(
         admin,
         User {
@@ -779,7 +783,7 @@ async fn test_db_update_user() {
     );
 
     db::save_password(&dbh, 1, "new password").await.unwrap();
-    let admin = get_user_by_id(&dbh, 1).await.unwrap().unwrap();
+    let admin = get_user_by_uid(&dbh, 1).await.unwrap().unwrap();
     assert_eq!(
         admin,
         User {

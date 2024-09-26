@@ -126,7 +126,7 @@ async fn create_group_get(
 
     let user = visitor.user.clone().unwrap();
 
-    let owner = db::get_user_by_id(dbh, uid).await.unwrap().unwrap();
+    let owner = db::get_user_by_uid(dbh, uid).await.unwrap().unwrap();
 
     Template::render(
         "create_group",
@@ -166,7 +166,10 @@ async fn create_group_post(
         creation_date,
     };
 
-    let owner = db::get_user_by_id(dbh, input.owner).await.unwrap().unwrap();
+    let owner = db::get_user_by_uid(dbh, input.owner)
+        .await
+        .unwrap()
+        .unwrap();
 
     db::add_group(dbh, &group).await.unwrap();
     notify::owner_group_was_created(dbh, myconfig, &owner, &group).await;

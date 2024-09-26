@@ -201,7 +201,10 @@ async fn send_to_group_owner(
     subject: &str,
     text: &str,
 ) {
-    let owner = db::get_user_by_id(dbh, group.owner).await.unwrap().unwrap();
+    let owner = db::get_user_by_uid(dbh, group.owner)
+        .await
+        .unwrap()
+        .unwrap();
     let to_address = &EmailAddress {
         name: owner.name,
         email: owner.email,
