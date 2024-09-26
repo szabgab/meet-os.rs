@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde_json::json;
 
 use surrealdb::engine::remote::ws::Client;
+use surrealdb::sql::{Id, Thing};
 use surrealdb::Surreal;
 
 use crate::db;
@@ -28,7 +29,9 @@ async fn teardown(dbh: Surreal<Client>, db_name: String) {
 
 async fn add_admin_helper(dbh: &Surreal<Client>) {
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let user = User {
+        id: Thing::from(("user", id)),
         uid: 1,
         name: ADMIN_NAME.to_owned(),
         email: ADMIN_EMAIL.to_owned(),
@@ -51,7 +54,9 @@ async fn add_admin_helper(dbh: &Surreal<Client>) {
 
 async fn add_owner_helper(dbh: &Surreal<Client>) {
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let user = User {
+        id: Thing::from(("user", id)),
         uid: 2,
         name: OWNER_NAME.to_owned(),
         email: OWNER_EMAIL.to_owned(),
@@ -75,7 +80,9 @@ async fn add_owner_helper(dbh: &Surreal<Client>) {
 
 async fn add_user_helper(dbh: &Surreal<Client>) {
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let user = User {
+        id: Thing::from(("user", id)),
         uid: 3,
         name: USER_NAME.to_owned(),
         email: USER_EMAIL.to_owned(),
@@ -215,8 +222,9 @@ async fn test_db_user() {
     let (dbh, db_name) = setup().await;
 
     let utc: DateTime<Utc> = Utc::now();
-
+    let id = Id::ulid();
     let user_foo = User {
+        id: Thing::from(("user", id)),
         uid: 1,
         name: String::from("Foo Bar"),
         email: String::from("foo@meet-os.com"),
@@ -241,7 +249,9 @@ async fn test_db_user() {
     assert_eq!(users[0].name, user_foo.name);
     assert_eq!(users[0], user_foo);
 
+    let id = Id::ulid();
     let other_user = User {
+        id: Thing::from(("user", id)),
         code: String::from("other code"),
         uid: 2,
         ..user_foo.clone()
@@ -249,9 +259,12 @@ async fn test_db_user() {
     let res = db::add_user(&dbh, &other_user).await;
     assert!(res.is_err());
     let err = res.err().unwrap().to_string();
+    //println!("{err}");
     assert!(err.contains("There was a problem with the database: Database index `user_email` already contains 'foo@meet-os.com'"));
 
+    let id = Id::ulid();
     let other_user = User {
+        id: Thing::from(("user", id)),
         code: String::from("other code"),
         email: String::from("peti@meet-os.com"),
         ..user_foo.clone()
@@ -279,7 +292,9 @@ async fn test_db_user() {
     //     "There was a problem with the database: Database index `user_code` already contains 'generated code'"
     // ));
 
+    let id = Id::ulid();
     let user_peti = User {
+        id: Thing::from(("user", id)),
         uid: 2,
         name: String::from("Peti Bar"),
         email: String::from("peti@meet-os.com"),
@@ -711,6 +726,7 @@ async fn test_db_update_user() {
     assert_eq!(
         admin,
         User {
+            id: admin.id.clone(),
             uid: 1,
             email: ADMIN_EMAIL.to_string(),
             password: String::from("should be hashed password"),
@@ -744,6 +760,7 @@ async fn test_db_update_user() {
     assert_eq!(
         admin,
         User {
+            id: admin.id.clone(),
             uid: 1,
             email: ADMIN_EMAIL.to_string(),
             password: String::from("should be hashed password"),
@@ -766,6 +783,7 @@ async fn test_db_update_user() {
     assert_eq!(
         admin,
         User {
+            id: admin.id.clone(),
             uid: 1,
             email: ADMIN_EMAIL.to_string(),
             password: String::from("new password"),

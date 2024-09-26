@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::Thing;
 
 use std::fs::read_to_string;
 
@@ -10,6 +11,7 @@ pub use notifications::*;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct User {
+    pub id: Thing,
     pub uid: usize,
     pub email: String,
     pub password: String,

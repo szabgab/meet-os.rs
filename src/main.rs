@@ -17,6 +17,7 @@ const MIN_PASSWORD_LENGTH: usize = 6;
 
 use chrono::{DateTime, Duration, Utc};
 use serde_json::json;
+use surrealdb::sql::{Id, Thing};
 
 use rocket::form::Form;
 use rocket::fs::{relative, FileServer};
@@ -501,8 +502,9 @@ async fn register_post(
 
     let uid = db::increment(dbh, "user").await.unwrap();
     let utc: DateTime<Utc> = Utc::now();
-
+    let id = Id::ulid();
     let user = User {
+        id: Thing::from(("user", id)),
         uid,
         name: name.clone(),
         email: email.clone(),
