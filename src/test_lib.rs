@@ -294,6 +294,7 @@ impl TestRunner {
     pub fn read_code_from_email(&self, filename: &str, prefix: &str) -> (usize, String) {
         let email_file = &self.email_folder.join(filename);
         let email_content = std::fs::read_to_string(email_file).unwrap();
+        //println!("{email_content}");
         // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
         let regex_string = format!("http://localhost:[0-9]+/{prefix}/([0-9]+)/([a-z0-9-]+)");
         let re = Regex::new(&regex_string).unwrap();
@@ -441,9 +442,9 @@ pub(crate) use check_html;
 
 macro_rules! check_message {
     ($html: expr, $title: expr, $message: expr) => {{
+        check_html!($html, "#message", $message);
         check_html!($html, "title", $title);
         check_html!($html, "h1", $title);
-        check_html!($html, "#message", $message);
     }};
 }
 pub(crate) use check_message;
