@@ -469,6 +469,7 @@ async fn test_db_group_membership() {
     assert_eq!(
         membership,
         Membership {
+            id: membership.id.clone(),
             gid: 1,
             uid: 1,
             join_date: membership.join_date,
@@ -483,6 +484,7 @@ async fn test_db_group_membership() {
     assert_eq!(
         membership,
         Membership {
+            id: membership.id.clone(),
             gid: 1,
             uid: 2,
             join_date: membership.join_date,
@@ -581,6 +583,7 @@ async fn test_db_rsvp() {
     assert_eq!(
         rsvp,
         RSVP {
+            id: rsvp.id.clone(),
             eid: 1,
             uid: 2,
             status: true,
@@ -592,6 +595,7 @@ async fn test_db_rsvp() {
     assert_eq!(
         rsvp,
         RSVP {
+            id: rsvp.id.clone(),
             eid: 1,
             uid: 1,
             status: true,
@@ -604,6 +608,7 @@ async fn test_db_rsvp() {
     assert_eq!(
         rsvp,
         RSVP {
+            id: rsvp.id.clone(),
             eid: 1,
             uid: 2,
             status: false,

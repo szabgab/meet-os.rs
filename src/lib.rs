@@ -41,6 +41,7 @@ pub struct Group {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct Membership {
+    pub id: Thing,
     pub gid: usize,
     pub uid: usize,
     pub join_date: DateTime<Utc>,
@@ -49,6 +50,7 @@ pub struct Membership {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct RSVP {
+    pub id: Thing,
     pub eid: usize,
     pub uid: usize,
     pub date: DateTime<Utc>,

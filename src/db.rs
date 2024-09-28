@@ -670,6 +670,7 @@ pub async fn join_group(dbh: &Surreal<Client>, gid: usize, uid: usize) -> surrea
     let date: DateTime<Utc> = Utc::now();
 
     let membership = Membership {
+        id: Thing::from(("membership", Id::ulid())),
         uid,
         gid,
         join_date: date,
@@ -766,6 +767,7 @@ pub async fn new_rsvp(
     let date: DateTime<Utc> = Utc::now();
 
     let rsvp = RSVP {
+        id: Thing::from(("rsvp", Id::ulid())),
         eid,
         uid,
         date,
