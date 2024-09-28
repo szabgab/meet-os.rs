@@ -30,6 +30,7 @@ pub struct User {
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 pub struct Group {
+    pub id: Thing,
     pub gid: usize,
     pub name: String,
     pub location: String,

@@ -106,7 +106,9 @@ async fn add_user_helper(dbh: &Surreal<Client>) {
 
 async fn add_groups_helper(dbh: &Surreal<Client>) {
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let rust_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 1,
         owner: 2,
         name: String::from("Rust Maven"),
@@ -118,7 +120,9 @@ async fn add_groups_helper(dbh: &Surreal<Client>) {
     assert_eq!(res, ());
 
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let python_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 2,
         owner: 2,
         name: String::from("Python Maven"),
@@ -130,7 +134,9 @@ async fn add_groups_helper(dbh: &Surreal<Client>) {
     assert_eq!(res, ());
 
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let guest_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 3,
         owner: 3,
         name: String::from("Guest Maven"),
@@ -325,7 +331,9 @@ async fn test_db_user() {
 
     // Add group
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let rust_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 1,
         owner: 2,
         name: String::from("Rust Maven"),
@@ -341,7 +349,9 @@ async fn test_db_user() {
     assert_eq!(groups[0], rust_maven);
 
     // Try to add another group with the same gid
+    let id = Id::ulid();
     let other_group = Group {
+        id: Thing::from(("group", id)),
         ..rust_maven.clone()
     };
     let res = db::add_group(&dbh, &other_group).await;
@@ -363,7 +373,9 @@ async fn test_db_groups() {
     add_user_helper(&dbh).await;
 
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let rust_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 1,
         owner: 2,
         name: String::from("Rust Maven"),
@@ -375,7 +387,9 @@ async fn test_db_groups() {
     assert_eq!(res, ());
 
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let python_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 2,
         owner: 2,
         name: String::from("Python Maven"),
@@ -387,7 +401,9 @@ async fn test_db_groups() {
     assert_eq!(res, ());
 
     let utc: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let guest_maven = Group {
+        id: Thing::from(("group", id)),
         gid: 3,
         owner: 3,
         name: String::from("Guest Maven"),
@@ -820,6 +836,7 @@ async fn test_db_update_group() {
     assert_eq!(
         group,
         Group {
+            id: group.id.clone(),
             gid: 1,
             name: String::from("Rust Maven"),
             location: String::new(),
@@ -838,6 +855,7 @@ async fn test_db_update_group() {
     assert_eq!(
         group,
         Group {
+            id: group.id.clone(),
             gid: 1,
             name: String::from("New Name"),
             location: String::from("New Location"),

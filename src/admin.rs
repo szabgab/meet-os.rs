@@ -8,6 +8,7 @@ use rocket::State;
 use rocket_dyn_templates::{context, Template};
 
 use surrealdb::engine::remote::ws::Client;
+use surrealdb::sql::{Id, Thing};
 use surrealdb::Surreal;
 
 use crate::db;
@@ -157,7 +158,9 @@ async fn create_group_post(
 
     rocket::info!("group_id: {gid}");
     let creation_date: DateTime<Utc> = Utc::now();
+    let id = Id::ulid();
     let group = Group {
+        id: Thing::from(("group", id)),
         name: input.name.to_owned(),
         location: input.location.to_owned(),
         description: input.description.to_owned(),
