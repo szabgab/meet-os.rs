@@ -804,7 +804,12 @@ pub async fn audit(dbh: &Surreal<Client>, atype: AuditType, json: Value) -> surr
     rocket::info!("audit {text}");
 
     let date: DateTime<Utc> = Utc::now();
-    let entry = Audit { date, atype, text };
+    let entry = Audit {
+        id: Thing::from(("audit", Id::ulid())),
+        date,
+        atype,
+        text,
+    };
 
     dbh.create(Resource::from("audit")).content(entry).await?;
 

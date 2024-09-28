@@ -157,6 +157,7 @@ async fn add_events_helper(dbh: &Surreal<Client>) {
     let gid = 1;
 
     let event = Event {
+        id: Thing::from(("event", Id::ulid())),
         eid,
         title: title.to_owned(),
         description: description.to_owned(),
@@ -170,6 +171,7 @@ async fn add_events_helper(dbh: &Surreal<Client>) {
 
     let date: DateTime<Utc> = Utc::now();
     let event = Event {
+        id: Thing::from(("event", Id::ulid())),
         eid: 2,
         title: String::from("Second conf"),
         description: String::new(),
@@ -524,6 +526,7 @@ async fn test_db_events() {
     let gid = 1;
 
     let event = Event {
+        id: Thing::from(("event", Id::ulid())),
         eid,
         title: title.to_owned(),
         description: description.to_owned(),
@@ -888,6 +891,7 @@ async fn test_db_update_event() {
     assert_eq!(
         event,
         Event {
+            id: event.id.clone(),
             eid: 1,
             title: String::from("First Conference"),
             description: String::new(),
@@ -909,6 +913,7 @@ async fn test_db_update_event() {
     assert_eq!(
         updated_event,
         Event {
+            id: event.id.clone(),
             eid: 1,
             title: String::from("New Title"),
             description: String::from("New Description"),

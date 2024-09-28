@@ -1273,6 +1273,7 @@ async fn add_event_post(
     let eid = db::increment(dbh, "event").await.unwrap();
 
     let event = Event {
+        id: Thing::from(("event", Id::ulid())),
         eid,
         title: title.clone(),
         description,
@@ -1415,6 +1416,7 @@ async fn edit_event_post(
     }
 
     let event = Event {
+        id: Thing::from(("event", Id::ulid())),
         eid: input.eid,
         title: title.clone(),
         description,

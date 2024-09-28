@@ -68,6 +68,7 @@ pub enum EventStatus {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct Event {
+    pub id: Thing,
     pub eid: usize,
     pub title: String,
     pub date: DateTime<Utc>,
@@ -90,6 +91,7 @@ pub enum AuditType {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Audit {
+    pub id: Thing,
     pub date: DateTime<Utc>,
     pub atype: AuditType,
     pub text: String,
@@ -103,6 +105,7 @@ pub struct EmailAddress {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Counter {
+    id: Thing,
     name: String,
     count: u32,
 }
