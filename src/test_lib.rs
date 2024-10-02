@@ -291,17 +291,17 @@ impl TestRunner {
         assert_eq!(res.status(), Status::Ok);
     }
 
-    pub fn read_code_from_email(&self, filename: &str, prefix: &str) -> (usize, String) {
+    pub fn read_code_from_email(&self, filename: &str, prefix: &str) -> (String, String) {
         let email_file = &self.email_folder.join(filename);
         let email_content = std::fs::read_to_string(email_file).unwrap();
         //println!("{email_content}");
-        // https://meet-os.com/verify-email/3/c0514ec6-c51e-4376-ae8e-df82ef79bcef
-        let regex_string = format!("http://localhost:[0-9]+/{prefix}/([0-9]+)/([a-z0-9-]+)");
+        // https://meet-os.com/verify-email/AX3JZ/c0514ec6-c51e-4376-ae8e-df82ef79bcef
+        let regex_string = format!("http://localhost:[0-9]+/{prefix}/([A-Z0-9]+)/([a-z0-9-]+)");
         let re = Regex::new(&regex_string).unwrap();
 
         //println!("email content: {email_content}");
         let (uid, code) = match re.captures(&email_content) {
-            Some(value) => (value[1].parse::<usize>().unwrap(), value[2].to_owned()),
+            Some(value) => (value[1].to_owned(), value[2].to_owned()),
             None => panic!("Code not find in email: {email_content}"),
         };
         println!("extract uid: {uid} code: {code} from email");

@@ -130,8 +130,9 @@ fn get_verify_email_with_bad_code() {
         ]))
         .dispatch();
     assert_eq!(res.status(), Status::Ok);
+    let (uid, _code) = tr.read_code_from_email("0.txt", "verify-email");
 
-    let res = tr.client.get(format!("/verify-email/1/abc")).dispatch();
+    let res = tr.client.get(format!("/verify-email/{uid}/abc")).dispatch();
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
     check_message!(&html, "Invalid code", "Invalid code <b>abc</b>");

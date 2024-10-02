@@ -504,7 +504,7 @@ async fn register_post(
     let utc: DateTime<Utc> = Utc::now();
     let id = Id::ulid();
     let user = User {
-        id: Thing::from(("user", id)),
+        id: Thing::from(("user", id.clone())),
         uid,
         name: name.clone(),
         email: email.clone(),
@@ -538,7 +538,7 @@ async fn register_post(
         r#"Hi,
     <p>
     Someone used your email to register on the Meet-OS web site.
-    If it was you, please <a href="{base_url}/verify-email/{uid}/{code}">click on this link</a> to verify your email address.
+    If it was you, please <a href="{base_url}/verify-email/{id}/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything. We'll discard your registration if it is not validated.
@@ -567,14 +567,14 @@ async fn verify_email(
     dbh: &State<Surreal<Client>>,
     myconfig: &State<MyConfig>,
     visitor: Visitor,
-    uid: usize,
+    uid: String,
     code: &str,
 ) -> Template {
     rocket::info!("verify-email of uid='{uid}' using code='{code}'");
 
     let config = get_public_config();
 
-    let Some(user) = db::get_user_by_uid(dbh, uid).await.unwrap() else {
+    let Some(user) = db::get_user_by_id_str(dbh, &uid).await.unwrap() else {
         return Template::render(
             "message",
             context! {title: "Invalid id", message: format!("Invalid id <b>{uid}</b>"), config, visitor},
@@ -1608,7 +1608,8 @@ async fn post_resend_email_verification_code(
 
     let process = "resetxxx";
     let code = Uuid::new_v4();
-    let uid = user.uid;
+    let user_id = user.id.to_string();
+    let id = user_id.split(':').last().unwrap();
 
     db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str())
         .await
@@ -1621,7 +1622,7 @@ async fn post_resend_email_verification_code(
         r#"Hi,
     <p>
     Someone registered your email address on the Meet-OS web site and then asked us to send a new email verification code.
-    If it was you, please <a href="{base_url}/verify-email/{uid}/{code}">click on this link</a> to verify your email address.
+    If it was you, please <a href="{base_url}/verify-email/{id}/{code}">click on this link</a> to verify your email address.
     <p>
     <p>
     If it was not you, we would like to apologize. You don't need to do anything. If the address is not verified soon, we'll remove it from our database.
