@@ -822,3 +822,19 @@ pub async fn get_audit(dbh: &Surreal<Client>) -> surrealdb::Result<Vec<Audit>> {
     let entries: Vec<Audit> = response.take(0)?;
     Ok(entries)
 }
+
+pub async fn get_user_by_id_str(
+    dbh: &Surreal<Client>,
+    id: &str,
+) -> surrealdb::Result<Option<User>> {
+    rocket::info!("get_user_by_id: '{id}'");
+
+    let mut response = dbh
+        .query("SELECT * FROM user WHERE id=$id;")
+        .bind(("id", Thing::from(("user", id))))
+        .await?;
+
+    let entry: Option<User> = response.take(0)?;
+
+    Ok(entry)
+}

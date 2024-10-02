@@ -1146,6 +1146,48 @@ async fn user(dbh: &State<Surreal<Client>>, visitor: Visitor, uid: usize) -> Tem
     )
 }
 
+#[get("/uid/<id>")]
+async fn user_by_id(dbh: &State<Surreal<Client>>, visitor: Visitor, id: &str) -> Template {
+    let config = get_public_config();
+
+    let user = match db::get_user_by_id_str(dbh, id).await.unwrap() {
+        None => {
+            return Template::render(
+                "message",
+                context! {title: "User not found", message: format!("There is no user with id <b>{id}</b>."), config, visitor},
+            )
+        }
+        Some(user) => user,
+    };
+
+    if !user.verified {
+        return Template::render(
+            "message",
+            context! {title: "Unverified user", message: format!("This user has not verified the email address yet."), config, visitor},
+        );
+    }
+
+    let about = "";
+    //let about = user.clone().about.map(|text| markdown2html(&text).unwrap());
+    let owned_groups = db::get_groups_by_owner_id(dbh, user.uid).await.unwrap();
+    let groups = db::get_groups_by_membership_id(dbh, user.uid)
+        .await
+        .unwrap();
+
+    Template::render(
+        "user",
+        context! {
+            title: user.name.clone(),
+            config ,
+            visitor,
+            user,
+            about,
+            groups,
+            owned_groups
+        },
+    )
+}
+
 #[get("/edit-group?<gid>")]
 async fn edit_group_get(dbh: &State<Surreal<Client>>, visitor: LoggedIn, gid: usize) -> Template {
     let config = get_public_config();
@@ -1713,6 +1755,7 @@ fn rocket() -> _ {
                 rsvp_no_event_get,
                 show_profile,
                 user,
+                user_by_id,
                 get_resend_email_verification_code,
                 post_resend_email_verification_code,
                 verify_email
