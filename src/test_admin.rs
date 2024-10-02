@@ -111,12 +111,20 @@ fn admin_search_post_as_admin() {
     check_html!(&html, "title", "Search");
     assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
     assert!(html.contains(r#"<b>Total: 1</b>"#));
+
     let expect = format!(
-        r#"<td><a href="/uid/{}">Site Manager</a></td>"#,
+        r#"<td><a href="/uid/{}">{ADMIN_NAME}</a></td>"#,
         ids["admin"]
     );
     assert!(html.contains(&expect));
+
     let expect = format!(r#"<td>{ADMIN_EMAIL}</td>"#);
+    assert!(html.contains(&expect));
+
+    let expect = format!(
+        r#"<td><a href="/admin/create-group?uid={}">create group</a></td>"#,
+        ids["admin"]
+    );
     assert!(html.contains(&expect));
 }
 
