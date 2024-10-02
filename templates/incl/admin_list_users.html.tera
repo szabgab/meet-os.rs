@@ -10,12 +10,12 @@
 
         {% for user in users %}
             <tr>
-              <td><a href="/user/{{ user.uid }}">{{ user.name }}</a></td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.registration_date }}</td>
-              <td>{{ user.verified }}</td>
-              <td>{{ user.verification_date }}</td>
-              <td><a href="/admin/create-group?uid={{user.uid}}">create group</a></td>
+              <td><a href="/uid/{{ user.0 }}">{{ user.1.name }}</a></td>
+              <td>{{ user.1.email }}</td>
+              <td>{{ user.1.registration_date }}</td>
+              <td>{{ user.1.verified }}</td>
+              <td>{{ user.1.verification_date }}</td>
+              <td><a href="/admin/create-group?uid={{user.0}}">create group</a></td>
             </tr>
         {% endfor %}
         </table>

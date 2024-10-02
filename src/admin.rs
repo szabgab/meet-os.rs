@@ -16,7 +16,7 @@ use crate::notify;
 use crate::web::AdminUser;
 
 use crate::{get_public_config, MyConfig, User};
-use meetings::{AuditType, Group};
+use meetings::{id_user_pairs, AuditType, Group};
 
 #[derive(FromForm)]
 struct GroupForm<'r> {
@@ -62,7 +62,8 @@ fn admin(visitor: AdminUser) -> Template {
 async fn admin_users(dbh: &State<Surreal<Client>>, visitor: AdminUser) -> Template {
     let config = get_public_config();
 
-    let users = db::get_users(dbh).await.unwrap();
+    let all_users = db::get_users(dbh).await.unwrap();
+    let users = id_user_pairs(all_users);
 
     Template::render(
         "admin_users",
@@ -81,7 +82,8 @@ fn search_get(visitor: AdminUser) -> Template {
 
     let user = visitor.user.clone().unwrap();
 
-    let users: Vec<User> = vec![];
+    let all_users: Vec<User> = vec![];
+    let users = id_user_pairs(all_users);
 
     Template::render(
         "search",
@@ -102,7 +104,7 @@ async fn search_post(
 
     let query = input.query.to_lowercase();
 
-    let users = db::get_users(dbh)
+    let all_users = db::get_users(dbh)
         .await
         .unwrap()
         .into_iter()
@@ -110,6 +112,8 @@ async fn search_post(
             usr.name.to_lowercase().contains(&query) || usr.email.to_lowercase().contains(&query)
         })
         .collect::<Vec<_>>();
+
+    let users = id_user_pairs(all_users);
 
     Template::render(
         "search",

@@ -45,7 +45,7 @@ fn admin_page_as_admin() {
 #[test]
 fn admin_users_page_as_admin() {
     let tr = TestRunner::new();
-    tr.setup_all();
+    let ids: std::collections::HashMap<&str, String> = tr.setup_all();
     tr.login_admin();
 
     let res = tr.client.get("/admin/users").dispatch();
@@ -54,9 +54,12 @@ fn admin_users_page_as_admin() {
     check_html!(&html, "title", "List Users by Admin");
     check_html!(&html, "h1", "List Users by Admin");
     //assert_eq!(html, "");
-    let expected = format!(r#"<a href="/user/4">{OTHER_NAME}</a>"#);
+    let expected = format!(r#"<a href="/uid/{}">{OTHER_NAME}</a>"#, ids["other"]);
     assert!(html.contains(&expected));
-    let expected = format!(r#"<td><a href="/user/1">{ADMIN_NAME}</a></td>"#);
+    let expected = format!(
+        r#"<td><a href="/uid/{}">{ADMIN_NAME}</a></td>"#,
+        ids["admin"]
+    );
     assert!(html.contains(&expected));
     assert!(html.contains(r#"<b>Total: 4</b>"#));
 }
@@ -77,7 +80,7 @@ fn admin_search_get_as_admin() {
 #[test]
 fn admin_search_post_as_admin() {
     let tr = TestRunner::new();
-    tr.setup_all();
+    let ids = tr.setup_all();
     tr.login_admin();
 
     //no params
@@ -108,7 +111,11 @@ fn admin_search_post_as_admin() {
     check_html!(&html, "title", "Search");
     assert!(html.contains(r#"<form method="POST" action="/admin/search">"#));
     assert!(html.contains(r#"<b>Total: 1</b>"#));
-    assert!(html.contains(r#"<td><a href="/user/1">Site Manager</a></td>"#));
+    let expect = format!(
+        r#"<td><a href="/uid/{}">Site Manager</a></td>"#,
+        ids["admin"]
+    );
+    assert!(html.contains(&expect));
     let expect = format!(r#"<td>{ADMIN_EMAIL}</td>"#);
     assert!(html.contains(&expect));
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::allow_attributes_without_reason)]
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
@@ -151,4 +153,31 @@ pub fn get_public_config() -> PublicConfig {
     let raw_string = read_to_string(filename).unwrap();
     let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
     data
+}
+
+/// # Panics
+///
+/// Panics when there is an error.
+#[must_use]
+pub fn id_user_pairs(users: Vec<User>) -> Vec<(String, User)> {
+    let id_user_vec = users
+        .into_iter()
+        .filter_map(|user| {
+            #[expect(clippy::if_then_some_else_none)]
+            if user.verified {
+                let id = user
+                    .id
+                    .to_string()
+                    .split(':')
+                    //.into_iter()
+                    .nth(1)
+                    .unwrap()
+                    .to_owned();
+                Some((id, user))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    id_user_vec
 }

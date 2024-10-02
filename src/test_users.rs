@@ -509,7 +509,7 @@ fn get_users_list_users_empty_db_guest() {
 fn get_users_list_users_many_users_guest() {
     let tr = TestRunner::new();
 
-    tr.setup_many_users();
+    let ids = tr.setup_many_users();
 
     let res = tr.client.get("/users").dispatch();
 
@@ -521,13 +521,22 @@ fn get_users_list_users_many_users_guest() {
     check_html!(&html, "h1", "List Users");
     assert!(!html.contains(r#"No users"#));
 
-    let expected = format!(r#"<li><a href="/user/2">{OWNER_NAME}</a></li>"#);
+    let expected = format!(
+        r#"<li><a href="/uid/{}">{OWNER_NAME}</a></li>"#,
+        ids["owner"]
+    );
     assert!(html.contains(&expected));
-    let expected = format!(r#"<li><a href="/user/3">{USER_NAME}</a></li>"#);
+    let expected = format!(r#"<li><a href="/uid/{}">{USER_NAME}</a></li>"#, ids["user"]);
     assert!(html.contains(&expected));
-    let expected = format!(r#"<li><a href="/user/4">{OTHER_NAME}</a></li>"#);
+    let expected = format!(
+        r#"<li><a href="/uid/{}">{OTHER_NAME}</a></li>"#,
+        ids["other"]
+    );
     assert!(html.contains(&expected));
-    let expected = format!(r#"<li><a href="/user/1">{ADMIN_NAME}</a></li>"#);
+    let expected = format!(
+        r#"<li><a href="/uid/{}">{ADMIN_NAME}</a></li>"#,
+        ids["admin"]
+    );
     assert!(html.contains(&expected));
 }
 
@@ -593,8 +602,8 @@ fn unverified_user_page_by_guest() {
 fn unverified_user_on_user_page_by_guest() {
     let tr = TestRunner::new();
 
-    tr.setup_admin();
-    tr.setup_user();
+    let admin_id = tr.setup_admin();
+    let user_id = tr.setup_user();
     tr.setup_unverified_user();
     tr.logout();
 
@@ -602,11 +611,11 @@ fn unverified_user_on_user_page_by_guest() {
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
-    //assert_eq!(html, "");
     check_html!(&html, "title", "List Users");
     check_html!(&html, "h1", "List Users");
-    assert!(html.contains(r#"<a href="/user/1">Site Manager</a>"#));
-    let expected = format!(r#"<a href="/user/2">{USER_NAME}</a></li>"#);
+    let expected = format!(r#"<a href="/uid/{admin_id}">Site Manager</a>"#);
+    assert!(html.contains(&expected));
+    let expected = format!(r#"<a href="/uid/{user_id}">{USER_NAME}</a></li>"#);
     assert!(html.contains(&expected));
     assert!(!html.contains(UNVERIFIED_NAME));
 

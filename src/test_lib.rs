@@ -153,8 +153,8 @@ impl TestRunner {
         self.register_user_helper(UNVERIFIED_NAME, UNVERIFIED_EMAIL, UNVERIFIED_PW);
     }
 
-    pub fn setup_all(&self) {
-        self.setup_many_users();
+    pub fn setup_all(&self) -> HashMap<&str, String> {
+        let ids = self.setup_many_users();
 
         self.create_group_helper("First Group", 2);
         self.create_group_helper("Second Group", 2);
@@ -168,7 +168,9 @@ impl TestRunner {
         // The setup_many_users logged the user out already so the above might return an error
         // That's why we don't check if it is Status::Ok
         //assert_eq!(res.status(), Status::Ok);
-        rocket::info!("--------------- finished setup_all ----------------")
+        rocket::info!("--------------- finished setup_all ----------------");
+
+        ids
     }
 
     pub fn setup_admin(&self) -> String {

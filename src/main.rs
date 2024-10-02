@@ -41,7 +41,8 @@ use surrealdb::Surreal;
 use meetings::db;
 
 use meetings::{
-    get_public_config, sendmail, AuditType, EmailAddress, Event, EventStatus, MyConfig, User,
+    get_public_config, id_user_pairs, sendmail, AuditType, EmailAddress, Event, EventStatus,
+    MyConfig, User,
 };
 
 use web::{LoggedIn, Visitor};
@@ -1088,10 +1089,7 @@ async fn list_users(dbh: &State<Surreal<Client>>, visitor: Visitor) -> Template 
 
     // TODO filtering  could be moved to the database call
     let all_users = db::get_users(dbh).await.unwrap();
-    let users = all_users
-        .into_iter()
-        .filter(|user| user.verified)
-        .collect::<Vec<_>>();
+    let users = id_user_pairs(all_users);
 
     Template::render(
         "users",
