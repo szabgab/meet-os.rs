@@ -1,5 +1,6 @@
 #![allow(unused_macros, unused_imports)]
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::ExitStatus;
 
@@ -170,29 +171,34 @@ impl TestRunner {
         rocket::info!("--------------- finished setup_all ----------------")
     }
 
-    pub fn setup_admin(&self) {
-        self.register_and_verify_user(ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW);
+    pub fn setup_admin(&self) -> String {
+        self.register_and_verify_user(ADMIN_NAME, ADMIN_EMAIL, ADMIN_PW)
     }
 
-    pub fn setup_owner(&self) {
-        self.register_and_verify_user(OWNER_NAME, OWNER_EMAIL, OWNER_PW);
+    pub fn setup_owner(&self) -> String {
+        self.register_and_verify_user(OWNER_NAME, OWNER_EMAIL, OWNER_PW)
     }
 
-    pub fn setup_user(&self) {
-        self.register_and_verify_user(USER_NAME, USER_EMAIL, USER_PW);
+    pub fn setup_user(&self) -> String {
+        self.register_and_verify_user(USER_NAME, USER_EMAIL, USER_PW)
     }
 
-    pub fn setup_many_users(&self) {
-        self.setup_admin();
-        self.setup_owner();
-        self.setup_user();
+    pub fn setup_many_users(&self) -> HashMap<&str, String> {
+        let mut ids: HashMap<&str, String> = HashMap::new();
+        ids.insert("admin", self.setup_admin());
+        ids.insert("owner", self.setup_owner());
+        ids.insert("user", self.setup_user());
 
-        self.register_and_verify_user(OTHER_NAME, OTHER_EMAIL, OTHER_PW);
+        ids.insert(
+            "other",
+            self.register_and_verify_user(OTHER_NAME, OTHER_EMAIL, OTHER_PW),
+        );
 
         // Make sure the client is not logged in after the setup
         let _res = &self.client.get(format!("/logout")).dispatch();
         //assert_eq!(res.status(), Status::Ok);
-        rocket::info!("--------------- finished setup_many_users ----------------")
+        rocket::info!("--------------- finished setup_many_users ----------------");
+        ids
     }
 
     pub fn setup_event(&self, eid: usize) {
@@ -231,9 +237,9 @@ impl TestRunner {
         }
     }
 
-    pub fn register_and_verify_user(&self, name: &str, email: &str, password: &str) {
+    pub fn register_and_verify_user(&self, name: &str, email: &str, password: &str) -> String {
         self.register_user_helper(name, email, password);
-        self.verify_email();
+        self.verify_email_helper()
     }
 
     pub fn add_event_helper(&self, title: &str, date: &str, gid: &str) {
@@ -257,7 +263,7 @@ impl TestRunner {
         //rocket::info!("{html}");
     }
 
-    fn verify_email(&self) {
+    fn verify_email_helper(&self) -> String {
         let dir = &self
             .email_folder
             .read_dir()
@@ -275,6 +281,8 @@ impl TestRunner {
             .get(format!("/verify-email/{uid}/{code}"))
             .dispatch();
         assert_eq!(res.status(), Status::Ok);
+
+        uid.to_owned()
     }
 
     pub fn register_user_helper(&self, name: &str, email: &str, password: &str) {
