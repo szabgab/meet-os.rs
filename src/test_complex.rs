@@ -6,7 +6,7 @@ use rocket::http::{ContentType, Status};
 fn test_complex() {
     let tr = TestRunner::new();
     tr.setup_admin();
-    tr.setup_owner();
+    let owner_id = tr.setup_owner();
     tr.login_owner();
 
     // profile is not listing any groups
@@ -26,7 +26,7 @@ fn test_complex() {
             ("name", group_name),
             ("location", "Virtual"),
             ("description", ""),
-            ("owner", "2"),
+            ("owner", &owner_id),
         ]))
         .dispatch();
     assert_eq!(res.status(), Status::Ok);

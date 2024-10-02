@@ -125,13 +125,13 @@ async fn search_post(
 async fn create_group_get(
     dbh: &State<Surreal<Client>>,
     visitor: AdminUser,
-    uid: usize,
+    uid: String,
 ) -> Template {
     let config = get_public_config();
 
     let user = visitor.user.clone().unwrap();
 
-    let owner = db::get_user_by_uid(dbh, uid).await.unwrap().unwrap();
+    let owner = db::get_user_by_id_str(dbh, &uid).await.unwrap().unwrap();
 
     Template::render(
         "create_group",
