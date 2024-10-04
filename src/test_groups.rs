@@ -18,11 +18,14 @@ fn create_group_by_admin() {
     let tr = TestRunner::new();
 
     tr.setup_admin();
-    tr.setup_owner();
+    let owner_id = tr.setup_owner();
     tr.login_admin();
 
     // Access the Group creation page with authorized user
-    let res = tr.client.get("/admin/create-group?uid=2").dispatch();
+    let res = tr
+        .client
+        .get(format!("/admin/create-group?uid={owner_id}"))
+        .dispatch();
 
     assert_eq!(res.status(), Status::Ok);
     let html = res.into_string().unwrap();
