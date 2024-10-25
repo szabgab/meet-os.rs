@@ -151,7 +151,7 @@ pub struct MyConfig {
 pub fn get_public_config() -> PublicConfig {
     let filename = "config.yaml";
     let raw_string = read_to_string(filename).unwrap();
-    let data: PublicConfig = serde_yaml::from_str(&raw_string).expect("YAML parsing error");
+    let data: PublicConfig = serde_yml::from_str(&raw_string).expect("YAML parsing error");
     data
 }
 
