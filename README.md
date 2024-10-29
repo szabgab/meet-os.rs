@@ -5,9 +5,9 @@ A platform to organize meetings at [Meet-OS](https://meet-os.com/). (Site not ye
 Written in [Rust](https://www.rust-lang.org/) using the [Rocket web framework](https://rocket.rs/) and the [SurrealDB database](https://surrealdb.com/).
 
 
-* [DESIGN](/docs/DESIGN).
-* [DEVELOPMENT](/docs/DEVELOPMENT) - Local development environment, contribuion, testing.
-* [DEPLOY](/docs/DEPLOY).
+* [DESIGN](/docs/DESIGN.md).
+* [DEVELOPMENT](/docs/DEVELOPMENT.md) - Local development environment, contribuion, testing.
+* [DEPLOY](/docs/DEPLOY.md).
 
 ## Community
 
