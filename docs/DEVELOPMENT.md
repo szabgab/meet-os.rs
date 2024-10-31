@@ -4,7 +4,7 @@
 * Start the Docker container that runs the SurrealDB
 
 ```
-./tools/setup.sh
+bash tools/setup.sh
 ```
 
 * Note: At the end of the development session you might want to stop the docker container.
