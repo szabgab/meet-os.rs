@@ -7,7 +7,7 @@ use sendgrid::v3::{
 
 use std::fs::create_dir_all;
 use std::fs::File;
-use std::io::Write;
+use std::io::Write as _;
 use std::path::Path;
 
 // TODO display some error if the sendgrid key is empty

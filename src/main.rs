@@ -31,7 +31,9 @@ use markdown::message;
 use regex::Regex;
 
 use pbkdf2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    password_hash::{
+        rand_core::OsRng, PasswordHash, PasswordHasher as _, PasswordVerifier as _, SaltString,
+    },
     Pbkdf2,
 };
 
@@ -531,7 +533,7 @@ async fn register_post(
                 context! {title: "Registration failed", message: format!("Could not register <b>{}</b>.", user.email), config, visitor},
             );
         }
-    };
+    }
 
     let base_url = &myconfig.base_url;
     let subject = "Verify your Meet-OS registration!";
@@ -782,7 +784,7 @@ async fn rsvp_yes_event_get(
         if rsvp.status {
             return Template::render(
                 "message",
-                context! {title: "You were already RSVPed", message: format!(r#"You were already RSVPed"#), config, visitor},
+                context! {title: "You were already RSVPed", message: format!("You were already RSVPed"), config, visitor},
             );
         }
         db::update_rsvp(dbh, eid, uid, true).await.unwrap();
@@ -1607,7 +1609,7 @@ async fn post_resend_email_verification_code(
     let process = "resetxxx";
     let code = Uuid::new_v4();
     let user_id = user.id.to_string();
-    let id = user_id.split(':').last().unwrap();
+    let id = user_id.split(':').next_back().unwrap();
 
     db::add_login_code_to_user(dbh, &email, process, code.to_string().as_str())
         .await
